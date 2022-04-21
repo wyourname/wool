@@ -9,7 +9,7 @@ import random
 # 新手上路嘀嘀嘀
 # 大佬看不上小白又嫌弃，不爱请勿伤害 键下积德
 # 使用方法：把uid=xxxx&token=xxxx&token_id=xxxxx
-# 放在参数里面即可帐号用@隔开脚本暂时写到这有空再改进没有多的号没有测试多账户运行
+# 放在account=''参数里面即可帐号用@隔开脚本暂时写到这有空再改进没有多的号没有测试多账户运行
 
 def get_article_url(url1, header1):
     print('我要开始获取文章链接啦，请稍等···')

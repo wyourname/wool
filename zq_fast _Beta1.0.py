@@ -69,7 +69,7 @@ if __name__ == '__main__':
                              "com.miui.hybrid/1.9.0.5 com.youth.kandianquickapp/2.5.7"}
     print('==============' + "开始运行" + '==============')
     for i in range(len(list_count)):
-        print('正在开始第{}个帐号的请求，每次12篇文章'.format(i))
+        print('正在开始第{}个帐号的请求，每次12篇文章'.format(i+1))
         url = url1.format(list_count[i])
         signature_list, signature_name = get_article_url(url, header1)
         print('获取到的文章列表为：' + str(len(signature_list)))

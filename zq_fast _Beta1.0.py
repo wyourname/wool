@@ -4,18 +4,19 @@ import json
 import time
 import random
 
-
 # @Author: 王权富贵233
 # 新手上路嘀嘀嘀
 # 大佬看不上小白又嫌弃，不爱请勿伤害 键下积德
 # 使用方法：把uid=xxxx&token=xxxx&token_id=xxxxx
-# 放在account=''参数里面即可帐号用@隔开脚本暂时写到这有空再改进没有多的号没有测试多账户运行
+# 放在参数里面即可帐号用@隔开脚本暂时写到这有空再改进没有多的号没有测试多账户运行
+#我的邀请码1038191728
 
 def get_article_url(url1, header1):
     print('我要开始获取文章链接啦，请稍等···')
+    # logging.info('我要开始获取文章链接啦，请稍等···')
     signature_list = []
     signature_name = []
-    response = requests.get(url1, headers=header1)
+    response = requests.get(url1, headers=header1, timeout=5)
     response_json = eval("u" + "\'" + response.text + "\'")
     response_final = json.loads(response_json)
     for i in range(len(response_final['items'])):
@@ -43,7 +44,10 @@ def request_article(signature_list, signature_name, sign):
     for i in range(len(signature_list)):
         url = 'https://user.youth.cn/FastApi/article/complete.json?signature={}&app_version=2.5.7&f=1&sign='.format(
             signature_list[i]) + sign[i]
-        response = requests.get(url)
+        requests.adapters.DEFAULT_RETRIES = 3
+        s = requests.session()
+        s.keep_alive = False
+        response = s.get(url)
         response_final = response.json()
         if response_final['error_code'] == "0":
             print(
@@ -66,7 +70,8 @@ if __name__ == '__main__':
     header1 = {"User-Agent": "Mozilla/5.0 (Linux; Android 9; MI 6 Build/PKQ1.190118.001; wv) AppleWebKit/537.36 ("
                              "KHTML, "
                              "like Gecko) Version/4.0 Chrome/80.0.3987.99 Mobile Safari/537.36 hap/1.9/xiaomi "
-                             "com.miui.hybrid/1.9.0.5 com.youth.kandianquickapp/2.5.7"}
+                             "com.miui.hybrid/1.9.0.5 com.youth.kandianquickapp/2.5.7",
+                             'Connection': 'close'}
     print('==============' + "开始运行" + '==============')
     for i in range(len(list_count)):
         print('正在开始第{}个帐号的请求，每次12篇文章'.format(i+1))

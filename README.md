@@ -32,4 +32,5 @@
 更改填写变量方式
 在data.json里面的zq_read 填入你的uid=xxxx&token=xxxxx&token_id=xxxxx
 需要安装依赖retry吧，我还没有用青龙跑
+加入杀死进程
 好像没人用以后不上传了

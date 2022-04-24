@@ -4,6 +4,14 @@ import random
 import time
 from retry import retry
 import requests
+import sys
+# 有点小改动
+# 其他功能还没实现
+# 加入杀死进程的功能
+# 有能力的填下我邀请码吧
+# https://user.youth.cn/h5/fastAppWeb/invite/invite_ground.html?share_uid=1038191728&channel=c8000&nickname=%E5%91%A8%E6%A0%91%E4%BA%BA%E9%B2%81%E8%BF%85&avatar=http%3A%2F%2Fres.youth.cn%2Favatar_202203_28_28n_6241677754c3f1038191728m.jpg&v=1650792446
+# 有空的时候加入自动提现3毛钱的功能
+# 阅读一天也是3毛左右
 
 
 class zq:
@@ -74,6 +82,9 @@ class zq:
                         print("阅读" + n_list[i] + "成功" + "获得" + str(data["items"]["read_score"]) + "青豆")
                         print("随机等待" + str(random.randint(30, 35)) + "秒")
                         time.sleep(random.randint(30, 35))
+                    elif data["error_code"] == "20019":
+                        print("今天阅读已经达到上限，明天再来吧,自动结束程序")
+                        sys.exit(0)
                     else:
                         print("阅读" + n_list[i] + "失败,应该是太频繁了")
                 else:

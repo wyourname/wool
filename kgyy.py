@@ -301,6 +301,7 @@ class kgyy:
             self.draw = draw
             await self.info(ck)
             await self.sign_status(ck)
+            await asyncio.sleep(random.randint(15,20))  
             await self.task_center(ck)
             print(f"=========结束第{cks_list.index(cks)+1}个账号运行===========")
         await self.close()

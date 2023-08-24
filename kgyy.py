@@ -2,8 +2,9 @@
 用我脚本怕黑号的,大可不必用我的,请删除脚本,觉得自己目前的脚本还行的也请忽略,多有得罪请勿见怪
 
 提现的openid,去提现页面,点一下提现至微信就能抓到的了nickname也一样
-
-export kgyycks='dfid=&appid=&token=&mid=&clientver=&from=client&clienttime=&userid&uuid...#openid#nickname#ture=2
+url?后面的xxxx即可只要xxxx
+包含dfid=&appid=&token=&mid=&clientver=&from=client&clienttime=&userid&uuid...这几个参数即可不要求排序
+export kgyycks='xxxx#openid#nickname#ture=2
 
 ture=2 提2块
 ture=5 5块

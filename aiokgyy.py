@@ -25,7 +25,7 @@ else:
     import subprocess
     print(f"python版本：{sys.version}，so要求3.10.x,其他版本可能无法运行")
     print(f"{so_file} 文件不存在")
-    github_url = 'https://raw.githubusercontent.com/your_username/your_repository/your_branch/aiokgyy_310_x86.so'
+    github_url = 'https://raw.kgithub.com/wangquanfugui233/zq_fast/master/aiokgyy_310_x86.so'
     subprocess.run(['curl', '-o', so_file, github_url])
     
 from aiokgyy_310_x86 import *

@@ -3,7 +3,7 @@
 
 提现的openid,去提现页面,点一下提现至微信就能抓到的了nickname也一样
 url?后面的xxxx即可只要xxxx
-【包含】   dfid=&appid=&token=&mid=&clientver=&from=client&clienttime=&userid&uuid...这几个参数即可 【不要求排序相同】
+【包含】   《dfid=&appid=&token=&mid=&clientver=&from=client&clienttime=&userid&uuid...这几个参数即可》 【不要求排序相同】
 export kgyycks='xxxx#openid#nickname#ture=2
 
 ture=2 提2块

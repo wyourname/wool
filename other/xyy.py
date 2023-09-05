@@ -102,20 +102,25 @@ class model:
     
     def do_read_task(self,origin,uk):
         url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/do_read?uk={uk}'
-        add_header= {'origin': f'https://{origin}'}
+        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
         res = self.request(url,add_headers=add_header)
-        if res and res['errcode'] == 0:
-            link_url = res['data']['link']
-            time.sleep(random.randint(2,4))
-            self.jump(url=link_url)
-            ts = random.randint(12,20)
-            print(f"【等待】：休息{ts}秒")
-            time.sleep(ts)
-            self.complete_task(uk,ts)
+        if res:
+            if res['errcode'] == 0:
+                link_url = res['data']['link']
+                time.sleep(random.randint(2,4))
+                self.jump(url=link_url)
+                ts = random.randint(12,20)
+                print(f"【等待】：休息{ts}秒")
+                time.sleep(ts)
+                self.complete_task(uk,ts)
+            else:
+                print(f"【阅读】：{res['msg']}")
+                if res['errcode'] == 407:
+                    self.cont = False
         else:
-            print(f"【阅读】：{res['msg']}")
-            if res['errcode'] == 407:
-                self.cont = False
+            print("发生了点意外,休息3秒")
+            time.sleep(3)
+            self.do_read_task(origin,uk)
 
 
     def jump(self,url):

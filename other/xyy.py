@@ -8,7 +8,8 @@ export xyycks='xxxxxxxx@xxxxxxxx'
 查看注册推送教程
 以下推送变量
 export WXPUSER_TOKEN='AT_XXXXXA...'
-export WXPUSER_TOPICID='1111111'
+export WXPUSER_TOPICID='1111111'或者 export WXPUSER_UID='UID_xxxxx' 二选一即可
+前者群发，后者单推个人，推荐后者
 
 """
 
@@ -80,7 +81,7 @@ class model:
                         self.do_read_task(host,uk=uk)
                         if self.cont == False:
                             break
-                        time.sleep(random.randint(2,4))
+                        time.sleep(random.randint(1,3))
                 else:
                     print("没有发现uk")
             else:
@@ -109,7 +110,7 @@ class model:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
                 self.jump(url=link_url)
-                ts = random.randint(12,20)
+                ts = random.randint(7,15)
                 print(f"【等待】：休息{ts}秒")
                 time.sleep(ts)
                 self.complete_task(uk,ts)
@@ -164,7 +165,7 @@ class model:
             if biz_value in self.check_data:
                 print(f"【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
-                self.wxpuser("小阅阅检测",encoded_url,self.user)
+                self.wxpuser("小阅阅检测,请1分钟内点击阅读",encoded_url)
                 print("【等待】：请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if self.get_read_state():
@@ -199,7 +200,7 @@ class model:
         else:
             return False
 
-    def wxpuser(self,title,url,user):
+    def wxpuser(self,title,url):
         # 此处代码抄袭了别人html的代码，见谅
         content = '''<!DOCTYPE html>
                 <html lang="zh-CN">
@@ -225,14 +226,17 @@ class model:
                 </body>
             </html>
         '''
-        content = content.replace('link',url).replace('abc',user)
+        content = content.replace('link',url).replace('abc',self.user)
         data = {
-        "appToken":self.wxpuser_token,
-        "content":content,
-        "summary":title,
-        "contentType":2,
-        "topicIds":[int(self.topicid)],
+            "appToken": self.wxpuser_token,
+            "content": content,
+            "summary": title,
+            "contentType": 2,
         }
+        if self.topicid is not None:
+            data["topicIds"] = [int(self.topicid)]
+        if self.wxpuser_uid is not None:
+            data["uids"] = [self.wxpuser_uid]
         # print(content)
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = requests.post(wxpuser_url, json=data).json()
@@ -249,12 +253,12 @@ class model:
         res = self.request(url,add_headers=add_header)
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
-            print(f"剩余金币{current_gold}")
+            print(f"【余额】：{current_gold}金币")
             if int(current_gold) >= 3000:
                 self.gold = int(int(current_gold)/1000)*1000
                 self.get_requestsid()
             else:
-                print(f"金币{current_gold}< 3000")
+                print(f"【余额】：{current_gold} < 3000 ,不满足条件")
         else:
             print("出现一些问题")
         
@@ -293,23 +297,36 @@ class model:
         add_headers = {"Content-Lenght": str(len(data1)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":url,'Cookie':self.cookie}
         res = self.request(url1,'post',data=data1,add_headers=add_headers)
         if res['errcode'] == 0:
-            print(f"提现{res['data']['money']}元")
+            print(f"【提现】：{res['data']['money']}元")
             url2 = self.url+'v1/withdraw'
             data2 = f"unionid={self.user}&signid={req_id}&ua=2&ptype=0&paccount=&pname="
             {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":url,'Cookie':self.cookie}
             res = self.request(url2,'post', data=data2,add_headers=add_headers)
             if res['errcode'] == 0:
-                print(f"提现{res['msg']}")
+                print(f"【提现】：{res['msg']}")
             else:
                 print(f"提现失败 原因：{res['msg']}")
         else:
             print(res)
-
-    def run(self):
+    
+    def check_env(self):
         self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
         self.topicid = os.getenv("WXPUSER_TOPICID")
+        self.wxpuser_uid = os.getenv("WXPUSER_UID")
         cks = os.getenv('xyycks')
-        cks_list = cks.split('@')
+        if cks is None:
+            print("小悦悦ck为空，请去抓包格式：'oZdBp.....' 多账户请用@分割")
+            exit()
+        if self.wxpuser_token is None:
+            print("wxpuser的apptoken为空，前往官网注册创建一个app")
+            exit()
+        if self.topicid is None and self.wxpuser_uid is None:
+            print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
+            exit()
+        return cks.split("@")      
+
+    def run(self):
+        cks_list = self.check_env()
         for ck in cks_list:   # 碰到#需要变数组同理也可得
             self.cont = True
             self.user = ck

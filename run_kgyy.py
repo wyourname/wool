@@ -13,12 +13,12 @@ import sys, os, subprocess
 def check_environment():
     v, o, a = sys.version_info, platform.system(), platform.machine()
     print(f"Python版本: {v.major}.{v.minor}.{v.micro}, 操作系统类型: {o}, 处理器架构: {a}")
-    if (v.minor in [9, 10]) and o == 'Linux' and a == 'x86_64':
+    if (v.minor in [10]) and o == 'Linux' and a == 'x86_64':
         print("符合运行要求")
         return True
     else:
-        if not (v.minor in [9, 10]):
-            print("不符合要求: Python版本不是3.9或3.10")
+        if not (v.minor in [10]):
+            print("不符合要求: Python版本不是3.10")
         if o != 'Linux':
             print("不符合要求: 操作系统类型不是Linux")
         if a != 'x86_64':

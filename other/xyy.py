@@ -253,11 +253,12 @@ class model:
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
             print(f"【余额】：{current_gold}金币")
-            if int(current_gold) >= 8000:
+            tag = 8000
+            if int(current_gold) >= tag:
                 self.gold = int(int(current_gold)/1000)*1000
                 self.get_requestsid()
             else:
-                print(f"【余额】：{current_gold} < 3000 ,不满足条件")
+                print(f"【余额】：{current_gold} < {tag} ,不满足条件")
         else:
             print("出现一些问题")
         

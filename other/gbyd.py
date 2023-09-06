@@ -207,11 +207,11 @@ class template:
                 </head>
                 <body>
                     <p>钢镚阅读检测</p><br>
-                    <p><a href="http://api.doudoudou.fun/redirect?user=abc&value=1&wxurl=link">点击阅读检测文章</a></p><br>
+                    <p><a href="http://api.doudoudou.fun/redirect?user=abc&value=1&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
                 </body>
             </html>
         '''
-        content = content.replace('link',url).replace('abc',self.cookie)
+        content = content.replace('link',url).replace('abc',self.cookie).replace('1900',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,
@@ -255,7 +255,7 @@ class template:
         self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
         self.topicid = os.getenv("WXPUSER_TOPICID")
         self.wxpuser_uid = os.getenv("WXPUSER_UID")
-        cks = os.getenv('gbcks')
+        cks = os.getenv('gbydcks')
         if cks is None:
             print("钢镚ck为空，请去抓包格式：'o-0fIvztHsv.....; zzbb_info=%7B%22o......' 多账户请用@分割")
             await self.close()

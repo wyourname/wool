@@ -185,7 +185,7 @@ class model:
         msg = self.request(msgurl)
         if msg:
             print(f"【公告】：{msg['messages']}")
-        url = f'https://api.doudoudou.fun/check=xyy?user={self.user}'
+        url = f'https://api.doudoudou.fun/check_dict?user={self.user}&value=0'
         res = self.request(url)
         if res and res['status'] == 200:
             self.check_data = res['check_dict']
@@ -193,7 +193,7 @@ class model:
             print(f"索取字典出现错误:{res}")
     
     def get_read_state(self):
-        url = f'http://api.doudoudou.fun/xyy/state?user={self.user}'
+        url = f'http://api.doudoudou.fun/read/state?user={self.user}&value=0'
         res = requests.get(url).json()
         if res['status'] == True:
             return True
@@ -222,11 +222,11 @@ class model:
                 </head>
                 <body>
                     <p>小阅阅阅读检测</p><br>
-                    <p><a href="http://api.doudoudou.fun/xyy?user=abc&wxurl=link">点击阅读检测文章</a></p><br>
+                    <p><a href="http://api.doudoudou.fun/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
                 </body>
             </html>
         '''
-        content = content.replace('link',url).replace('abc',self.user)
+        content = content.replace('link',url).replace('abc',self.user).replace('1900',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,
@@ -240,7 +240,6 @@ class model:
         # print(content)
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = requests.post(wxpuser_url, json=data).json()
-        print(res)
         if res['success'] == True:
             print(f"【通知】：检测发送成功！")
         else:
@@ -254,7 +253,7 @@ class model:
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
             print(f"【余额】：{current_gold}金币")
-            if int(current_gold) >= 3000:
+            if int(current_gold) >= 8000:
                 self.gold = int(int(current_gold)/1000)*1000
                 self.get_requestsid()
             else:

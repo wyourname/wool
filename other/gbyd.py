@@ -1,10 +1,9 @@
 """
 微信阅读：钢镚
-链接：https://wi77168.hbsxd.top:10263/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi77168.hbsxd.top:10263&codeuserid=2&time=1693909586
-抓 wi77168.hbsxd.top 下的 cookie: gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx,
+链接：http://2488240.ceu.gbl.6rt3sup6c4iy.cloud/?p=2488240
+抓 2488240.ceu.. 下的 cookie: gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx,
 把cookie完整复制下来就行
 export gbydcks='cookie1@cookie2' 单账号就export gbydcks='cookie'就行了
-
 
 必要推送：WXPUSER  前往网站https://wxpusher.zjiecode.com/docs/#/?id=%e6%b3%a8%e5%86%8c%e5%b9%b6%e4%b8%94%e5%88%9b%e5%bb%ba%e5%ba%94%e7%94%a8
 查看注册推送教程

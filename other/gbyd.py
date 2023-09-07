@@ -18,6 +18,7 @@ export WXPUSER_TOPICID='1111111'或者 export WXPUSER_UID='UID_xxxxx' 二选一�
 
 import asyncio
 import aiohttp
+import requests
 import hashlib
 import random,json
 from typing import Optional, Dict 
@@ -31,6 +32,22 @@ class template:
     def __init__(self) -> None:
         self.sessions = aiohttp.ClientSession()
         self.url = 'http://2478987.hqtu4dwdhi2pet.xcgh.qb33ict7e0mj.cloud/'
+        for url in ['http://api.doudoudou.fun','http://api.hwayla.top']:
+            if self.test_api(url):
+                print(f"url:{url} 测试通过")
+                self.aol = url
+                break
+        
+    def test_api(self,url):
+        print("开始测试检测服务可用性")
+        api_url = url + '/read/announcement'
+        res = requests.get(api_url)
+        if res.status_code == 200:
+            result = res.json()
+            print(f"【公告】：{result['messages']}")
+            return True
+        else:
+            return False
 
     async def close(self):
         await self.sessions.close()
@@ -207,11 +224,11 @@ class template:
                 </head>
                 <body>
                     <p>钢镚阅读检测</p><br>
-                    <p><a href="http://api.doudoudou.fun/redirect?user=abc&value=1&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
+                    <p><a href="self.aol/redirect?user=abc&value=1&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
                 </body>
             </html>
         '''
-        content = content.replace('link',url).replace('abc',self.cookie).replace('1900',str(int(time.time())))
+        content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.cookie).replace('1900',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,
@@ -232,7 +249,7 @@ class template:
             print(f"【通知】：发送失败！！！！！") 
 
     async def get_read_state(self):
-        url = f'http://api.doudoudou.fun/read/state?user={self.cookie}&value=1'
+        url = self.aol + f'/read/state?user={self.cookie}&value=1'
         res = await self.request(url)
         if res['status'] == True:
             return True
@@ -240,11 +257,7 @@ class template:
             return False
         
     async def check_read(self):
-        msgurl = f"http://api.doudoudou.fun/read/announcement"
-        msg = await self.request(msgurl)
-        if msg:
-            print(f"【公告】：{msg['messages']}")
-        url = f'http://api.doudoudou.fun/check_dict?user={self.cookie}&value=1'
+        url = self.aol + f'/check_dict?user={self.cookie}&value=1'
         res = await self.request(url)
         if res and res['status'] == 200:
             self.check_data = res['check_dict']

@@ -26,11 +26,28 @@ class model:
         """
         """
         self.session = requests.Session()
+        for url in ['http://api.doudoudou.fun','http://api.hwayla.top']:
+            if self.test_api(url):
+                print(f"url:{url} 测试通过")
+                self.aol = url
+                break
         self.url = 'http://1692433047.3z2rpa.top/yunonline/'
 
     def close(self):
         self.session.close()
-
+    
+    def test_api(self,url):
+        print("开始测试检测服务可用性")
+        api_url = url + '/read/announcement'
+        res = requests.get(api_url)
+        if res.status_code == 200:
+            result = res.json()
+            print(f"【公告】：{result['messages']}")
+            return True
+        else:
+            return False
+        
+        
     def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None):
         host = urlparse(url).netloc
         _default_headers = {
@@ -181,11 +198,11 @@ class model:
             print("__biz parameter not found in the URL")
 
     def check_read(self):
-        msgurl = f"https://api.doudoudou.fun/read/announcement"
-        msg = self.request(msgurl)
-        if msg:
-            print(f"【公告】：{msg['messages']}")
-        url = f'https://api.doudoudou.fun/check_dict?user={self.user}&value=0'
+        # msgurl =self.aol + f"/read/announcement"
+        # msg = self.request(msgurl)
+        # if msg:
+        #     print(f"【公告】：{msg['messages']}")
+        url = self.aol + f'/check_dict?user={self.user}&value=0'
         res = self.request(url)
         if res and res['status'] == 200:
             self.check_data = res['check_dict']
@@ -193,7 +210,7 @@ class model:
             print(f"索取字典出现错误:{res}")
     
     def get_read_state(self):
-        url = f'http://api.doudoudou.fun/read/state?user={self.user}&value=0'
+        url = self.aol+ f'/read/state?user={self.user}&value=0'
         res = requests.get(url).json()
         if res['status'] == True:
             return True
@@ -222,11 +239,11 @@ class model:
                 </head>
                 <body>
                     <p>小阅阅阅读检测</p><br>
-                    <p><a href="http://api.doudoudou.fun/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
+                    <p><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
                 </body>
             </html>
         '''
-        content = content.replace('link',url).replace('abc',self.user).replace('1900',str(int(time.time())))
+        content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.user).replace('1900',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,

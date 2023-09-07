@@ -1,6 +1,6 @@
 """
 微信阅读：小阅阅
-链接：https://wi77168.hbsxd.top:10263/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi77168.hbsxd.top:10263&codeuserid=2&time=1693909586
+链接：https://wai2023090607-1304279846.cos.ap-nanjing.myqcloud.com/todo.html?auth=31cf5cf7e3f49fd7ce1738ac295dcc4f&codeurl=wai2023090607-1304279846.cos.ap-nanjing.myqcloud.com&codeuserid=2&time=1694098844
 抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx,
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'

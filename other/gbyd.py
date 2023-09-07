@@ -291,7 +291,7 @@ class template:
             await self.do_read_task()
             balance = await self.read_info()
             await self.with_draw(balance=balance)
-            print(f"{'='*7}结束第{cks_list.index(ck+1)}账号{'='*7}")
+            print(f"{'='*7}结束第{cks_list.index(ck)+1}账号{'='*7}")
         await self.close()
 
 async def main():

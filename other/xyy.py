@@ -345,12 +345,14 @@ class model:
     def run(self):
         cks_list = self.check_env()
         for ck in cks_list:   # 碰到#需要变数组同理也可得
+            print(f"{'='*7}开始第{cks_list.index(ck)+1}账号{'='*7}")
             self.cont = True
             self.user = ck
             self.cookie = f'ysm_uid={ck}'
             self.check_read()
             self.account()
             self.user_gold()
+            print(f"{'='*7}结束第{cks_list.index(ck)+1}账号{'='*7}")
         self.close()
 
 def main():

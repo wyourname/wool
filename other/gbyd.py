@@ -1,6 +1,5 @@
 """
 微信阅读：钢镚
-链接：微信阅读：小阅阅
 链接：https://wi77168.hbsxd.top:10263/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi77168.hbsxd.top:10263&codeuserid=2&time=1693909586
 抓 wi77168.hbsxd.top 下的 cookie: gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx,
 把cookie完整复制下来就行
@@ -286,12 +285,14 @@ class template:
     async def run(self):
         cks_list = await self.check_env()
         for ck in cks_list:   # 碰到#需要变数组同理也可得
+            print(f"{'='*7}开始第{cks_list.index(ck)+1}账号{'='*7}")
             self.cookie = ck
             await self.check_read()
             await self.user_info()
             await self.do_read_task()
             balance = await self.read_info()
             await self.with_draw(balance=balance)
+            print(f"{'='*7}结束第{cks_list.index(ck+1)}账号{'='*7}")
         await self.close()
 
 async def main():

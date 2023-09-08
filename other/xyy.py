@@ -351,7 +351,7 @@ class model:
         if self.wxpuser_token is None:
             print("wxpuser的apptoken为空，前往官网注册创建一个app")
             exit()
-        if self.topicid is None and self.wxpuser_uid is None:
+        if self.topicid is None and wxpuser_uid is None:
             print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
             exit()
         return cks.split("@"),wxpuser_uid.split('@')      

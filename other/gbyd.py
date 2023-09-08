@@ -265,7 +265,7 @@ class template:
     async def check_env(self):
         self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
         self.topicid = os.getenv("WXPUSER_TOPICID")
-        self.wxpuser_uid = os.getenv("WXPUSER_UID")
+        wxpuser_uid = os.getenv("WXPUSER_UID")
         cks = os.getenv('gbydcks')
         if cks is None:
             print("钢镚ck为空，请去抓包格式：'o-0fIvztHsv.....; zzbb_info=%7B%22o......' 多账户请用@分割")
@@ -275,17 +275,18 @@ class template:
             print("wxpuser的apptoken为空，前往官网注册创建一个app")
             await self.close()
             exit()
-        if self.topicid is None and self.wxpuser_uid is None:
+        if self.topicid is None and wxpuser_uid is None:
             print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
             await self.close()
             exit()
-        return cks.split("@")  
+        return cks.split("@") , wxpuser_uid.split('@')
 
     async def run(self):
-        cks_list = await self.check_env()
+        cks_list,wx_uids = await self.check_env()
         for ck in cks_list:   # 碰到#需要变数组同理也可得
             print(f"{'='*7}开始第{cks_list.index(ck)+1}账号{'='*7}")
             self.cookie = ck
+            self.wxpuser_uid = wx_uids[cks_list.index(ck)]
             await self.check_read()
             await self.user_info()
             await self.do_read_task()

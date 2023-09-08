@@ -82,11 +82,11 @@ class Gbyd:
         res1 = await self.request(url1)
         if res:
             if res['code'] == 0:
-                print(f"【用户{self.index}信息】:id {res['data']['uid']}")
-                print(f"【用户{self.index}通知】:{res1['data']['msg']}")
+                print(f"【用户{self.index}】【信息】:id {res['data']['uid']}")
+                print(f"【用户{self.index}】【通知】:{res1['data']['msg']}")
                 await self.read_info()
             else:
-                print(f"【用户{self.index}错误】:获取用户信息失败 {res}")
+                print(f"【用户{self.index}】【错误】:获取用户信息失败 {res}")
         else:
             print("请求出现了问题，稍后再来看吧")
     
@@ -98,7 +98,7 @@ class Gbyd:
         res = await self.request(url)
         if res:
             if res['code'] == 0:
-               print(f"【用户{self.index}收入】:今天收入 {res['data']['gold']}, 阅读 {res['data']['read']},当前余额 {res['data']['remain']}金币") 
+               print(f"【用户{self.index}】【收入】:今天收入 {res['data']['gold']}, 阅读 {res['data']['read']},当前余额 {res['data']['remain']}金币") 
                return res['data']['remain']
         else:
             print("请求出现了问题,无法获得信息")
@@ -106,7 +106,7 @@ class Gbyd:
     async def do_read_task(self):
         await asyncio.sleep(random.randint(2,5))
         for i in range(1,31):
-            print(f"【用户{self.index}阅读】:开始第{i}次阅读")
+            print(f"【用户{self.index}】【阅读】:开始第{i}次阅读")
             ts = int(time.time())
             sign = await self.create_sign(ts)
             url = self.url + f"read/task?time={ts}&sign={sign}"
@@ -115,7 +115,7 @@ class Gbyd:
                 link = res['data']['link']
                 if await self.varification(link):
                     random_sleep = random.randint(8,15)
-                    print(f"【用户{self.index}等待】:{random_sleep}秒")
+                    print(f"【用户{self.index}】【等待】:{random_sleep}秒")
                     await asyncio.sleep(random_sleep)
                     ts1 = int(time.time())
                     url1 = self.url+ f"user/msg?time={ts1}&sign={sign}"
@@ -127,7 +127,7 @@ class Gbyd:
                     break
                 await asyncio.sleep(random.randint(1,3))
             else:
-                print(f"【用户{self.index}结果】:{res['message']}")
+                print(f"【用户{self.index}】【结果】:{res['message']}")
                 break
 
     async def complete_task(self):
@@ -139,12 +139,12 @@ class Gbyd:
         res = await self.request(url,'post',data=data,add_headers=add_header)
         if res:
             if res['code'] == 0:
-                print(f"【用户{self.index}奖励】:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
+                print(f"【用户{self.index}】【奖励】:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
                 return True
             else:
-                print(f"【用户{self.index}阅读】:失败 {res}")
+                print(f"【用户{self.index}】【阅读】:失败 {res}")
         else:
-            print(f"【用户{self.index}错误】:发生意外 {res}")
+            print(f"【用户{self.index}】【错误】:发生意外 {res}")
             await self.complete_task()
 
 
@@ -154,21 +154,21 @@ class Gbyd:
         if '__biz' in query_parameters:
             biz_value = query_parameters['__biz'][0]
             if biz_value in self.check_data:
-                print(f"【用户{self.index}检测】: {self.check_data[biz_value][0]}公众号")
+                print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
                 await self.wxpuser("钢镚检测,请1分钟内点击阅读",encoded_url)
-                print(f"【用户{self.index}等待】:请手动前往wxpuser点击阅读")
+                print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if await self.get_read_state():
-                        print(f"【用户{self.index}阅读】:已手动阅读,稍微延迟5秒钟")
+                        print(f"【用户{self.index}】【阅读】:已手动阅读,稍微延迟5秒钟")
                         await asyncio.sleep(5)
                         return True
                     if i == 60:
-                        print("超时未阅读，终止本次阅读")
+                        print(f"【用户{self.index}】【警告】:超时未阅读，终止本次阅读")
                         return False
                     time.sleep(1)
             else:
-                print(f"【用户{self.index}文章】:没有检测")
+                print(f"【用户{self.index}】【文章】:没有检测")
                 return True
         else:
             print("__biz parameter not found in the URL")
@@ -181,13 +181,13 @@ class Gbyd:
             res = await self.request(url)
             if res:
                 if res['code'] == 0:
-                    print(f"【用户{self.index}提现】:{res['message']}")
+                    print(f"【用户{self.index}】【提现】:{res['message']}")
                 else:
-                    print(res)
+                    print(f"【用户{self.index}】【提现】:{res['message']}")
             else:
                 print("提现出差错了")
         else:
-            print(f"【用户{self.index}提现】: 未达到提现金额，暂不提现")
+            print(f"【用户{self.index}】【提现】: 未达到提现金额，暂不提现")
 
 
     async def wxpuser(self,title,url):
@@ -231,9 +231,9 @@ class Gbyd:
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = await self.request(wxpuser_url,'post',data=json_data, headers={"Content-Type":"application/json"})
         if res['success'] == True:
-            print(f"【用户{self.index}通知】:检测发送成功！")
+            print(f"【用户{self.index}】【通知】:检测发送成功！")
         else:
-            print(f"【用户{self.index}通知】:发送失败！！！！！") 
+            print(f"【用户{self.index}】【通知】:发送失败！！！！！") 
 
     async def get_read_state(self):
         url = self.aol + f'/read/state?user={self.cookie}&value=1'
@@ -255,7 +255,7 @@ class Gbyd:
     async def process_account(self, ck, wxpuser_uid, wxpuser_token, topicid ,index_u, a_url):
         self.aol = a_url
         self.index = index_u
-        print(f"【用户{self.index}开始】:{'='*10}执行任务{'='*10}")
+        print(f"【用户{self.index}】【开始】:{'='*10}执行任务{'='*10}")
         self.wxpuser_token = wxpuser_token
         self.topicid=topicid
         self.cookie = ck
@@ -266,7 +266,7 @@ class Gbyd:
         balance = await self.read_info()
         await self.with_draw(balance=balance)
         await self.close()
-        print(f"【用户{self.index}结束】:{'='*10}结束执行{'='*10}")
+        print(f"【用户{self.index}】【结束】:{'='*10}结束执行{'='*10}")
 
 def test_api(url):
     print("开始测试检测服务可用性")

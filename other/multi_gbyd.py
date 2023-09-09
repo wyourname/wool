@@ -245,7 +245,7 @@ class Gbyd:
                 </style>
             </head>
             <body>
-                <div class="title">小阅阅阅读检测</div>
+                <div class="title">钢镚阅读检测，务必在一分钟内点击阅读</div>
                 <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>

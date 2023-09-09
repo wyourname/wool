@@ -174,7 +174,7 @@ class Gbyd:
             print("__biz parameter not found in the URL")
 
     async def with_draw(self,balance):
-        if balance >= 3000:
+        if balance >= 6000:
             ts = int(time.time())
             sign = await self.create_sign(ts)
             url = self.url + f"withdraw/wechat?time={ts}&sign={sign}"

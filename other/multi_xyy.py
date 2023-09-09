@@ -119,7 +119,7 @@ class Xyy:
                 if res['errcode'] == 407:
                     self.cont = False
         else:
-            print("发生了点意外,休息3秒")
+            print(f"【用户{self.index}】发生了点意外,休息3秒")
             time.sleep(3)
             self.do_read_task(origin,uk)
 
@@ -210,9 +210,9 @@ class Xyy:
             return False
 
     def wxpuser(self,title,url):
-        # 此处代码抄袭了别人html的代码，见谅
-        content = '''<!DOCTYPE html>
-                <html lang="zh-CN">
+        content = '''
+        <!DOCTYPE html>
+            <html lang="zh-CN">
                 <head>
                 <meta charset="UTF-8">
                 <title>TITLE</title>
@@ -223,15 +223,53 @@ class Xyy:
                         animation: bgAnimation 6s linear infinite;
                     }
                     @keyframes bgAnimation {
-                        0% {background-position: 0% 50%;}
-                        50% {background-position: 100% 50%;}
-                        100% {background-position: 0% 50%;}
+                        0% {
+                            background-position: 0% 50%;
+                        }
+                    
+                        50% {
+                            background-position: 100% 50%;
+                        }
+                    
+                        100% {
+                            background-position: 0% 50%;
+                        }
+                    }
+                    .title {
+                        text-align: center;
+                        font-size: 25px;
+                        display: block;
+                    }
+                    .button {
+                        background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
+                        text-align: center;
+                        transition: 0.5s;
+                        background-size: 200% auto;
+                        border-radius: 10px;
+                        width: 50%;
+                        margin: 25px auto;
+                    }
+                    .button a {
+                        padding: 15px 45px;
+                        display: block;
+                        text-decoration: none;
+                        color: white;
+                    }
+                    .tips {
+                        text-align: center;
+                        margin: auto;
+                        padding: 10px 0px;
+                        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
                     }
                 </style>
                 </head>
                 <body>
-                    <p>小阅阅阅读检测</p><br>
-                    <p><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
+                    <div class="title">小阅阅阅读检测</div>
+                    <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a><div>
+                    <div class="tips">
+                        <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
+                        <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                    </div><br>
                 </body>
             </html>
         '''
@@ -335,20 +373,20 @@ class Xyy:
 
 
 def check_env():
-        wxpuser_token = os.getenv("WXPUSER_TOKEN")
-        topicid = os.getenv("WXPUSER_TOPICID")
-        wxpuser_uid = os.getenv("WXPUSER_UID")
-        cks = os.getenv('xyycks')
-        if cks is None:
-            print("小悦悦ck为空，请去抓包格式:'oZdBp.....' 多账户请用@分割")
-            exit()
-        if wxpuser_token is None:
-            print("wxpuser的apptoken为空，前往官网注册创建一个app")
-            exit()
-        if topicid is None and wxpuser_uid is None:
-            print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
-            exit()
-        return wxpuser_token, topicid, wxpuser_uid.split('@'), cks.split("@")
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('xyycks')
+    if cks is None:
+        print("小悦悦ck为空，请去抓包格式:'oZdBp.....' 多账户请用@分割")
+        exit()
+    if wxpuser_token is None:
+        print("wxpuser的apptoken为空，前往官网注册创建一个app")
+        exit()
+    if topicid is None and wxpuser_uid is None:
+        print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
+        exit()
+    return wxpuser_token, topicid, wxpuser_uid.split('@'), cks.split("@")
 
 
 def test_api(url):

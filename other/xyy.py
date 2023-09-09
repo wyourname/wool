@@ -132,7 +132,7 @@ class model:
             if res['errcode'] == 0:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
-                self.jump(url=link_url)
+                self.jump(url=link_url,uk=uk)
                 # ts = random.randint(7,15)
                 # print(f"【等待】：休息{ts}秒")
                 # time.sleep(ts)
@@ -232,30 +232,68 @@ class model:
             return False
 
     def wxpuser(self,title,url):
-        # 此处代码抄袭了别人html的代码，见谅
-        content = '''<!DOCTYPE html>
-                <html lang="zh-CN">
-                <head>
-                <meta charset="UTF-8">
-                <title>TITLE</title>
-                <style type=text/css>
-                    body {
-                        background-image: linear-gradient(120deg, #fdfbfb 0%, #a5d0e5 100%);
-                        background-size: 300%;
-                        animation: bgAnimation 6s linear infinite;
+        content = '''
+    <!DOCTYPE html>
+        <html lang="zh-CN">
+        <head>
+            <meta charset="UTF-8">
+            <title>TITLE</title>
+            <style type=text/css>
+                body {
+                    background-image: linear-gradient(120deg, #fdfbfb 0%, #a5d0e5 100%);
+                    background-size: 300%;
+                    animation: bgAnimation 6s linear infinite;
+                }
+                @keyframes bgAnimation {
+                    0% {
+                        background-position: 0% 50%;
                     }
-                    @keyframes bgAnimation {
-                        0% {background-position: 0% 50%;}
-                        50% {background-position: 100% 50%;}
-                        100% {background-position: 0% 50%;}
+                
+                    50% {
+                        background-position: 100% 50%;
                     }
-                </style>
-                </head>
-                <body>
-                    <p>小阅阅阅读检测</p><br>
-                    <p><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
-                </body>
-            </html>
+                
+                    100% {
+                        background-position: 0% 50%;
+                    }
+                }
+                .title {
+                    text-align: center;
+                    font-size: 25px;
+                    display: block;
+                }
+                .button {
+                    background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
+                    text-align: center;
+                    transition: 0.5s;
+                    background-size: 200% auto;
+                    border-radius: 10px;
+                    width: 50%;
+                    margin: 25px auto;
+                }
+                .button a {
+                    padding: 15px 45px;
+                    display: block;
+                    text-decoration: none;
+                    color: white;
+                }
+                .tips {
+                    text-align: center;
+                    margin: auto;
+                    padding: 10px 0px;
+                    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+                }
+            </style>
+        </head>
+            <body>
+                <div class="title">小阅阅阅读检测</div>
+                <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a><div>
+                <div class="tips">
+                    <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
+                    <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                </div><br>
+            </body>
+        </html>
         '''
         content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.user).replace('1900',str(int(time.time())))
         data = {

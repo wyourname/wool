@@ -187,13 +187,19 @@ class Xyy:
             print("__biz parameter not found in the URL")
             return True
 
-    def check_read(self):
-        url = self.aol + f'/check_dict?user={self.user}&value=0'
-        res = self.request(url)
-        if res and res['status'] == 200:
+    def check_read(self,a_line,maxretry=2):
+        url = a_line + f'/check_dict?user={self.user}&value=0'
+        res = requests.get(url)
+        if res.status_code == 200:
+            res = res.json()
             self.check_data = res['check_dict']
         else:
-            print(f"索取字典出现错误:{res}")
+            if maxretry >0:
+                b_line = 'http://api.doudoudou.fun'
+                print(f"【用户{self.index}】：索取字典出现错误:{res.status_code},试着重新获取！")
+                self.check_read(b_line,maxretry-1)
+            else:
+                exit()
     
     def get_read_state(self):
         url = self.aol+ f'/read/state?user={self.user}&value=0'
@@ -322,7 +328,7 @@ class Xyy:
         self.app_token = app_token
         self.wx_uid = wx_uid
         self.cookie = f'ysm_uid={ck}'
-        self.check_read()
+        self.check_read(url)
         self.account()
         self.user_gold()
         print(f"【用户{index}】【结束任务】: 第 {index}个 账号")

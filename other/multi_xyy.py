@@ -1,6 +1,6 @@
 """
 微信阅读:小阅阅多线程并发版本，帮别人挂的最佳选择
-链接:https://wai2023090606-1304279846.cos.ap-nanjing.myqcloud.com/todo.html?auth=31cf5cf7e3f49fd7ce1738ac295dcc4f&codeurl=wai2023090606-1304279846.cos.ap-nanjing.myqcloud.com&codeuserid=2&time=1694150293
+链接:https://wi29252.masx.top:10262/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi29252.masx.top:10262&codeuserid=2&time=1694233111
 抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx,
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'

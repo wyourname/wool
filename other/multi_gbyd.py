@@ -191,7 +191,6 @@ class Gbyd:
 
 
     async def wxpuser(self,title,url):
-        # 此处代码抄袭了别人html的代码，见谅
         content = '''<!DOCTYPE html>
                 <html lang="zh-CN">
                 <head>
@@ -204,15 +203,53 @@ class Gbyd:
                         animation: bgAnimation 6s linear infinite;
                     }
                     @keyframes bgAnimation {
-                        0% {background-position: 0% 50%;}
-                        50% {background-position: 100% 50%;}
-                        100% {background-position: 0% 50%;}
+                        0% {
+                            background-position: 0% 50%;
+                        }
+                    
+                        50% {
+                            background-position: 100% 50%;
+                        }
+                    
+                        100% {
+                            background-position: 0% 50%;
+                        }
+                    }
+                    .title {
+                        text-align: center;
+                        font-size: 25px;
+                        display: block;
+                    }
+                    .button {
+                        background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
+                        text-align: center;
+                        transition: 0.5s;
+                        background-size: 200% auto;
+                        border-radius: 10px;
+                        width: 50%;
+                        margin: 25px auto;
+                    }
+                    .button a {
+                        padding: 15px 45px;
+                        display: block;
+                        text-decoration: none;
+                        color: white;
+                    }
+                    .tips {
+                        text-align: center;
+                        margin: auto;
+                        padding: 10px 0px;
+                        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
                     }
                 </style>
                 </head>
                 <body>
-                    <p>钢镚阅读检测</p><br>
-                    <p><a href="self.aol/redirect?user=abc&value=1&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
+                    <div class="title">小阅阅阅读检测</div>
+                    <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a><div>
+                    <div class="tips">
+                        <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
+                        <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                    </div><br>
                 </body>
             </html>
         '''
@@ -243,13 +280,19 @@ class Gbyd:
         else:
             return False
         
-    async def check_read(self):
-        url = self.aol + f'/check_dict?user={self.cookie}&value=1'
-        res = await self.request(url)
-        if res and res['status'] == 200:
+    async def check_read(self,a_line,maxretry=2):
+        url = a_line + f'/check_dict?user={self.user}&value=0'
+        res = requests.get(url)
+        if res.status_code == 200:
+            res = res.json()
             self.check_data = res['check_dict']
         else:
-            print(f"索取字典出现错误:{res}")
+            if maxretry >0:
+                b_line = 'http://api.doudoudou.fun'
+                print(f"【用户{self.index}】：索取字典出现错误:{res.status_code},试着重新获取！")
+                self.check_read(b_line,maxretry-1)
+            else:
+                exit()
 
 
     async def process_account(self, ck, wxpuser_uid, wxpuser_token, topicid ,index_u, a_url):
@@ -260,7 +303,7 @@ class Gbyd:
         self.topicid=topicid
         self.cookie = ck
         self.wxpuser_uid = wxpuser_uid
-        await self.check_read()
+        await self.check_read(a_url)
         await self.user_info()
         await self.do_read_task()
         balance = await self.read_info()

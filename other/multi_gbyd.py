@@ -281,7 +281,7 @@ class Gbyd:
             return False
         
     async def check_read(self,a_line,maxretry=2):
-        url = a_line + f'/check_dict?user={self.user}&value=0'
+        url = a_line + f'/check_dict?user={self.cookie}&value=0'
         res = requests.get(url)
         if res.status_code == 200:
             res = res.json()

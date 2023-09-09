@@ -191,9 +191,10 @@ class Gbyd:
 
 
     async def wxpuser(self,title,url):
-        content = '''<!DOCTYPE html>
-                <html lang="zh-CN">
-                <head>
+        content = '''
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+            <head>
                 <meta charset="UTF-8">
                 <title>TITLE</title>
                 <style type=text/css>
@@ -242,16 +243,16 @@ class Gbyd:
                         box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
                     }
                 </style>
-                </head>
-                <body>
-                    <div class="title">小阅阅阅读检测</div>
-                    <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a><div>
-                    <div class="tips">
-                        <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
-                        <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
-                    </div><br>
-                </body>
-            </html>
+            </head>
+            <body>
+                <div class="title">小阅阅阅读检测</div>
+                <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
+                <div class="tips">
+                    <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
+                    <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                </div><br>
+            </body>
+        </html>
         '''
         content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.cookie).replace('1900',str(int(time.time())))
         data = {

@@ -189,7 +189,7 @@ class template:
             print("__biz parameter not found in the URL")
 
     async def with_draw(self,balance):
-        if balance >= 3000:
+        if balance >= 6000:
             ts = int(time.time())
             sign = await self.create_sign(ts)
             url = self.url + f"withdraw/wechat?time={ts}&sign={sign}"
@@ -290,11 +290,19 @@ class template:
         else:
             print(f"【通知】：发送失败！！！！！") 
 
-    async def get_read_state(self):
+    async def get_read_state(self,max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=1'
-        res = await self.request(url)
-        if res['status'] == True:
-            return True
+        res = requests.get(url)
+        if res.status_code == 200:
+            res = res.json()
+            if res['status'] == True:
+                return True
+            else:
+                print(res)
+                if res['status'] == '-1' and max_retry>0:
+                    time.sleep(5)
+                    self.get_read_state(max_retry-1)
+                return False
         else:
             return False
         

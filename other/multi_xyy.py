@@ -209,7 +209,6 @@ class Xyy:
             if res['status'] == True:
                 return True
             else:
-                print(res)
                 if res['status'] == '-1' and max_retry>0:
                     time.sleep(5)
                     self.get_read_state(max_retry-1)

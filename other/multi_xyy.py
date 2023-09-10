@@ -206,7 +206,6 @@ class Xyy:
         res = requests.get(url)
         if res.status_code == 200:
             res = res.json()
-            print(res)
             if res['status'] == True:
                 return True
             else:

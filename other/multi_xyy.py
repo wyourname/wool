@@ -202,10 +202,11 @@ class Xyy:
                 exit()
     
     def get_read_state(self,max_retry=3):
-        url = self.aol + f'/read/state?user={self.cookie}&value=1'
+        url = self.aol + f'/read/state?user={self.user}&value=1'
         res = requests.get(url)
         if res.status_code == 200:
             res = res.json()
+            print(res)
             if res['status'] == True:
                 return True
             else:

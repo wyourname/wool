@@ -224,7 +224,7 @@ class model:
             print(f"索取字典出现错误:{res}")
     
     def get_read_state(self, max_retry=3):
-        url = self.aol + f'/read/state?user={self.cookie}&value=1'
+        url = self.aol + f'/read/state?user={self.user}&value=1'
         res = requests.get(url)
         if res.status_code == 200:
             res = res.json()

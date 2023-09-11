@@ -327,14 +327,10 @@ class Gather:
         await self.close()
 
 async def check_env():
-    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
-    topicid = None
-    wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079'
-    cks = 'oC34q6wjmXwVJ07LNPQvIyRBvdA4&16f91c8d272a1c16514315e4b543bfc3'
-    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    # topicid = os.getenv("WXPUSER_TOPICID")
-    # wxpuser_uid = os.getenv("WXPUSER_UID")
-    # cks = os.getenv('gathercks')
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('gathercks')
     if cks is None:
         print("ck为空，请去抓包格式:'' 多账户请用@分割")
         exit()

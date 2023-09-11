@@ -1,11 +1,9 @@
 """
-export gathercks='oC3xxxxxx&16xxxxxxxxxxx' # un&token的值
-cookie通用，前提是都要手动打开一次完成注册
-我不推荐玩这个和人人帮，太坑了，但是脚本都写了没办法
+export rrbcks='手机号&uid&token' # 自动提现，提前绑定支付宝,每天6毛,容易黑，过一天就好了，一天2次
 
-http://mr1694410945512.fgrtlkg.cn/user/index.html?mid=UVMLMUVD6 【花花阅读】看文章赚零花钱，全新玩法，提现秒到(若链接打不开，可复制到手机浏览器里打开)
-http://mr1694410993363.aidhtjj.cn/coin/index.html?mid=3VMRCHUVZ 【元宝阅读】看文章赚零花钱，全新玩法，提现秒到(若链接打不开，可复制到手机浏览器里打开)
-http://mr1694411016431.rikybod.cn/ox/index.html?mid=EU4USNEMM 【星空阅读】看文章赚零花钱，全新玩法，提现秒到(若链接打不开，可复制到手机浏览器里打开)
+我不推荐玩这个和三合一，太坑了，但是脚本都写了没办法
+
+邀请链接http://ebb.nianshuiyong.cloud/user/index.html?mid=1700837019170766848任务类型多，综合收益高；简单易上手，提现秒到账；拉新推广，享受永久分成；大额提现，享受专属客服（若链接打不开，可复制到手机浏览器里打开）
 
 必要推送:WXPUSER  前往网站https://wxpusher.zjiecode.com/docs/#/?id=%e6%b3%a8%e5%86%8c%e5%b9%b6%e4%b8%94%e5%88%9b%e5%bb%ba%e5%ba%94%e7%94%a8
 查看注册推送教程
@@ -18,8 +16,8 @@ WXPUSER_TOPICID和WXPUSER_UID二选一即可 WXPUSER_UID要和cookie数量一致
 
 比如我2个微信阅读只想推送给一个微信 那就export WXPUSER_UID='UID_123456@UID_123456'
 前者群发，后者单推个人，推荐后者
-
 """
+
 
 
 import asyncio
@@ -28,17 +26,21 @@ from typing import Optional, Dict
 import requests
 from urllib.parse import urlparse,parse_qs,quote
 import time,json,re,random
-import sys
 import os
 
+"""
+人人帮
+待完善
 
 
-class Gather:
+"""
+
+
+class Rrbyd:
     def __init__(self) -> None:
 
         self.sessions = aiohttp.ClientSession()
-        self.base_url = 'http://u.cocozx.cn/api/'
-        # self.check_data = {'Mzg2Mzk3Mjk5NQ==':['欢乐的小鱼儿', 'gh_cf733a65ca3d']}
+        self.base_url = 'http://ebb.vinse.cn/api/'
         
 
     
@@ -54,7 +56,10 @@ class Gather:
             'Accept-Encoding': 'gzip, deflate',
             'Content-Type': 'application/json',
             'Proxy-Connection': 'keep-alive',
-            'Origin': 'http://mr1694402649954.rlmeqlv.cn',
+            'mid': 'null',
+            'platform': '0',
+            'Origin': 'http://ebb101.twopinkone.cloud',
+            'Referer': 'http://ebb101.twopinkone.cloud/',
             'Accept-Language': 'zh-CN,zh',
             }
         try:
@@ -78,52 +83,115 @@ class Gather:
             return None    
     
     async def user_info(self):
-        url = self.base_url+f'{self.key}/info'
-        data_json = {'un':self.un,'token':self.cookie,"pageSize": 10}
-        res = await self.request(url,'post',data=json.dumps(data_json))
+        url = self.base_url+'user/info'
+        add_headers = {'un':self.un,'uid':self.uid,'token':self.cookie}
+        data_json = {"pageSize": 10}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
         if res:
             if res['code'] == 0:
-                print(f"【用户】:{res['result']['uid']} 当前{res['result']['moneyCurrent']}")
-                if 10000 > int(res['result']['moneyCurrent']) >=3000:
-                    await self.with_draw("3000")
+                print(f"【用户】:{res['result']['nickName']}  当前{res['result']['integralCurrent']}")
+                if res['result']['integralCurrent'] >=5000:
+                    await self.with_draw(5000)
+
             else:
                 print(f"【用户】:error infomation:{res}")
         else:
             print("【用户】:返回为空,肯定出问题了")
 
-
-    async def start(self):
-        url = f'http://u.cocozx.cn/api/{self.key}/getReadHost'
-        data_json = {'un':self.un,'token':self.cookie,"pageSize": 10}
-        res = await self.request(url,'post',data=json.dumps(data_json))
+    async def sign_status(self):
+        url = self.base_url+'user/getUserSignDays'
+        add_headers = {'un':self.un,'uid':self.uid,'token':self.cookie}
+        data_json = {"pageSize": 10}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
         if res:
             if res['code'] == 0:
-                print(f'【用户】:获取到阅读url {res["result"]["host"]}')
-                if res["result"]["host"]:
-                    await asyncio.sleep(3)
-                    await self.read(res["result"]["host"])
+                if res['result']['signStatus'] == 0:
+                    print(f"【用户】:今天尚未签到,试着签到")
+                    await self.signIn()
+                else:
+                    print(f"【用户】:今天已经签到")
+            else:
+                print(f"error infomation:{res}")
+        else:
+            print("【用户】:返回为空,肯定出问题了")
+
+    async def signIn(self):
+        url = self.base_url+'user/sign'
+        add_headers = {'un':self.un,'uid':self.uid,'token':self.cookie}
+        data_json = {"pageSize": 10}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
+        if res:
+            if res['code'] == 0:
+                print(f"【用户】:签到获得{res['result']['point']}豆")
+            else:
+                print(f"【用户】:签到失败{res}")
+        else:
+            print("【用户】:返回为空,肯定出问题了")
+    
+    async def start(self):
+        url = f'https://u.cocozx.cn/ipa/read/getEntryUrl?fr=ebb0726&uid={self.uid}'
+        res = await self.request(url=url)
+        if res:
+            if res['code'] == 0 and res['result']['status'] !=2:
+                print(f'【用户】:获取到阅读url {res["result"]["url"]}')
+                if res["result"]["url"]:
+                    await self.read(res["result"]["url"])
             else:
                 print("【用户】:当前不能阅读")
         else:
             print("【用户】:请求出现差错了,有问题")
     
     async def read(self,start_url):
-        res = await self.request(start_url+'/r.html',dtype='text')
+        res = await self.request(start_url,dtype='text')
         if res:
             print("【用户】:模拟打开页面成功")
-            await self.complete(start_url)
+            extracted_value = re.search(r'mr(\d+)', start_url).group(1) if re.search(r'mr(\d+)', start_url) else None
+            if extracted_value:
+                host = urlparse(start_url).netloc
+                value = await self.get_group(extracted_value,host=host)
+                await self.read_info(host=host,value=value)
         else:
             print("【用户】:请求出现差错了,有问题")
 
-
-    async def complete(self,host):
-        url = self.base_url+f'{self.key}/read'
+    async def read_info(self,host,value):
+        url = 'http://u.cocozx.cn/ipa/read/info'
         data_json = {
-            "un": self.un,
-            "token": self.cookie,
+            "fr": "ebb0726",
+            "uid": self.uid,
+            "group": value,
+            "un": None,
+            "token": None,
             "pageSize": 20
             }
-        add_headers = {'Origin': host}
+        add_headers = {'Origin': f'http://{host}'}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
+        if res:
+            if res['code'] == 0:
+                print(f"【用户】:当前任务最大数量{res['result']['dayMax']},当前次数{res['result']['dayCount']}")
+                num = res['result']['dayMax'] - res['result']['dayCount']
+                for i in range(num):
+                    print(f"【用户】:第{i+1}次阅读")
+                    result = await self.complete(host=host,value=value)
+                    if result is False:
+                        break
+                    else:
+                        await asyncio.sleep(random.randint(2,3))
+            else:
+                print("【用户】:当前不能阅读")
+        else:
+            print("【用户】:请求出现差错了,有问题")
+    
+    async def complete(self,host,value):
+        url = 'http://u.cocozx.cn/ipa/read/read'
+        data_json = {
+            "fr": "ebb0726",
+            "uid": self.uid,
+            "group": value,
+            "un": None,
+            "token": None,
+            "pageSize": 20
+            }
+        add_headers = {'Origin': f'http://{host}'}
         res = await self.request(url,'post', data=json.dumps(data_json),add_headers=add_headers)
         if res:
             if res['code'] == 0:
@@ -132,23 +200,36 @@ class Gather:
                         ts = random.randint(7,15)
                         print(f"【用户】:等待{ts}秒")
                         await asyncio.sleep(ts)
-                        submit_url = self.base_url+f'{self.key}/submit'
+                        submit_url = 'http://u.cocozx.cn/ipa/read/submit'
                         res = await self.request(submit_url,'post', data=json.dumps(data_json),add_headers=add_headers)
                         if res:
                             if res['code'] == 0:
-                               print(f"【用户】:完成阅读+{res['result']['val']}币,还剩{res['result']['progress']}次")
-                               if res['result']['progress'] >0 and int(res['result']['val']) >0:
-                                   await self.complete(host=host)
+                               print(f"【用户】:完成阅读{res['result']['dayCount']}次")
                             else:
                                  print(f"【用户】:阅读失败{res}")
                         else:
                             print("【用户】:请求出现差错了,有问题")
+                        return True
                     else:
                         return False
                 else:
                     print("【用户】:没有url了")
+                    return False
             else:
                 print("【用户】:发生什么事情了")
+        else:
+            print("【用户】:请求出现差错了,有问题")
+
+    async def with_draw(self,money):
+        url = f"http://ebb.vinse.cn/apiuser/aliWd"
+        data_json = {"val": money, "pageSize": 10}
+        add_headers = {'un':self.un,'uid':self.uid,'token':self.cookie}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
+        if res:
+            if res['code'] == 0:
+                print(f"【用户】:提现{money/10000}元成功！")
+            else:
+                print(f"【用户】:提现{money/10000}元失败！原因{res}")
         else:
             print("【用户】:请求出现差错了,有问题")
 
@@ -161,7 +242,7 @@ class Gather:
             if biz_value in self.check_data:
                 print(f"【用户】【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
-                await self.wxpuser("三合一检测,请1分钟内点击阅读",encoded_url)
+                await self.wxpuser("人人帮检测,请1分钟内点击阅读",encoded_url)
                 print(f"【用户】【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if await self.get_read_state():
@@ -178,28 +259,6 @@ class Gather:
         else:
             print("__biz parameter not found in the URL")
             return True
-        
-    async def with_draw(self,money):
-        data_json={
-            "val":money,
-            "un": self.un,
-            "token": self.cookie,
-            "pageSize": "20"
-        }
-        if self.key == 'user':
-            url = self.base_url+f'{self.key}/wd'
-        else:
-            url = self.base_url+f'{self.key}/wdmoney'
-            print(url)
-        res = await self.request(url,'post', data=json.dumps(data_json))
-        if res:
-            if res['code'] == 0:
-                print(f"【用户】:提现{int(money)/10000}元成功")
-            else:
-                print(f"【用户】:提现{int(money)/10000}元失败 原因：{res}")
-        else:
-            print("【用户】:请求出现差错了,有问题")
-
 
     async def wxpuser(self,title,url):
         content = '''
@@ -256,8 +315,8 @@ class Gather:
                 </style>
             </head>
             <body>
-                <div class="title">三合一阅读检测，务必在一分钟内点击阅读</div>
-                <div class='button'><a href="self.aol/redirect?user=abc&value=2&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
+                <div class="title">人人帮阅读检测，务必在一分钟内点击阅读</div>
+                <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
                     <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
@@ -282,8 +341,32 @@ class Gather:
         if res['success'] == True:
             print(f"【用户】【通知】:检测发送成功！")
         else:
-            print(f"【用户】【通知】:发送失败！！！！！{res}") 
+            print(f"【用户】【通知】:发送失败！！！！！") 
 
+    async def get_group(self,num,host):
+        add_headers = {'Origin': f'http://{host}',
+                   'X-Requested-With': 'com.tencent.mm',
+                   'Accept-Language': 'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7'}
+        data_json = {"un": None, "token": None, "pageSize": 20}
+        url = f'http://u.cocozx.cn/api/common/ustr?t={num}'
+        res = await self.request(url,'post', add_headers=add_headers, data=json.dumps(data_json))
+        if res:
+            if res['code'] == 0:
+                if res['result']['str']:
+                    parsed_url = urlparse(res['result']['str'])
+                    # 提取参数
+                    query_parameters = parse_qs(parsed_url.query)
+                    # 获取 "group" 参数的值
+                    group_value = query_parameters.get('group', [None])[0]
+                    if group_value is not None:
+                        return group_value
+                    else:
+                        return None
+            else:
+                print("【用户】:发生什么事情")
+                return None
+        else:
+            print("【用户】:我有罪,请求错了")
 
     async def get_read_state(self,max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=2'
@@ -314,29 +397,25 @@ class Gather:
             else:
                 exit()
 
-    async def run(self, ck, read, wxpuser_uid, topicid, wxpuser_token, a_url):
-        self.un,self.cookie = ck.split('&')
-        self.key = read
+    async def run(self, ck,wxpuser_uid,topicid,wxpuser_token,a_url):
+        self.un,self.uid,self.cookie = ck.split('&')
         self.aol = a_url
         self.wxpuser_token = wxpuser_token
         self.topicid=topicid
         self.wxpuser_uid = wxpuser_uid
         await self.check_read()
         await self.user_info()
+        await self.sign_status()
         await self.start()
         await self.close()
 
 async def check_env():
-    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
-    topicid = None
-    wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079'
-    cks = 'oC34q6wjmXwVJ07LNPQvIyRBvdA4&16f91c8d272a1c16514315e4b543bfc3'
-    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    # topicid = os.getenv("WXPUSER_TOPICID")
-    # wxpuser_uid = os.getenv("WXPUSER_UID")
-    # cks = os.getenv('gathercks')
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('rrbcks')
     if cks is None:
-        print("ck为空，请去抓包格式:'' 多账户请用@分割")
+        print("人人帮ck为空，请去抓包格式:'手机号&uid&token' 多账户请用@分割")
         exit()
     if wxpuser_token is None:
         print("wxpuser的apptoken为空，前往官网注册创建一个app")
@@ -349,12 +428,9 @@ async def check_env():
 
 async def main():
     cks,wx_uid,topicidid,wxpuser_token =  await check_env()
-    read_list = ['user','coin','ox']
-    for read in  read_list:
-        for ck in cks:
-            abc = Gather()
-            await abc.run(ck,read,wx_uid[cks.index(ck)],topicidid,wxpuser_token,'http://api.doudoudou.fun')  
-         
+    for ck in cks:
+        abc = Rrbyd()
+        await abc.run(ck,wx_uid[cks.index(ck)],topicidid,wxpuser_token,'http://api.doudoudou.fun')  
         
 
 if __name__ == '__main__':

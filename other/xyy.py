@@ -388,14 +388,10 @@ class model:
             print(res)
     
     def check_env(self):
-        self.wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
-        self.topicid = None
-        wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079'
-        cks = 'oZdBp0x2Y9UeGNBKxUA9Ej4DtXv0'
-        # self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
-        # self.topicid = os.getenv("WXPUSER_TOPICID")
-        # wxpuser_uid = os.getenv("WXPUSER_UID")
-        # cks = os.getenv('xyycks')
+        self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
+        self.topicid = os.getenv("WXPUSER_TOPICID")
+        wxpuser_uid = os.getenv("WXPUSER_UID")
+        cks = os.getenv('xyycks')
         if cks is None:
             print("小悦悦ck为空，请去抓包格式：'oZdBp.....' 多账户请用@分割")
             exit()

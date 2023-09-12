@@ -166,7 +166,7 @@ class model:
         # print(res.status_code)
         location= res.headers.get('Location')
         if self.varification(location):
-            ts = random.randint(15,30)
+            ts = random.randint(8,16)
             print(f"【等待】：休息{ts}秒")
             time.sleep(ts)
             self.complete_task(uk,ts,origin)

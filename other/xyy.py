@@ -132,7 +132,7 @@ class model:
             if res['errcode'] == 0:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
-                self.jump(url=link_url,uk=uk)
+                self.jump(url=link_url,uk=uk,origin=origin)
                 # ts = random.randint(7,15)
                 # print(f"【等待】：休息{ts}秒")
                 # time.sleep(ts)
@@ -147,7 +147,7 @@ class model:
             self.do_read_task(origin,uk)
 
 
-    def jump(self,url, uk):
+    def jump(self,url, uk,origin):
         url = url+'?/'
         host = urlparse(url).netloc
         headers = {
@@ -166,20 +166,22 @@ class model:
         # print(res.status_code)
         location= res.headers.get('Location')
         if self.varification(location):
-            ts = random.randint(7,15)
+            ts = random.randint(15,30)
             print(f"【等待】：休息{ts}秒")
             time.sleep(ts)
-            self.complete_task(uk,ts)
+            self.complete_task(uk,ts,origin)
 
-    def complete_task(self,uk,ts):
-        tsp = int(time.time())*1000
-        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}'
-        res = self.request(url)
+    def complete_task(self,uk,ts, origin):
+        tsp = int(time.time())
+        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
+        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}000'
+        res = self.request(url,add_headers=add_header)
         if res and res['errcode'] == 0:
             print(f"【奖励】：{res['msg']}, +{res['data']['gold']}币,今天阅读数：{res['data']['day_read']},剩余{res['data']['remain_read']}")
             if res['data']['gold'] == 0:
                 self.cont = False
         else:
+            print(res)
             print(f"领取阅读币失败:{res['msg']}")
             if res['errcode'] == 407:
                 self.cont = False
@@ -386,10 +388,14 @@ class model:
             print(res)
     
     def check_env(self):
-        self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
-        self.topicid = os.getenv("WXPUSER_TOPICID")
-        wxpuser_uid = os.getenv("WXPUSER_UID")
-        cks = os.getenv('xyycks')
+        self.wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
+        self.topicid = None
+        wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079'
+        cks = 'oZdBp0x2Y9UeGNBKxUA9Ej4DtXv0'
+        # self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
+        # self.topicid = os.getenv("WXPUSER_TOPICID")
+        # wxpuser_uid = os.getenv("WXPUSER_UID")
+        # cks = os.getenv('xyycks')
         if cks is None:
             print("小悦悦ck为空，请去抓包格式：'oZdBp.....' 多账户请用@分割")
             exit()

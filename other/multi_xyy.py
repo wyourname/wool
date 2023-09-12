@@ -109,7 +109,7 @@ class Xyy:
             if res['errcode'] == 0:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
-                self.jump(url=link_url,uk=uk)
+                self.jump(url=link_url,uk=uk,origin=origin)
                 # ts = random.randint(7,15)
                 # print(f"【用户{self.index}】【等待】:休息{ts}秒")
                 # time.sleep(ts)
@@ -123,10 +123,11 @@ class Xyy:
             time.sleep(3)
             self.do_read_task(origin,uk)
 
-    def complete_task(self,uk,ts):
-        tsp = int(time.time())*1000
-        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}'
-        res = self.request(url)
+    def complete_task(self,uk,ts,origin):
+        tsp = int(time.time())
+        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
+        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}000'
+        res = self.request(url,add_headers=add_header)
         if res and res['errcode'] == 0:
             print(f"【用户{self.index}】【奖励】:{res['msg']}, +{res['data']['gold']}币,今天阅读数:{res['data']['day_read']},剩余{res['data']['remain_read']}")
             if res['data']['gold'] == 0:
@@ -136,7 +137,7 @@ class Xyy:
             if res['errcode'] == 407:
                 self.cont = False
 
-    def jump(self,url,uk):
+    def jump(self,url,uk,origin):
         url = url+'?/'
         host = urlparse(url).netloc
         headers = {
@@ -154,10 +155,10 @@ class Xyy:
         res = requests.get(url,headers=headers,allow_redirects=False)
         location= res.headers.get('Location')
         if self.varification(location):
-            ts = random.randint(7,15)
+            ts = random.randint(8,16)
             print(f"【用户{self.index}】【等待】:休息{ts}秒")
             time.sleep(ts)
-            self.complete_task(uk,ts)
+            self.complete_task(uk,ts,origin)
 
     
     def varification(self,url):

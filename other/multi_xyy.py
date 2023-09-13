@@ -367,6 +367,8 @@ class Xyy:
     def run(self, ck,app_token, wx_uid,topicid,index,url):
         self.aol = url
         self.index = index
+        print(f"【用户{self.index}】【等待】:执行前休息{index*10}秒")
+        time.sleep(index*10)
         print(f"【用户{index}】【开始任务】: 第{index}个的账号")
         self.cont = True
         self.user = ck
@@ -377,7 +379,7 @@ class Xyy:
         self.check_read(url)
         self.account()
         self.user_gold()
-        print(f"【用户{index}】【结束任务】: 第 {index}个 账号")
+        print(f"【用户{index}】【结束任务】: 第{index}个 账号")
 
 
 def check_env():

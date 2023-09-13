@@ -306,6 +306,8 @@ class Gbyd:
     async def process_account(self, ck, wxpuser_uid, wxpuser_token, topicid ,index_u, a_url):
         self.aol = a_url
         self.index = index_u
+        print(f"【用户{self.index}】【等待】:执行前休息{index_u*10}秒")
+        await asyncio.sleep(index_u*10)
         print(f"【用户{self.index}】【开始】:{'='*10}执行任务{'='*10}")
         self.wxpuser_token = wxpuser_token
         self.topicid=topicid

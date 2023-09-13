@@ -449,9 +449,9 @@ class Rrbyd:
         self.topicid=topicid
         self.wxpuser_uid = wxpuser_uid
         await self.check_read()
-        # await self.user_info()
-        # await self.sign_status()
-        # await self.start()
+        await self.user_info()
+        await self.sign_status()
+        await self.start()
         await self.souhu()
         await self.close()
 

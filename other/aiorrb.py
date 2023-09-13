@@ -367,6 +367,51 @@ class Rrbyd:
                 return None
         else:
             print("【用户】:我有罪,请求错了")
+    
+    async def souhu(self):
+        url = self.base_url + 'task/v2/getTask'
+        data_json = {
+        "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
+        "businessType": 5,
+        "taskType": "14",
+        "pageSize": 10
+        }
+        add_headers = {'un':self.un,'uid':self.uid,'token':self.cookie}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
+        if res:
+            # print(res)
+            if res['code'] == 0:
+                print(f"【用户】:当前提交的搜狐任务助力数量为{res['result']['commitNum']},当前任务数量限制为{res['result']['taskLimitNum']}")
+                chances = res['result']['taskLimitNum']-res['result']['commitNum']
+                if chances>0:
+                    ts = random.randint(70,80)
+                    print(f"【用户】:开始搜狐视频助力,等待{ts}秒")
+                    await asyncio.sleep(ts)
+                    await self.commit_souhu()
+                    await asyncio.sleep(random.randint(2,3))
+                    await self.souhu()
+            else:
+                print(f"【用户】:发生了什么事情,原来是{res['msg']}")
+        else:
+            print("【用户】:我有罪,请求出错了")
+
+    async def commit_souhu(self):
+        url = self.base_url +'task/v2/commitTask'
+        data_json = {
+                "imgUrl": "http://juyouimg.oss-cn-zhangjiakou.aliyuncs.com/15/task/QoExACdjJc.png",
+                "businessType": 5,
+                "taskType": "14", 
+                "pageSize": 10
+            }
+        add_headers = {'un':self.un,'uid':self.uid,'token':self.cookie}
+        res = await self.request(url,'post',data=json.dumps(data_json),add_headers=add_headers)
+        if res:
+            if res['code'] == 0:
+                print(f"【用户】:搜狐视频助力成功")
+            else:
+                print(f"【用户】:搜狐视频助力失败!!!!!!!!!!!!!!!!!!{res}")
+        else:
+            print("【用户】:我有罪,请求出错了")
 
     async def get_read_state(self,max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=2'
@@ -404,9 +449,10 @@ class Rrbyd:
         self.topicid=topicid
         self.wxpuser_uid = wxpuser_uid
         await self.check_read()
-        await self.user_info()
-        await self.sign_status()
-        await self.start()
+        # await self.user_info()
+        # await self.sign_status()
+        # await self.start()
+        await self.souhu()
         await self.close()
 
 async def check_env():

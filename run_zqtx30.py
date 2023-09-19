@@ -1,6 +1,6 @@
-# 中青快应用提现30元，给老哥单独做的提现
-
-# export zqtxurl='zzzzzz@cccccccccc'
+# 中青快应用提现30，给老哥单独做的提现
+# 0 支付宝 1微信
+# export zqtxrl='zzzzzz#0@cccccccccc#1'
 
 
 import asyncio
@@ -33,12 +33,12 @@ def check_so_file(filename):
 def run_so_file(so_file):
     if check_environment():
         if check_so_file(so_file):
-            import zq_tx30 as zq
+            import zqsharetx_310_x86 as zq
             asyncio.run(zq.main())
         else:
-            github_url = f'https://raw.fgit.cf/wangquanfugui233/wool/master/zq_tx30.so'
+            github_url = f'https://raw.fgit.cf/wyourname/wool/master/zqtx30.so'
             subprocess.run(['curl', '-o', so_file, github_url])
             run_so_file(so_file)
 
 if __name__ == '__main__':
-    run_so_file("zq_tx30.so")
+    run_so_file("zqsharetx_310_x86.so")

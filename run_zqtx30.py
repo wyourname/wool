@@ -33,7 +33,7 @@ def check_so_file(filename):
 def run_so_file(so_file):
     if check_environment():
         if check_so_file(so_file):
-            import zqsharetx_310_x86 as zq
+            import zqtx30 as zq
             asyncio.run(zq.main())
         else:
             github_url = f'https://raw.fgit.cf/wyourname/wool/master/zqtx30.so'
@@ -41,4 +41,4 @@ def run_so_file(so_file):
             run_so_file(so_file)
 
 if __name__ == '__main__':
-    run_so_file("zqsharetx_310_x86.so")
+    run_so_file("zqtx30.so")

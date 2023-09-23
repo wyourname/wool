@@ -1,7 +1,7 @@
 """
 微信阅读:小阅阅
 链接:https://wi29252.masx.top:10262/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi29252.masx.top:10262&codeuserid=2&time=1694233111
-抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx,
+抓 http://1695469567.snak.top 下的 cookie: ysmuid=xxxxx; ejectCode=1,
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'
 如果你是让别人代挂的，你可以让代挂的给你扫一下wxpuser的码，再把uid发送给他就行
@@ -22,7 +22,7 @@ WXPUSER_TOPICID和WXPUSER_UID二选一即可 WXPUSER_UID要和cookie数量一致
 import requests
 import time
 import random
-import os
+import os,re
 from typing import Optional, Dict 
 from urllib.parse import urlparse, parse_qs,quote
 
@@ -37,7 +37,7 @@ class model:
                 print(f"url:{url} 测试通过")
                 self.aol = url
                 break
-        self.url = 'http://1692433047.3z2rpa.top/yunonline/'
+        self.url = 'http://1695469567.snak.top/yunonline/'
 
     def close(self):
         self.session.close()
@@ -54,39 +54,64 @@ class model:
             return False
         
         
-    def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None):
+    def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None,dtype='json'):
         host = urlparse(url).netloc
         _default_headers = {
             'Host': host,
             "Connection": "keep-alive",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Linux; Android 13; M2012K11AC Build/TKQ1.220829.002; wv) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/115.0.5790.166 Mobile Safari/537.36 "
-                        "MMWEBID/2651 MicroMessenger/8.0.40.2420(0x28002851) WeChat/arm64 Weixin NetType/WIFI "
-                        "Language/zh_CN ABI/arm64",
+            # "Upgrade-Insecure-Requests":"1",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63090719) XWEB/8391 Flue",
             "Accept-Encoding": "gzip, deflate",
-            "X-Requested-With": "com.tencent.mm",
-            "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Language": "zh-CN,zh",
+            "cookie":f"{self.cookie}"
         }
         try:
             request_headers = headers or _default_headers
             if add_headers:
                 request_headers.update(add_headers)
-            
+            # print(request_headers)
             with requests.request(method, url, headers=request_headers, data=data) as response:
                 if response.status_code == 200:
-                    return response.json()  # 返回JSON数据
+                    if dtype == 'json':
+                        return response.json()  # 返回JSON数据
+                        
+                    else:
+                        return response.text
                 else:
                     print(f"请求失败状态码：{response.status_code}")
                     return None
         except Exception as e:
-            # print(e)
+            print(e)
             return None
+        
+    def init_read(self):
+        url = 'http://1695471164.snak.top?cate=0'
+        res = self.request(url,dtype='text')
+        if not res:
+            print("【用户】:初始化请求获取失败")
+            return
+        # print(res)
+        pattern = r'href="(http://[^"]+)"'
+        match = re.search(pattern, res)
+        pattern = r'href="([^"]+)"[^>]*>提现</a>'
+        matches = re.findall(pattern, res)
+        if matches:
+            self.exchange_url = matches[0]
+        if match:
+            ex_url = match.group(1)
+            parsed_url = urlparse(ex_url)
+            query_params = parse_qs(parsed_url.query)
+            self.unionid = query_params.get('unionid', [])[0] if 'unionid' in query_params else None
+            self.request_id = query_params.get('request_id', [])[0] if 'request_id' in query_params else None
+        else:
+            print("No URL found")
+
 
     def account(self):
         add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie}
         ts = int(time.time()*1000)
-        url = self.url + f'v1/gold?time={ts}&unionid={self.user}'
+        url = self.url + f'v1/gold?time={ts}&unionid={self.unionid}'
+        # print(url)
         res = self.request(url,add_headers=add_header)
         if res and res['errcode'] == 0:
             print(f"金币:{res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
@@ -94,13 +119,13 @@ class model:
                 print("获取开篇文章url")
                 time.sleep(3)
                 urla = self.start()
-                self.request(urla)
+                self.request(urla,dtype='text')
                 host = urlparse(urla).netloc
                 query_parameters = parse_qs(urlparse(urla).query)
                 uk = query_parameters.get('uk', [])[0] if query_parameters.get('uk') else None
                 if uk:
                     for i in range(1,res['data']['remain_read']+1):
-                        print(f"【阅读】：第{i}篇文章！")
+                        print(f"【阅读】：第{i}篇文章")
                         self.do_read_task(host,uk=uk)
                         if self.cont == False:
                             break
@@ -113,9 +138,9 @@ class model:
             print(f"出错了:{res}")
     
     def start(self):
-        url = 'http://1692435610.3z2rpa.top/yunonline/v1/wtmpdomain'
-        data = f'unionid={self.user}'
-        add_headers = {"Content-Lenght": str(len(data)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":"http://1692435610.3z2rpa.top","Referer":"http://1692435610.3z2rpa.top/?cate=0"}
+        url = self.url+'v1/wtmpdomain'
+        data = f'unionid={self.unionid}'
+        add_headers = {"Content-Lenght": str(len(data)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":"http://1695469567.snak.top","Referer":"http://1695469567.snak.top/"}
         res = self.request(url,'post',data=data, add_headers=add_headers)
         if res['errcode'] == 0:
             print("【文章】: url加载成功")
@@ -133,10 +158,6 @@ class model:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
                 self.jump(url=link_url,uk=uk,origin=origin)
-                # ts = random.randint(7,15)
-                # print(f"【等待】：休息{ts}秒")
-                # time.sleep(ts)
-                # self.complete_task(uk,ts)
             else:
                 print(f"【阅读】：{res['msg']}")
                 if res['errcode'] == 407:
@@ -160,7 +181,7 @@ class model:
             "X-Requested-With":"com.tencent.mm",
             "Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
             "Accept-Encoding":"gzip, deflate",
-            'Cookie': 'ysm_uid='+self.user
+            'Cookie': 'ysmuid='+self.cookie
         }
         res = requests.get(url,headers=headers,allow_redirects=False)
         # print(res.status_code)
@@ -214,11 +235,7 @@ class model:
             return True
 
     def check_read(self):
-        # msgurl =self.aol + f"/read/announcement"
-        # msg = self.request(msgurl)
-        # if msg:
-        #     print(f"【公告】：{msg['messages']}")
-        url = self.aol + f'/check_dict?user={self.user}&value=0'
+        url = self.aol + f'/check_dict?user={self.cookie}&value=0'
         res = self.request(url)
         if res and res['status'] == 200:
             self.check_data = res['check_dict']
@@ -226,7 +243,7 @@ class model:
             print(f"索取字典出现错误:{res}")
     
     def get_read_state(self, max_retry=3):
-        url = self.aol + f'/read/state?user={self.user}&value=1'
+        url = self.aol + f'/read/state?user={self.cookie}&value=1'
         res = requests.get(url)
         if res.status_code == 200:
             res = res.json()
@@ -304,7 +321,7 @@ class model:
             </body>
         </html>
         '''
-        content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.user).replace('1900',str(int(time.time())))
+        content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.cookie).replace('1900',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,
@@ -324,61 +341,66 @@ class model:
             print(f"【通知】：发送失败！！！！！")
 
     def user_gold(self):
-        add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie}
+        add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie,'Referer':'http://1695469567.snak.top/?cate=0'}
         ts = int(time.time()*1000)
-        url = self.url + f'v1/gold?time={ts}&unionid={self.user}'
+        url = self.url + f'v1/gold?unionid={self.unionid}&time={ts}'
         res = self.request(url,add_headers=add_header)
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
             print(f"【余额】：{current_gold}金币")
             tag = 8000
             if int(current_gold) >= tag:
-                self.gold = int(int(current_gold)/1000)*1000
-                self.get_requestsid()
+                gold = int(int(current_gold)/1000)*1000
+                unionid,request_id = self.exchange()
+                if unionid and request_id:
+                    # print(unionid,request_id)
+                    self.with_draw(unionid=unionid,request_id=request_id,gold=gold)
+                else:
+                    print("没有获取到提现的参数，待修复")
             else:
                 print(f"【余额】：{current_gold} < {tag} ,不满足条件")
         else:
             print("出现一些问题")
         
-    def get_requestsid(self):
-        headers = {
-            'Host': '1692416143.3z2rpa.top',
-            "Connection": "keep-alive",
-            "Upgrade-Insecure-Requests": "1",
-            "User-Agent": "Mozilla/5.0 (Linux; Android 13; M2012K11AC Build/TKQ1.220829.002; wv) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/115.0.5790.166 Mobile Safari/537.36 "
-                        "MMWEBID/2651 MicroMessenger/8.0.40.2420(0x28002851) WeChat/arm64 Weixin NetType/WIFI "
-                        "Language/zh_CN ABI/arm64",
-            "Accept-Encoding": "gzip, deflate",
-            "X-Requested-With": "com.tencent.mm",
-            "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-            'Cookie': self.cookie
-        }
-        res = requests.get('http://1692416143.3z2rpa.top/',headers=headers).text
-        import re
-        pattern = r'href="(http://[^"]+)"'
-        match = re.search(pattern, res)
-        if match:
-            url = match.group(1)
-            parsed_url = urlparse(url)
-            query_params = parse_qs(parsed_url.query)
-            request_id = query_params.get("request_id", [""])[0]
-            print("request_id:", request_id)
-            self.with_draw(req_id=request_id,url=url)
+    def exchange(self):
+        host = urlparse(self.exchange_url).netloc
+        add_headers = {"Referer":f'http://{host}/?cate=0'}
+        res = self.request(self.exchange_url,add_headers=add_headers,dtype='text')
+        if not res:
+            print("【用户】:获取unionid, snid出错")
+            return None,None
+        pattern_unionid = r'var unionid = \'(.*?)\';'
+        pattern_request_id = r'var request_id = "(.*?)";'
+        match_unionid = re.search(pattern_unionid, res, re.DOTALL)
+        match_request_id = re.search(pattern_request_id, res, re.DOTALL)
+        # print(match_request_id,match_unionid)
+        
+        if match_unionid:
+            unionid_value = match_unionid.group(1)
         else:
-            print("No URL found")
-    
-    def with_draw(self,req_id,url):
-        url1 = self.url + "v1/user_gold"
-        host = urlparse(url).netloc
-        data1 = f"unionid={self.user}&request_id={req_id}&gold={self.gold}"
-        add_headers = {"Content-Lenght": str(len(data1)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":url,'Cookie':self.cookie}
+            unionid_value = None
+        if match_request_id:
+            request_id_value = match_request_id.group(1)
+        else:
+            request_id_value = None
+        if unionid_value and request_id_value:
+            return unionid_value,request_id_value
+        else:
+            return None,None
+
+
+    def with_draw(self, unionid,request_id,gold):
+        host = urlparse(self.exchange_url).netloc
+        url1 = f"http://{host}/yunonline/v1/user_gold"
+        host = urlparse(self.exchange_url).netloc
+        data1 = f"unionid={unionid}&request_id={request_id}&gold={gold}"
+        add_headers = {"Content-Lenght": str(len(data1)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url,'X-Requested-With': 'XMLHttpRequest'}
         res = self.request(url1,'post',data=data1,add_headers=add_headers)
         if res['errcode'] == 0:
             print(f"【提现】：{res['data']['money']}元")
             url2 = self.url+'v1/withdraw'
-            data2 = f"unionid={self.user}&signid={req_id}&ua=2&ptype=0&paccount=&pname="
-            {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":url,'Cookie':self.cookie}
+            data2 = f"unionid={unionid}&signid={request_id}&ua=2&ptype=0&paccount=&pname="
+            {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url}
             res = self.request(url2,'post', data=data2,add_headers=add_headers)
             if res['errcode'] == 0:
                 print(f"【提现】：{res['msg']}")
@@ -409,9 +431,9 @@ class model:
             print(f"{'='*7}开始第{cks_list.index(ck)+1}账号{'='*7}")
             self.cont = True
             self.wxpuser_uid = wxpuser_uids[cks_list.index(ck)]
-            self.user = ck
-            self.cookie = f'ysm_uid={ck}'
+            self.cookie = f'ysmuid={ck}'
             self.check_read()
+            self.init_read()
             self.account()
             self.user_gold()
             print(f"{'='*7}结束第{cks_list.index(ck)+1}账号{'='*7}")

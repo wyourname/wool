@@ -39,7 +39,7 @@ def run_so_file(so_file):
             import aiokgyy_310_x86 as kg
             asyncio.run(kg.main())
         else:
-            github_url = f'https://raw.kgithub.com/wangquanfugui233/wool/master/{so_file}'
+            github_url = f'https://raw.kgithub.com/wyourname/wool/master/other/{so_file}'
             subprocess.run(['curl', '-o', so_file, github_url])
             run_so_file(so_file)
 

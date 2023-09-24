@@ -1,6 +1,6 @@
 """
 微信阅读:小阅阅多线程并发版本，帮别人挂的最佳选择
-链接:https://wai2023090606-1304279846.cos.ap-nanjing.myqcloud.com/todo.html?auth=31cf5cf7e3f49fd7ce1738ac295dcc4f&codeurl=wai2023090606-1304279846.cos.ap-nanjing.myqcloud.com&codeuserid=2&time=1694150293
+链接:https://wi29252.masx.top:10262/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi29252.masx.top:10262&codeuserid=2&time=1694233111
 抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx,
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'
@@ -66,9 +66,9 @@ class Xyy:
         url = self.url + f'v1/gold?time={ts}&unionid={self.user}'
         res = self.request(url,add_headers=add_header)
         if res and res['errcode'] == 0:
-            print(f"【用户{self.index}】金币:{res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
+            print(f"【用户{self.index}】【用户】金币:{res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
             if res['data']['remain_read'] >0:
-                print(f"【开始{self.index}】:获取开篇文章url")
+                print(f"【用户{self.index}】【开始】:获取开篇文章url")
                 time.sleep(3)
                 urla = self.start()
                 self.request(urla)
@@ -77,7 +77,7 @@ class Xyy:
                 uk = query_parameters.get('uk', [])[0] if query_parameters.get('uk') else None
                 if uk:
                     for i in range(1,res['data']['remain_read']+1):
-                        print(f"【阅读{self.index}】:第{i}篇文章！")
+                        print(f"【用户{self.index}】【阅读】:第{i}篇文章！")
                         self.do_read_task(host,uk=uk)
                         if self.cont == False:
                             break
@@ -95,7 +95,7 @@ class Xyy:
         add_headers = {"Content-Lenght": str(len(data)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":"http://1692435610.3z2rpa.top","Referer":"http://1692435610.3z2rpa.top/?cate=0"}
         res = self.request(url,'post',data=data, add_headers=add_headers)
         if res['errcode'] == 0:
-            print(f"【文章{self.index}】: url加载成功")
+            print(f"【用户{self.index}】【文章】: url加载成功")
             return res['data']['domain']
         else:
             return None
@@ -109,34 +109,35 @@ class Xyy:
             if res['errcode'] == 0:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
-                self.jump(url=link_url,uk=uk)
+                self.jump(url=link_url,uk=uk,origin=origin)
                 # ts = random.randint(7,15)
-                # print(f"【等待{self.index}】:休息{ts}秒")
+                # print(f"【用户{self.index}】【等待】:休息{ts}秒")
                 # time.sleep(ts)
                 # self.complete_task(uk,ts)
             else:
-                print(f"【阅读{self.index}】:{res['msg']}")
+                print(f"【用户{self.index}】【阅读】:{res['msg']}")
                 if res['errcode'] == 407:
                     self.cont = False
         else:
-            print("发生了点意外,休息3秒")
+            print(f"【用户{self.index}】发生了点意外,休息3秒")
             time.sleep(3)
             self.do_read_task(origin,uk)
 
-    def complete_task(self,uk,ts):
-        tsp = int(time.time())*1000
-        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}'
-        res = self.request(url)
+    def complete_task(self,uk,ts,origin):
+        tsp = int(time.time())
+        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
+        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}000'
+        res = self.request(url,add_headers=add_header)
         if res and res['errcode'] == 0:
-            print(f"【奖励{self.index}】:{res['msg']}, +{res['data']['gold']}币,今天阅读数:{res['data']['day_read']},剩余{res['data']['remain_read']}")
+            print(f"【用户{self.index}】【奖励】:{res['msg']}, +{res['data']['gold']}币,今天阅读数:{res['data']['day_read']},剩余{res['data']['remain_read']}")
             if res['data']['gold'] == 0:
                 self.cont = False
         else:
-            print(f"领取阅读币失败:{res['msg']}")
+            print(f"【用户{self.index}】【奖励】:获取失败{res['msg']}")
             if res['errcode'] == 407:
                 self.cont = False
 
-    def jump(self,url,uk):
+    def jump(self,url,uk,origin):
         url = url+'?/'
         host = urlparse(url).netloc
         headers = {
@@ -154,10 +155,10 @@ class Xyy:
         res = requests.get(url,headers=headers,allow_redirects=False)
         location= res.headers.get('Location')
         if self.varification(location):
-            ts = random.randint(7,15)
-            print(f"【等待{self.index}】:休息{ts}秒")
+            ts = random.randint(8,16)
+            print(f"【用户{self.index}】【等待】:休息{ts}秒")
             time.sleep(ts)
-            self.complete_task(uk,ts)
+            self.complete_task(uk,ts,origin)
 
     
     def varification(self,url):
@@ -166,48 +167,61 @@ class Xyy:
         if '__biz' in query_parameters:
             biz_value = query_parameters['__biz'][0]
             if biz_value in self.check_data:
-                print(f"【检测{self.index}】: {self.check_data[biz_value][0]} 公众号")
+                print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]} 公众号")
                 encoded_url = quote(url)
                 self.wxpuser("小阅阅检测,请1分钟内点击阅读",encoded_url)
-                print(f"【等待{self.index}】:请手动前往wxpuser点击阅读")
+                print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if self.get_read_state():
-                        print(f"【阅读{self.index}】:已手动阅读,休息5秒继续干活")
+                        print(f"【用户{self.index}】【阅读】:已手动阅读,休息5秒继续干活")
                         time.sleep(5)
                         return True
                     if i == 59:
-                        print("超时未阅读，终止本次阅读")
+                        print(f"【用户{self.index}】【警告】:超时未阅读，终止本次阅读")
                         self.cont = False
                         return False
                     time.sleep(1)
             else:
-                print(f"【文章{self.index}】:没有检测")
+                print(f"【用户{self.index}】【文章】:没有检测")
                 return True
         else:
             print("__biz parameter not found in the URL")
             return True
 
-    def check_read(self):
-        url = self.aol + f'/check_dict?user={self.user}&value=0'
-        res = self.request(url)
-        if res and res['status'] == 200:
+    def check_read(self,a_line,maxretry=2):
+        url = a_line + f'/check_dict?user={self.user}&value=0'
+        res = requests.get(url)
+        if res.status_code == 200:
+            res = res.json()
             self.check_data = res['check_dict']
         else:
-            print(f"索取字典出现错误:{res}")
+            if maxretry >0:
+                b_line = 'http://api.doudoudou.fun'
+                print(f"【用户{self.index}】：索取字典出现错误:{res.status_code},试着重新获取！")
+                self.check_read(b_line,maxretry-1)
+            else:
+                exit()
     
-    def get_read_state(self):
-        url = self.aol+ f'/read/state?user={self.user}&value=0'
-        res = requests.get(url).json()
-        if res['status'] == True:
-            return True
+    def get_read_state(self,max_retry=3):
+        url = self.aol + f'/read/state?user={self.user}&value=1'
+        res = requests.get(url)
+        if res.status_code == 200:
+            res = res.json()
+            if res['status'] == True:
+                return True
+            else:
+                if res['status'] == '-1' and max_retry>0:
+                    time.sleep(5)
+                    self.get_read_state(max_retry-1)
+                return False
         else:
             return False
 
     def wxpuser(self,title,url):
-        # 此处代码抄袭了别人html的代码，见谅
-        content = '''<!DOCTYPE html>
-                <html lang="zh-CN">
-                <head>
+        content = '''
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+            <head>
                 <meta charset="UTF-8">
                 <title>TITLE</title>
                 <style type=text/css>
@@ -217,17 +231,55 @@ class Xyy:
                         animation: bgAnimation 6s linear infinite;
                     }
                     @keyframes bgAnimation {
-                        0% {background-position: 0% 50%;}
-                        50% {background-position: 100% 50%;}
-                        100% {background-position: 0% 50%;}
+                        0% {
+                            background-position: 0% 50%;
+                        }
+                    
+                        50% {
+                            background-position: 100% 50%;
+                        }
+                    
+                        100% {
+                            background-position: 0% 50%;
+                        }
+                    }
+                    .title {
+                        text-align: center;
+                        font-size: 25px;
+                        display: block;
+                    }
+                    .button {
+                        background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
+                        text-align: center;
+                        transition: 0.5s;
+                        background-size: 200% auto;
+                        border-radius: 10px;
+                        width: 50%;
+                        margin: 25px auto;
+                    }
+                    .button a {
+                        padding: 15px 45px;
+                        display: block;
+                        text-decoration: none;
+                        color: white;
+                    }
+                    .tips {
+                        text-align: center;
+                        margin: auto;
+                        padding: 10px 0px;
+                        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
                     }
                 </style>
-                </head>
-                <body>
-                    <p>小阅阅阅读检测</p><br>
-                    <p><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></p><br>
-                </body>
-            </html>
+            </head>
+            <body>
+                <div class="title">小阅阅阅读检测，务必在一分钟内点击阅读</div>
+                <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
+                <div class="tips">
+                    <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
+                    <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                </div><br>
+            </body>
+        </html>
         '''
         content = content.replace('self.aol',self.aol).replace('link',url).replace('abc',self.user).replace('1900',str(int(time.time())))
         data = {
@@ -244,9 +296,9 @@ class Xyy:
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = requests.post(wxpuser_url, json=data).json()
         if res['success'] == True:
-            print(f"【通知{self.index}】:检测发送成功！")
+            print(f"【用户{self.index}】【通知】:检测发送成功！")
         else:
-            print(f"【通知{self.index}】:发送失败！！！！！")
+            print(f"【用户{self.index}】【通知】:发送失败！！！！！")
 
     def user_gold(self):
         add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie}
@@ -255,13 +307,13 @@ class Xyy:
         res = self.request(url,add_headers=add_header)
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
-            print(f"【余额{self.index}】:{current_gold}金币")
+            print(f"【用户{self.index}】【余额】:{current_gold}金币")
             tag = 8000
             if int(current_gold) >= tag:
                 self.gold = int(int(current_gold)/1000)*1000
                 self.get_requestsid()
             else:
-                print(f"【余额{self.index}】:{current_gold} < {tag} ,不满足条件")
+                print(f"【用户{self.index}】【余额】:{current_gold} < {tag} ,不满足条件")
         else:
             print("出现一些问题")
         
@@ -300,51 +352,51 @@ class Xyy:
         add_headers = {"Content-Lenght": str(len(data1)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":url,'Cookie':self.cookie}
         res = self.request(url1,'post',data=data1,add_headers=add_headers)
         if res['errcode'] == 0:
-            print(f"【提现{self.index}】:{res['data']['money']}元")
+            print(f"【用户{self.index}】【提现】:{res['data']['money']}元")
             url2 = self.url+'v1/withdraw'
             data2 = f"unionid={self.user}&signid={req_id}&ua=2&ptype=0&paccount=&pname="
             {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":url,'Cookie':self.cookie}
             res = self.request(url2,'post', data=data2,add_headers=add_headers)
             if res['errcode'] == 0:
-                print(f"【提现{self.index}】:{res['msg']}")
+                print(f"【用户{self.index}】【提现】:{res['msg']}")
             else:
-                print(f"提现失败 原因:{res['msg']}")
+                print(f"【用户{self.index}】【提现】:失败{res['msg']}")
         else:
             print(res)
     
     def run(self, ck,app_token, wx_uid,topicid,index,url):
         self.aol = url
         self.index = index
-        print(f"【开始{index}】: 第{index}个的账号")
+        print(f"【用户{self.index}】【等待】:执行前休息{index*10}秒")
+        time.sleep(index*10)
+        print(f"【用户{index}】【开始任务】: 第{index}个的账号")
         self.cont = True
         self.user = ck
         self.topicid = topicid
         self.app_token = app_token
         self.wx_uid = wx_uid
         self.cookie = f'ysm_uid={ck}'
-        self.check_read()
+        self.check_read(url)
         self.account()
         self.user_gold()
-        print(f"【结束{index}】: cookie为 {index} 账号")
+        print(f"【用户{index}】【结束任务】: 第{index}个 账号")
 
 
 def check_env():
-        wxpuser_token = os.getenv("WXPUSER_TOKEN")
-        topicid = os.getenv("WXPUSER_TOPICID")
-        wxpuser_uid = os.getenv("WXPUSER_UID")
-        cks = os.getenv('xyycks')
-        cks = 'oZdBp0x2Y9UeGNBKxUA9Ej4DtXv0@oZdBp02-aXLn3CQOLFbWxH33LAhw'
-        # cks = 'oZdBp0zncuzTjN4KzFeUtqUZKB2c@oZdBp039ZVdkAnaZ39dAKhM4qahs'
-        if cks is None:
-            print("小悦悦ck为空，请去抓包格式:'oZdBp.....' 多账户请用@分割")
-            exit()
-        if wxpuser_token is None:
-            print("wxpuser的apptoken为空，前往官网注册创建一个app")
-            exit()
-        if topicid is None and wxpuser_uid is None:
-            print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
-            exit()
-        return wxpuser_token, topicid, wxpuser_uid.split('@'), cks.split("@")
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('xyycks')
+    if cks is None:
+        print("小悦悦ck为空，请去抓包格式:'oZdBp.....' 多账户请用@分割")
+        exit()
+    if wxpuser_token is None:
+        print("wxpuser的apptoken为空，前往官网注册创建一个app")
+        exit()
+    if topicid is None and wxpuser_uid is None:
+        print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
+        exit()
+    return wxpuser_token, topicid, wxpuser_uid.split('@'), cks.split("@")
 
 
 def test_api(url):

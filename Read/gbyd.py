@@ -305,13 +305,15 @@ class template:
         else:
             return False
         
-    async def check_read(self):
+    async def init_check_dict(self):
         url = self.aol + f'/check_dict?user={self.cookie}&value=1'
         res = await self.request(url)
         if res and res['status'] == 200:
             self.check_data = res['check_dict']
         else:
             print(f"索取字典出现错误:{res}")
+            await asyncio.sleep(3)
+            await self.init_check_dict()
 
     async def check_env(self):
         self.wxpuser_token = os.getenv("WXPUSER_TOKEN")
@@ -338,7 +340,7 @@ class template:
             print(f"{'='*7}开始第{cks_list.index(ck)+1}账号{'='*7}")
             self.cookie = ck
             self.wxpuser_uid = wx_uids[cks_list.index(ck)]
-            await self.check_read()
+            await self.init_check_dict()
             await self.user_info()
             await self.do_read_task()
             balance = await self.read_info()

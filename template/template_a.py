@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 from typing import Optional, Dict 
 from urllib.parse import urlparse
-import time
+import time,random
 import sys
 import os
 
@@ -21,11 +21,12 @@ async def other_method(self):
     add_header= {"cookie":self.cookie}
     await requests(url,add_headers=add_header)
 
-用async 实现并发可以如下
+类内部用async 实现并发可以如下
 tasks1 = [self.request(url) for _ in range(并发数)]
 responses1 = await asyncio.gather(*tasks1)
 for response in responses1:
     print(response)
+
 
 """
 
@@ -52,50 +53,79 @@ class template:
     async def close(self):
         await self.sessions.close()
 
-    async def request(self,url,method='get',data=None, add_headers: Optional[Dict[str,str]]=None, headers=None):
+    async def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None, dtype='json', max_retries=3):
         host = urlparse(url).netloc
-        # self._default_headers['Host'] = host
-        self._default_headers={
+        _default_headers = {
             'Host': host,
-            'User-Agent': 'com.ss.android.ugc.live/260301 (Linux; U; Android 13; zh_CN; M2012K11AC; Build/TKQ1.220829.002; Cronet/TTNetVersion:f2f67850 2023-07-04 QuicVersion:4d847ea3 2023-05-09)',
+            'User-Agent': 'ua',
             'Connection': 'close',
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate',
-            'sdk-version': '2',
-            'passport-sdk-version': '203107',
         }
-        try:
-            request_headers = headers or self._default_headers
-            if add_headers:
-                request_headers.update(add_headers)
-            async with getattr(self.sessions, method)(url,headers = request_headers, data=data) as response:
+        retries = 0
+        while retries < max_retries:
+            try:
+                request_headers = headers or _default_headers
+                if add_headers:
+                    request_headers.update(add_headers)
+                async with getattr(self.sessions, method)(url, headers=request_headers, data=data) as response:
                     if response.status == 200:
-                        return await response.json()     #返回text或json 看情况如json就response.json()
+                        if dtype == 'json':
+                            return await response.json()
+                        else:
+                            return await response.text()
                     else:
                         print(f"请求失败状态码：{response.status}")
-                        return await response.json()    # 同理由可得
-        except Exception as e:
-            print(e)
-            return None    
+                        # 可以选择休眠一段时间再重试，以避免频繁请求
+                        await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
+            except Exception as e:
+                print(f"请求出现错误：{e}")
+            
+            retries += 1
+        print(f"无法完成请求，已达到最大重试次数 ({max_retries})")
+        return None    
 
     async def expamget(self):
+        # Here you can write some code.
         pass
 
     async def post(self):
+        # Here you can write some code.
         pass
 
-    async def run(self):
-        cks = ''
-        # cks = os.getenv('cks')
-        cks_list = cks.split('@')
-        for ck in cks_list:   # 碰到#需要变数组同理也可得
-            pass
+    async def run(self,index, ck):#
+        # This is the starting point of the program.
+        # You can call functions inside the class here.
+        # Here you can write some code.
         await self.close()
 
+async def check_env():
+        # 这里可以写完善一点的获取环境变量功能
+        cks = os.getenv('cks')
+        if cks is None:
+            print("你没有填写hscks")
+            exit()
+        correct_data = []
+        for index ,ck in enumerate(cks.split("@")):
+            # 也许这里可以添加你的变量检测是否合规
+            # Here you can write some code.
+            correct_data.append(ck)
+        return correct_data,
+
 async def main():
-    abc = template()
-    await abc.run()  
-        
+    cks_list = await check_env()
+    # 检查是否存在环境变量 multi
+    use_concurrency = os.environ.get('multi', 'false').lower() == 'true'
+    tasks = []
+    for index, ck in enumerate(cks_list):
+        abc = template()
+        task = abc.run(index, ck)
+        tasks.append(task)
+    if use_concurrency:  # 如果是true 那么就执行并发
+        await asyncio.gather(*tasks)  # 并发执行任务
+    else:  # 如果是false 那么就串行执行
+        for task in tasks:
+            await task  
 
 if __name__ == '__main__':
     asyncio.run(main())

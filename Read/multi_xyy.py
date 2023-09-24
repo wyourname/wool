@@ -397,8 +397,8 @@ class Xyy:
         print(f"【用户{self.index}】【开始任务】: 第{index}个的账号")
         self.cont = True
         self.topicid = topicid
-        self.app_token = app_token
-        self.wx_uid = wx_uid
+        self.wxpuser_token = app_token
+        self.wxpuser_uid = wx_uid
         self.cookie = f'ysmuid={ck}'
         self.init_chekc_dict()
         self.init_read()

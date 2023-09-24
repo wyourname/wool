@@ -194,10 +194,10 @@ class Xyy:
                 print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
                 self.wxpuser("小阅阅检测,请1分钟内点击阅读",encoded_url)
-                print("【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
+                print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if self.get_read_state():
-                        print("【用户{self.index}】【阅读】:已手动阅读,休息5秒")
+                        print(f"【用户{self.index}】【阅读】:已手动阅读,休息5秒")
                         time.sleep(5)
                         return True
                     if i == 59:

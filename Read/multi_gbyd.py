@@ -288,32 +288,31 @@ class Gbyd:
         else:
             return False
         
-    async def check_read(self,a_line,maxretry=2):
-        url = a_line + f'/check_dict?user={self.cookie}&value=0'
+    async def init_check_dict(self,maxretry=3):
+        url = self.aol + f'/check_dict?user={self.cookie}&value=0'
         res = requests.get(url)
         if res.status_code == 200:
             res = res.json()
             self.check_data = res['check_dict']
         else:
             if maxretry >0:
-                b_line = 'http://api.doudoudou.fun'
                 print(f"【用户{self.index}】：索取字典出现错误:{res.status_code},试着重新获取！")
-                self.check_read(b_line,maxretry-1)
+                self.init_check_dict(maxretry-1)
             else:
                 exit()
 
 
-    async def process_account(self, ck, wxpuser_uid, wxpuser_token, topicid ,index_u, a_url):
-        self.aol = a_url
-        self.index = index_u
-        print(f"【用户{self.index}】【等待】:执行前休息{index_u*10}秒")
-        await asyncio.sleep(index_u*10)
+    async def process_account(self,index, ck, wxpuser_uid, wxpuser_token, topicid , check_url, sleep_time):
+        self.aol = check_url
+        self.index = index
+        print(f"【用户{self.index}】:随机休息{sleep_time}秒，我怕你点不了那么多")
+        await asyncio.sleep(sleep_time)
         print(f"【用户{self.index}】【开始】:{'='*10}执行任务{'='*10}")
         self.wxpuser_token = wxpuser_token
         self.topicid=topicid
         self.cookie = ck
         self.wxpuser_uid = wxpuser_uid
-        await self.check_read(a_url)
+        await self.check_read()
         await self.user_info()
         await self.do_read_task()
         balance = await self.read_info()
@@ -358,9 +357,10 @@ async def main():
     from random import choice
     cks_list, wx_uids,topicid,wxpuser_token = await check_env()
     tasks = []
-    for ck in cks_list:
+    random_sleep_list = [i * random.randint(30, 45) for i in range(len(cks_list))]
+    for index, ck in enumerate(cks_list):
         abc = Gbyd()
-        tasks.append(abc.process_account(ck, wx_uids[cks_list.index(ck)], wxpuser_token=wxpuser_token, topicid=topicid, index_u=cks_list.index(ck)+1, a_url=choice(aol)))
+        tasks.append(abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=choice(aol),sleep_time=random_sleep_list[index]))
     await asyncio.gather(*tasks)
   
 

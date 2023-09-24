@@ -31,16 +31,12 @@ class model:
     def __init__(self) -> None:
         """
         """
-        self.session = requests.Session()
         for url in ['http://api.doudoudou.fun','http://api.hwayla.top']:
             if self.test_api(url):
                 print(f"url:{url} 测试通过")
                 self.aol = url
                 break
         self.url = 'http://1695469567.snak.top/yunonline/'
-
-    def close(self):
-        self.session.close()
     
     def test_api(self,url):
         print("开始测试检测服务可用性")
@@ -48,7 +44,7 @@ class model:
         res = requests.get(api_url)
         if res.status_code == 200:
             result = res.json()
-            print(f"【公告】：{result['messages']}")
+            print(f"【公告】:{result['messages']}")
             return True
         else:
             return False
@@ -78,7 +74,7 @@ class model:
                     else:
                         return response.text
                 else:
-                    print(f"请求失败状态码：{response.status_code}")
+                    print(f"请求失败状态码:{response.status_code}")
                     return None
         except Exception as e:
             print(e)
@@ -125,7 +121,7 @@ class model:
                 uk = query_parameters.get('uk', [])[0] if query_parameters.get('uk') else None
                 if uk:
                     for i in range(1,res['data']['remain_read']+1):
-                        print(f"【阅读】：第{i}篇文章")
+                        print(f"【阅读】:第{i}篇文章")
                         self.do_read_task(host,uk=uk)
                         if self.cont == False:
                             break
@@ -159,7 +155,7 @@ class model:
                 time.sleep(random.randint(2,4))
                 self.jump(url=link_url,uk=uk,origin=origin)
             else:
-                print(f"【阅读】：{res['msg']}")
+                print(f"【阅读】:{res['msg']}")
                 if res['errcode'] == 407:
                     self.cont = False
         else:
@@ -181,14 +177,14 @@ class model:
             "X-Requested-With":"com.tencent.mm",
             "Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
             "Accept-Encoding":"gzip, deflate",
-            'Cookie': 'ysmuid='+self.cookie
+            'Cookie': self.cookie
         }
         res = requests.get(url,headers=headers,allow_redirects=False)
         # print(res.status_code)
         location= res.headers.get('Location')
         if self.varification(location):
             ts = random.randint(8,16)
-            print(f"【等待】：休息{ts}秒")
+            print(f"【等待】:休息{ts}秒")
             time.sleep(ts)
             self.complete_task(uk,ts,origin)
 
@@ -198,7 +194,7 @@ class model:
         url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}000'
         res = self.request(url,add_headers=add_header)
         if res and res['errcode'] == 0:
-            print(f"【奖励】：{res['msg']}, +{res['data']['gold']}币,今天阅读数：{res['data']['day_read']},剩余{res['data']['remain_read']}")
+            print(f"【奖励】:{res['msg']}, +{res['data']['gold']}币,今天阅读数:{res['data']['day_read']},剩余{res['data']['remain_read']}")
             if res['data']['gold'] == 0:
                 self.cont = False
         else:
@@ -216,10 +212,10 @@ class model:
                 print(f"【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
                 self.wxpuser("小阅阅检测,请1分钟内点击阅读",encoded_url)
-                print("【等待】：请手动前往wxpuser点击阅读")
+                print("【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if self.get_read_state():
-                        print("【阅读】：已手动阅读,休息5秒")
+                        print("【阅读】:已手动阅读,休息5秒")
                         time.sleep(5)
                         return True
                     if i == 59:
@@ -228,10 +224,10 @@ class model:
                         return False
                     time.sleep(1)
             else:
-                print(f"【文章】：没有检测")
+                print(f"【文章】:没有检测")
                 return True
         else:
-            print("__biz parameter not found in the URL")
+            print("【文章】:__biz parameter not found in the URL")
             return True
 
     def check_read(self):
@@ -336,9 +332,9 @@ class model:
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = requests.post(wxpuser_url, json=data).json()
         if res['success'] == True:
-            print(f"【通知】：检测发送成功！")
+            print(f"【通知】:检测发送成功！")
         else:
-            print(f"【通知】：发送失败！！！！！")
+            print(f"【通知】:发送失败！！！！！")
 
     def user_gold(self):
         add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie,'Referer':'http://1695469567.snak.top/?cate=0'}
@@ -347,7 +343,7 @@ class model:
         res = self.request(url,add_headers=add_header)
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
-            print(f"【余额】：{current_gold}金币")
+            print(f"【余额】:{current_gold}金币")
             tag = 8000
             if int(current_gold) >= tag:
                 gold = int(int(current_gold)/1000)*1000
@@ -358,7 +354,7 @@ class model:
                 else:
                     print("没有获取到提现的参数，待修复")
             else:
-                print(f"【余额】：{current_gold} < {tag} ,不满足条件")
+                print(f"【余额】:{current_gold} < {tag} ,不满足条件")
         else:
             print("出现一些问题")
         
@@ -397,15 +393,15 @@ class model:
         add_headers = {"Content-Lenght": str(len(data1)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url,'X-Requested-With': 'XMLHttpRequest'}
         res = self.request(url1,'post',data=data1,add_headers=add_headers)
         if res['errcode'] == 0:
-            print(f"【提现】：{res['data']['money']}元")
+            print(f"【提现】:{res['data']['money']}元")
             url2 = self.url+'v1/withdraw'
             data2 = f"unionid={unionid}&signid={request_id}&ua=2&ptype=0&paccount=&pname="
             {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url}
             res = self.request(url2,'post', data=data2,add_headers=add_headers)
             if res['errcode'] == 0:
-                print(f"【提现】：{res['msg']}")
+                print(f"【提现】:{res['msg']}")
             else:
-                print(f"提现失败 原因：{res['msg']}")
+                print(f"提现失败 原因:{res['msg']}")
         else:
             print(res)
     
@@ -415,7 +411,7 @@ class model:
         wxpuser_uid = os.getenv("WXPUSER_UID")
         cks = os.getenv('xyycks')
         if cks is None:
-            print("小悦悦ck为空，请去抓包格式：'oZdBp.....' 多账户请用@分割")
+            print("小悦悦ck为空，请去抓包格式:'oZdBp.....' 多账户请用@分割")
             exit()
         if self.wxpuser_token is None:
             print("wxpuser的apptoken为空，前往官网注册创建一个app")
@@ -437,7 +433,6 @@ class model:
             self.account()
             self.user_gold()
             print(f"{'='*7}结束第{cks_list.index(ck)+1}账号{'='*7}")
-        self.close()
 
 def main():
     abc = model()

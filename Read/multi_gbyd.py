@@ -312,7 +312,7 @@ class Gbyd:
         self.topicid=topicid
         self.cookie = ck
         self.wxpuser_uid = wxpuser_uid
-        await self.check_read()
+        await self.init_check_dict()
         await self.user_info()
         await self.do_read_task()
         balance = await self.read_info()

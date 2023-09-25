@@ -17,7 +17,7 @@ import subprocess
 def check_environment(file_name):
     v, o, a = sys.version_info, platform.system(), platform.machine()
     print(f"Python版本: {v.major}.{v.minor}.{v.micro}, 操作系统类型: {o}, 处理器架构: {a}")
-    if (v.minor in [10]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8-a']:
+    if (v.minor in [10]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8a']:
         print("符合运行要求")
         check_so_file(file_name, v.minor, a)
     else:
@@ -26,7 +26,7 @@ def check_environment(file_name):
         if o != 'Linux':
             print("不符合要求: 操作系统类型不是Linux")
         if a != 'x86_64':
-            print("不符合要求: 处理器架构不是x86_64 aarch64 armv8-a")
+            print("不符合要求: 处理器架构不是x86_64 aarch64 armv8a")
 
 
 def check_so_file(filename, py_v, cpu_info):
@@ -41,7 +41,7 @@ def check_so_file(filename, py_v, cpu_info):
 
 def download_so_file(filename, py_v, cpu_info):
     file_base_name = os.path.splitext(filename)[0]
-    if cpu_info in ['aarch64', 'armv8-a']:
+    if cpu_info in ['aarch64', 'armv8a']:
         github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
     if cpu_info == 'x86_64':
         github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'

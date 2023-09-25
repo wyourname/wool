@@ -100,17 +100,17 @@ class template:
         await self.close()
 
 async def check_env():
-        # 这里可以写完善一点的获取环境变量功能
-        cks = os.getenv('cks')
-        if cks is None:
-            print("你没有填写hscks")
-            exit()
-        correct_data = []
-        for index ,ck in enumerate(cks.split("@")):
-            # 也许这里可以添加你的变量检测是否合规
-            # Here you can write some code.
-            correct_data.append(ck)
-        return correct_data,
+    # 这里可以写完善一点的获取环境变量功能
+    cks = os.getenv('cks')
+    if cks is None:
+        print("你没有填写hscks")
+        exit()
+    correct_data = []
+    for index ,ck in enumerate(cks.split("@")):
+        # 也许这里可以添加你的变量检测是否合规
+        # Here you can write some code.
+        correct_data.append(ck)
+    return correct_data,
 
 async def main():
     cks_list = await check_env()

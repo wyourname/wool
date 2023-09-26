@@ -1,20 +1,29 @@
 """
-微信阅读:小阅阅多线程并发版本，帮别人挂的最佳选择
+这是我的WXPUSER_TOKEN,你可以直接拿来用
+export WXPUSER_TOKEN="AT_aYF2532tqjrD4dX90OrJsuiflscRureX"
+微信打开链接:https://wxpusher.zjiecode.com/wxuser/?type=1&id=50341#/follow
+关注wxpuser app 订阅公众号就能获取你的uid
+export WXPUSER_UID="UID_xxxxx"
+||||||
+微信阅读:小阅阅
 链接:https://wi29252.masx.top:10262/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi29252.masx.top:10262&codeuserid=2&time=1694233111
-抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx,
+抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx;
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'
-如果你是让别人代挂的，你可以让代挂的给你扫一下wxpuser的码，再把uid发送给他就行
+export multi_xyy='true'  # 并发开关，可以不填
+你不想用我的WXPUSER_TOKEN,这是你的自行注册的教程
+如果你是让别人代挂的,你可以让代挂的给你扫一下wxpuser的码,再把uid发送给他就行
 必要推送:WXPUSER  前往网站https://wxpusher.zjiecode.com/docs/#/?id=%e6%b3%a8%e5%86%8c%e5%b9%b6%e4%b8%94%e5%88%9b%e5%bb%ba%e5%ba%94%e7%94%a8
 查看注册推送教程
 以下推送变量
 export WXPUSER_TOKEN='AT_XXXXXA...'
-export WXPUSER_TOPICID='1111111'   # 这个可以不填 
-export WXPUSER_UID='UID_xxxxx@UID_XXXX' WXPUSER_TOPICID和WXPUSER_UID二选一即可 WXPUSER_UID要和cookie数量一致，WXPUSER_UID可以重复填
+export WXPUSER_TOPICID='1111111'   # 这个可以不填,不推荐这个
+export WXPUSER_UID='UID_xxxxx@UID_XXXX' WXPUSER_TOPICID和WXPUSER_UID二选一即可 WXPUSER_UID要和cookie数量一致,WXPUSER_UID可以重复填
 比如我2个微信阅读只想推送给一个微信 那就export WXPUSER_UID='UID_123456@UID_123456'
 
 前者群发，后者单推个人，推荐后者
 
+new Env('小阅阅阅读')
 """
 
 import requests

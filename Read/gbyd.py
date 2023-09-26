@@ -26,7 +26,7 @@ import hashlib
 import random,json
 from typing import Optional, Dict 
 from urllib.parse import urlparse,parse_qs,quote
-import time
+import time,re
 import os
 
 
@@ -71,6 +71,23 @@ class Gbyd:
         hash.update(key.encode())
         sign = hash.hexdigest()
         return sign
+    
+    async def valid_auth(self):
+        ts = int(time.time())
+        match = re.search(r'gfsessionid=([^;]+)', self.cookie)
+        zzid = match.group(1)
+        str1 = f'{ts}&zzid={zzid}'
+        sign = await self.create_sign(str1)
+        url = self.url +f'auth/valid?time={ts}&zzid={zzid}&sign={sign}'
+        res = await self.request(url)
+        if not res:
+            print("valid 的方法错误,联系开发者吧")
+            return 
+        if res['code'] == 0:
+            print(f"【用户{self.index}】【登录】:模拟登录{res['message']}")
+            await asyncio.sleep(3)
+        else:
+            print(f"【用户{self.index}】【登录】:模拟登录{res['message']}")
 
     async def user_info(self):
         ts = int(time.time())
@@ -317,6 +334,7 @@ class Gbyd:
         self.cookie = ck
         self.wxpuser_uid = wxpuser_uid
         await self.init_check_dict()
+        await self.valid_auth()
         await self.user_info()
         await self.do_read_task()
         balance = await self.read_info()

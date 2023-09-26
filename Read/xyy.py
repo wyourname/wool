@@ -227,6 +227,7 @@ class Xyy:
         res = self.request(url)
         if res and res['status'] == 200:
             self.check_data = res['check_dict']
+            print(f"【用户{self.index}】:初始化状态成功")
         else:
             print(f"索取字典出现错误:{res},休息5秒")
             time.sleep(5)

@@ -206,8 +206,8 @@ class Xyy:
                 print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if self.get_read_state():
-                        print(f"【用户{self.index}】【阅读】:已手动阅读,休息5秒")
-                        time.sleep(5)
+                        print(f"【用户{self.index}】【阅读】:已手动阅读,休息3秒")
+                        time.sleep(3)
                         return True
                     if i == 59:
                         print("超时未阅读，终止本次阅读")
@@ -455,7 +455,7 @@ def main():
         if test_api(url):
             print(f"{url} 联通性测试通过")
             aol.append(url)
-    random_sleep_list = [i * random.randint(30, 40) for i in range(len(cks_list))]
+    random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
     from random import choice
     # 检查是否启用并发
     multi = os.environ.get("multi_xyy")

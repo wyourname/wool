@@ -184,8 +184,8 @@ class Gbyd:
                 print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
                 for i in range(1,61):
                     if await self.get_read_state():
-                        print(f"【用户{self.index}】【阅读】:已手动阅读,稍微延迟5秒钟")
-                        await asyncio.sleep(5)
+                        print(f"【用户{self.index}】【阅读】:已手动阅读,稍微延迟3秒钟")
+                        await asyncio.sleep(3)
                         return True
                     if i == 60:
                         print(f"【用户{self.index}】【警告】:超时未阅读，终止本次阅读")
@@ -389,7 +389,7 @@ async def main():
     from random import choice
     if use_concurrency:
         tasks = []
-        random_sleep_list = [i * random.randint(30, 45) for i in range(len(cks_list))]
+        random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
         for index, ck in enumerate(cks_list):
             abc = Gbyd()
             tasks.append(abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=choice(aol),sleep_time=random_sleep_list[index]))

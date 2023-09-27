@@ -189,8 +189,8 @@ class Xyy:
             if res['data']['gold'] == 0:
                 self.cont = False
         else:
-            print(res)
-            print(f"领取阅读币失败:{res['msg']}")
+            # print(res)
+            print(f"【用户{self.index}】:领取阅读币失败{res['msg']}")
             if res['errcode'] == 407:
                 self.cont = False
     

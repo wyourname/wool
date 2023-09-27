@@ -172,7 +172,6 @@ class Gbyd:
 
 
     async def varification(self,url):
-        print(url)
         parsed_url = urlparse(url)
         query_parameters = parse_qs(parsed_url.query)
         if '__biz' in query_parameters:
@@ -342,11 +341,11 @@ class Gbyd:
         self.cookie = ck
         self.wxpuser_uid = wxpuser_uid
         await self.init_check_dict()
-        # await self.valid_auth()
-        # await self.user_info()
-        # await self.do_read_task()
-        # balance = await self.read_info()
-        # await self.with_draw(balance=balance)
+        await self.valid_auth()
+        await self.user_info()
+        await self.do_read_task()
+        balance = await self.read_info()
+        await self.with_draw(balance=balance)
         await self.close()
         print(f"【用户{self.index}】【结束】:{'='*10}结束执行{'='*10}")
 
@@ -363,14 +362,10 @@ async def test_api(url):
                 return False
 
 async def check_env():
-    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
-    topicid = None
-    wxpuser_uid = 'UID_LM1CRTy41NtFdmAInRVsvH245ALN@UID_eDYvNdBwz7hV0JnXlCou1wAok079'
-    cks = 'gfsessionid=o-0fIv5LIRMAMYquIzCdHNPFrYDU; zzbb_info=%7B%22openid%22%3A%22oF1b14gFuSpLaKIwF7CB8O6OpP-Y%22%2C%22pid%22%3A2488240%2C%22uid%22%3A2630091%7D'
-    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    # topicid = os.getenv("WXPUSER_TOPICID")
-    # wxpuser_uid = os.getenv("WXPUSER_UID")
-    # cks = os.getenv('gbydcks')
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('gbydcks')
     if cks is None:
         print("钢镚ck为空,请去抓包格式:'o-0fIvztHsv.....; zzbb_info=%7B%22o......' 多账户请用@分割")
         exit()

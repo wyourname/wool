@@ -210,7 +210,7 @@ class Xyy:
                         time.sleep(3)
                         return True
                     if i == 59:
-                        print("超时未阅读，终止本次阅读")
+                        print(f"【用户{self.index}】【阅读】:超时未阅读，终止本次阅读")
                         self.cont = False
                         return False
                     time.sleep(1)

@@ -172,6 +172,7 @@ class Gbyd:
 
 
     async def varification(self,url):
+        print(url)
         parsed_url = urlparse(url)
         query_parameters = parse_qs(parsed_url.query)
         if '__biz' in query_parameters:
@@ -269,7 +270,7 @@ class Gbyd:
             </head>
             <body>
                 <div class="title">钢镚阅读检测，务必在一分钟内点击阅读</div>
-                <div class='button'><a href="self.aol/redirect?user=abc&value=0&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
+                <div class='button'><a href="self.aol/redirect?user=abc&value=1&timestamp=1900&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
                     <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
@@ -314,7 +315,7 @@ class Gbyd:
         
     async def init_check_dict(self, maxretry=3):
         print(f"【用户{self.index}】:初始化阅读后台检测状态")
-        url = self.aol + f'/check_dict?user={self.cookie}&value=0'
+        url = self.aol + f'/check_dict?user={self.cookie}&value=1'
         async with aiohttp.ClientSession() as client:
             async with client.get(url) as res:
                 if res.status ==200:

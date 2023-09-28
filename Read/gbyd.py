@@ -180,14 +180,14 @@ class Gbyd:
             if biz_value in self.check_data:
                 print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
-                await self.wxpuser("钢镚检测,请1分钟内点击阅读",encoded_url)
+                await self.wxpuser(f"钢镚【用户{self.index}】检测,请90秒内点击阅读",encoded_url)
                 print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
-                for i in range(1,61):
+                for i in range(1,91):
                     if await self.get_read_state():
                         print(f"【用户{self.index}】【阅读】:已手动阅读,稍微延迟3秒钟")
                         await asyncio.sleep(3)
                         return True
-                    if i == 60:
+                    if i == 90:
                         print(f"【用户{self.index}】【警告】:超时未阅读，终止本次阅读")
                         return False
                     time.sleep(1)

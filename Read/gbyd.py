@@ -172,7 +172,7 @@ class Gbyd:
 
 
     async def varification(self,url):
-        print(url)
+        # print(url)
         parsed_url = urlparse(url)
         query_parameters = parse_qs(parsed_url.query)
         if '__biz' in query_parameters:

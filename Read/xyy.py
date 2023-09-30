@@ -204,12 +204,13 @@ class Xyy:
                 encoded_url = quote(url)
                 self.wxpuser(f"小阅阅【用户{self.index}】检测,请90秒内点击阅读",encoded_url)
                 print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
-                for i in range(1,91):
+                start_time = int(time.time())
+                while True:
                     if self.get_read_state():
                         print(f"【用户{self.index}】【阅读】:已手动阅读,休息3秒")
                         time.sleep(3)
                         return True
-                    if i == 90:
+                    if int(time.time()) - start_time > 90:
                         print(f"【用户{self.index}】【阅读】:超时未阅读，终止本次阅读")
                         self.cont = False
                         return False
@@ -235,18 +236,25 @@ class Xyy:
     
     def get_read_state(self, max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=0'
-        res = requests.get(url)
-        if res.status_code == 200:
-            res = res.json()
-            if res['status'] == True:
-                return True
+        try:
+            res = requests.get(url)
+            if res.status_code == 200:
+                res = res.json()
+                if res['status'] == True:
+                    return True
+                else:
+                    if res['status'] == '-1' and max_retry>0:
+                        time.sleep(5)
+                        self.get_read_state(max_retry-1)
+                    return False
             else:
-                if res['status'] == '-1' and max_retry>0:
-                    time.sleep(5)
-                    self.get_read_state(max_retry-1)
                 return False
-        else:
-            return False
+        except Exception as e:
+            print(f"捕获到请求状态异常：{e}")
+            if max_retry == 0:
+                return False
+            time.sleep(3)
+            self.get_read_state(max_retry-1)
 
     def wxpuser(self,title,url):
         content = '''

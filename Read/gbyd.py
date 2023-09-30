@@ -182,13 +182,14 @@ class Gbyd:
                 encoded_url = quote(url)
                 await self.wxpuser(f"钢镚【用户{self.index}】检测,请90秒内点击阅读",encoded_url)
                 print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
-                for i in range(1,91):
+                start_time = int(time.time())
+                while True:
                     if await self.get_read_state():
                         print(f"【用户{self.index}】【阅读】:已手动阅读,稍微延迟3秒钟")
                         await asyncio.sleep(3)
                         return True
-                    if i == 90:
-                        print(f"【用户{self.index}】【警告】:超时未阅读，终止本次阅读")
+                    if int(time.time())- start_time > 90:
+                        print(f"【用户{self.index}】【警告】:90秒到啦,终止本次阅读")
                         return False
                     time.sleep(1)
             else:
@@ -299,19 +300,26 @@ class Gbyd:
 
     async def get_read_state(self,max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=1'
-        async with aiohttp.ClientSession() as client:
-            async with client.get(url) as res:
-                if res.status ==200:
-                    res1 = await res.json()
-                    if res1['status'] == True:
-                        return True
+        try:
+            async with aiohttp.ClientSession() as client:
+                async with client.get(url) as res:
+                    if res.status ==200:
+                        res1 = await res.json()
+                        if res1['status'] == True:
+                            return True
+                        else:
+                            if res1['status'] == '-1' and max_retry>0:
+                                await asyncio.sleep(5)
+                                await self.get_read_state(max_retry-1)
+                            return False
                     else:
-                        if res1['status'] == '-1' and max_retry>0:
-                            await asyncio.sleep(5)
-                            await self.get_read_state(max_retry-1)
                         return False
-                else:
-                    return False
+        except Exception as e:
+            print(f"捕获到请求状态异常:{e}")
+            if max_retry == 0:
+                return False
+            await asyncio.sleep(3)
+            await self.get_read_state(max_retry-1)
         
     async def init_check_dict(self, maxretry=3):
         print(f"【用户{self.index}】:初始化阅读后台检测状态")

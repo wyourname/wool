@@ -376,10 +376,12 @@ async def check_env():
     wxpuser_uid = os.getenv("WXPUSER_UID")
     cks = os.getenv('gbydcks')
     if cks is None:
-        print("钢镚ck为空,请去抓包格式:'o-0fIvztHsv.....; zzbb_info=%7B%22o......' 多账户请用@分割")
+        print("钢镚ck为空,请去抓包格式:'gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx' 多账户请用@分割")
+        print('cookie填写:export gbydcks="gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx"')
         exit()
     if wxpuser_token is None:
-        print("wxpuser的apptoken为空,前往官网注册创建一个app")
+        print("wxpuser的apptoken为空,前往官网注册创建一个app,复制应用token和微信关注wxpuser公众号获取uid")
+        print("获取完请在配置文件填写:export WXPUSER_TOKEN=AT_aYF2.....\nexport WXPUSER_UID=UID_....")
         exit()
     if topicid is None and wxpuser_uid is None:
         print("wxpuser的topicid和WXPUSER_UID都为空,请至少填写其中一个")

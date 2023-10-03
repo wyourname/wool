@@ -7,7 +7,7 @@ export WXPUSER_UID="UID_xxxxx"
 ||||||
 微信阅读:小阅阅
 链接:https://wi29252.masx.top:10262/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi29252.masx.top:10262&codeuserid=2&time=1694233111
-抓 1692433047.3z2rpa.top 下的 cookie: ysm_uid=xxxxx;
+抓  wi29252.masx.top下的 cookie: ysmuid=xxxxx;
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'
 export multi_xyy='true'  # 并发开关，可以不填
@@ -311,7 +311,7 @@ class Xyy:
                 </style>
             </head>
             <body>
-                <div class="title">小阅阅阅读检测，务必在一分钟内点击阅读</div>
+                <div class="title">小阅阅阅读检测，务必在一分半钟内点击阅读</div>
                 <div class='button'><a href="self.aol/redirect?user=uuu&value=0&timestamp=tsone&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
@@ -433,13 +433,15 @@ def check_env():
     wxpuser_uid = os.getenv("WXPUSER_UID")
     cks = os.getenv('xyycks')
     if cks is None:
-        print("小悦悦ck为空，请去抓包格式:'oZdBp.....' 多账户请用@分割")
+        print("小悦悦ck为空,请去抓包格式:cookie:'ysmuid=xxxxx.....'只要xxxxx 多账户请用@分割")
+        print("cookie填写,export xyycks='xxxxxx'")
         exit()
     if wxpuser_token is None:
-        print("wxpuser的apptoken为空，前往官网注册创建一个app")
+        print("wxpuser的apptoken为空,前往官网注册创建一个app,复制应用token和微信关注wxpuser公众号获取uid")
+        print("获取完请在配置文件填写:export WXPUSER_TOKEN=AT_aYF2.....\nexport WXPUSER_UID=UID_....")
         exit()
     if topicid is None and wxpuser_uid is None:
-        print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
+        print("wxpuser的topicid和WXPUSER_UID都为空,请至少填写其中一个")
         exit()
     return wxpuser_token, topicid, wxpuser_uid.split('@'), cks.split("@")
 

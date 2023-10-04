@@ -1,7 +1,7 @@
 """
 new Env("农好优")
 export nhycks='手机号#密码@...'
-邀请码 289680
+邀请 http://wap.nonghaoyou.cn/Public/reg/recom/289680
 签到需要支付宝授权实名挂着玩
 
 """

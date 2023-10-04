@@ -80,7 +80,7 @@ class template:
                         await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
             except Exception as e:
                 print(f"请求出现错误：{e}")
-            
+                await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
             retries += 1
         print(f"无法完成请求，已达到最大重试次数 ({max_retries})")
         return None    
@@ -119,7 +119,7 @@ async def main():
     tasks = []
     for index, ck in enumerate(cks_list):
         abc = template()
-        task = abc.run(index, ck)
+        task = abc.run(index, ck[index])
         tasks.append(task)
     if use_concurrency:  # 如果是true 那么就执行并发
         await asyncio.gather(*tasks)  # 并发执行任务

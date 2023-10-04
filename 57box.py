@@ -129,7 +129,11 @@ class Box:
         if not res:
             print(f"[盲盒][用户{self.index}]:请求出错")
         if res['errno'] == 0:
-            print(f"[盲盒][用户{self.index}]:抽到{res}")
+            try:
+                print(f"[盲盒][用户{self.index}]:抽到{res['data']['prizes_data'][0]['complete_prize_title']}")
+            except Exception as e:
+                print(f"[盲盒][用户{self.index}]:error {e}")
+                print(f"[盲盒][用户{self.index}]:{res['data']}")
         else:
             print(f"[盲盒][用户{self.index}]:开盒失败{res['message']}")
 

@@ -150,14 +150,14 @@ async def check_env():
     # 这里可以写完善一点的获取环境变量功能
     cks = os.getenv('nhycks')
     if cks is None:
-        print("你没有填写hscks")
+        print("你没有填写nhycks")
         exit()
     correct_data = []
     for index ,ck in enumerate(cks.split("@")):
         # 也许这里可以添加你的变量检测是否合规
         # Here you can write some code.
         if len(ck.split('#'))!=2:
-            print("zzzz")
+            print(f"账号{index+1}:你确定你填对了嘛！")
         else:
             correct_data.append(ck)
     return correct_data,

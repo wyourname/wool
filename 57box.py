@@ -1,10 +1,10 @@
 """
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
 new Env("57box")
-57box
-export 57boxcks='手机号#密码@手机号#密码'
+app 57box
+export boxcks='手机号#密码@手机号#密码'
 # 顺序不要颠倒
-我的本大部分的并发格式 脚本名_multi='true'
+我的本大部分的并发格式 box_multi='true'
 
 """
 
@@ -178,9 +178,9 @@ async def get_msg():
 
 async def check_env():
     # 这里可以写完善一点的获取环境变量功能
-    cks = os.getenv('57boxcks')
+    cks = os.getenv('boxcks')
     if cks is None:
-        print("你没有填写57boxcks")
+        print("你没有填写boxcks")
         exit()
     correct_data = []
     for index ,ck in enumerate(cks.split("@")):
@@ -196,7 +196,7 @@ async def main():
     await get_msg()
     cks_list = await check_env()
     # 检查是否存在环境变量 multi
-    use_concurrency = os.environ.get('57box_multi', 'false').lower() == 'true'
+    use_concurrency = os.environ.get('box_multi', 'false').lower() == 'true'
     tasks = []
     for index, ck in enumerate(cks_list):
         abc = Box()

@@ -194,7 +194,8 @@ async def check_env():
             print(f"账号{index+1}的格式填写错误应为:手机号#密码")
         else:
             correct_data.append(ck)
-    return correct_data,
+        print(correct_data)
+    return correct_data
 
 async def main():
     await get_msg()
@@ -204,7 +205,7 @@ async def main():
     tasks = []
     for index, ck in enumerate(cks_list):
         abc = Box()
-        task = abc.run(index+1, ck[index])
+        task = abc.run(index+1, ck)
         tasks.append(task)
     if use_concurrency:  # 如果是true 那么就执行并发
         await asyncio.gather(*tasks)  # 并发执行任务

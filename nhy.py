@@ -177,7 +177,7 @@ async def check_env():
             print(f"账号{index+1}:你确定你填对了嘛！")
         else:
             correct_data.append(ck)
-    return correct_data,
+    return correct_data
 
 async def main():
     await get_msg()
@@ -187,7 +187,7 @@ async def main():
     tasks = []
     for index, ck in enumerate(cks_list):
         abc = template()
-        task = abc.run(index+1, ck[index])
+        task = abc.run(index+1, ck)
         tasks.append(task)
     if use_concurrency:  # 如果是true 那么就执行并发
         await asyncio.gather(*tasks)  # 并发执行任务

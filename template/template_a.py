@@ -110,7 +110,7 @@ async def check_env():
         # 也许这里可以添加你的变量检测是否合规
         # Here you can write some code.
         correct_data.append(ck)
-    return correct_data,
+    return correct_data
 
 async def main():
     cks_list = await check_env()
@@ -119,7 +119,7 @@ async def main():
     tasks = []
     for index, ck in enumerate(cks_list):
         abc = template()
-        task = abc.run(index, ck[index])
+        task = abc.run(index, ck)
         tasks.append(task)
     if use_concurrency:  # 如果是true 那么就执行并发
         await asyncio.gather(*tasks)  # 并发执行任务

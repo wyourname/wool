@@ -84,7 +84,7 @@ class Box:
             print(e)
             print(f"[异常][用户{self.index}]: 获取任务列表时发生异常")
 
-    async def complete_task(self, task, answer='228899'):
+    async def complete_task(self, task):
         for _ in range(int(task['valid_day_times'])):
             print(f"[信息][用户{self.index}] 开始任务: {task['task_title']}")
             url = f'https://www.57box.cn/app/index.php?i=2&t=0&v=1&from=wxapp&c=entry&a=wxapp&do=uptaskinfo&token={self.token}'
@@ -98,7 +98,7 @@ class Box:
                 data = {
                 'm': 'greatriver_lottery_operation',
                 'id': task['id'],
-                'answer': answer
+                'answer': '669988'
                 }
             if task['id'] == "30":
                 data = {
@@ -116,8 +116,6 @@ class Box:
                 else:
                     # print(res)
                     print(f"[错误][用户{self.index}]:做任务{task['task_title']}时失败")
-                    if task['id'] == '26':
-                        await self.complete_task(task, answer='669988')
                     time.sleep(3)
                     break
             except Exception as e:

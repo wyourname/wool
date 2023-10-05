@@ -91,16 +91,18 @@ class template:
         if not res:
             print(f"[用户{self.index}]:获取签到uid失败")
             return 
-        if "今日已完成签到" in res:
-            print(f"[用户{self.index}]:今日已完成签到")
-            return 
-        match = re.search(r"var uid = '([^']+)';", res)
-        if match:
-            uid = match.group(1)
-            print(f"[用户{self.index}]:获取签到uid {uid}")
-            await self.complete_sign(uid,url)
+        pattern_not_completed = r'<div class="signin-btn" onclick="toSign()">.*?</div>'
+        match_not_completed = re.search(pattern_not_completed, res)
+        if match_not_completed:
+            match = re.search(r"var uid = '([^']+)';", res)
+            if match:
+                uid = match.group(1)
+                print(f"[用户{self.index}]:获取签到uid {uid}")
+                await self.complete_sign(uid,url)
+            else:
+                print("未找到uid值")
         else:
-            print("未找到uid值")
+            print(f"[用户{self.index}]:今日已完成签到")
 
     async def complete_sign(self, uid, referer_url):
         url = 'http://wap.nonghaoyou.cn/Member/ad_video_api'
@@ -122,14 +124,29 @@ class template:
             print(f"[用户{self.index}]:签到失败第{res}")
 
 
+    async def user_info(self):
+        url = 'http://wap.nonghaoyou.cn/Member/index'
+        add_headers = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',"X-Requested-With":"com.cb.tiaoma.nhy",'Referer':'http://wap.nonghaoyou.cn/','Cookie':self.cookie}
+        res = await self.request(url,add_headers=add_headers,dtype='text')
+        pattern = r'<div class="my-number">([\d.]+)</div>\s*<div class="my-text">(余额|预估收益|积分)</div>'
+        # 使用正则表达式查找匹配的内容
+        matches = re.findall(pattern, res)
+        # 提取匹配的值
+        values = {}
+        for match in matches:
+            value, item = match
+            values[item] = value
+        print(f"[用户{self.index}]:余额 {values.get('余额','未找到')}|预估收益 {values.get('预估收益','未找到')}|当前积分 {values.get('积分','未找到')}")
+
 
     async def run(self,index, ck):#
         self.index = index
         phone,passwd = ck.split('#')
         if await self.login(phone,passwd):
-            await asyncio.sleep(3)
+            await asyncio.sleep(random.randint(3,5))
+            await self.user_info()
+            await asyncio.sleep(random.randint(3,5))
             await self.signinfo()
-
         await self.close()
 
 

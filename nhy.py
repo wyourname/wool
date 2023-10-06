@@ -91,9 +91,7 @@ class template:
         if not res:
             print(f"[用户{self.index}]:获取签到uid失败")
             return 
-        pattern_not_completed = r'<div class="signin-btn" onclick="toSign()">.*?</div>'
-        match_not_completed = re.search(pattern_not_completed, res)
-        if match_not_completed:
+        if '<div class="signin-btn" onclick="toSign()">立即签到' in res:
             match = re.search(r"var uid = '([^']+)';", res)
             if match:
                 uid = match.group(1)
@@ -147,6 +145,8 @@ class template:
             await self.user_info()
             await asyncio.sleep(random.randint(3,5))
             await self.signinfo()
+            await asyncio.sleep(random.randint(3,5))
+            await self.user_info()
         await self.close()
 
 
@@ -166,6 +166,7 @@ async def get_msg():
 async def check_env():
     # 这里可以写完善一点的获取环境变量功能
     cks = os.getenv('nhycks')
+    cks = '13232153728#123456789com'
     if cks is None:
         print("你没有填写nhycks")
         exit()

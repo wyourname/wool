@@ -135,6 +135,19 @@ class template:
             value, item = match
             values[item] = value
         print(f"[用户{self.index}]:余额 {values.get('余额','未找到')}|预估收益 {values.get('预估收益','未找到')}|当前积分 {values.get('积分','未找到')}")
+        money = values.get('余额','0.0')
+        if float(money) >= 20.0:
+            await self.withdraw()
+
+    async def withdraw(self):
+        url = 'http://wap.nonghaoyou.cn/Member/tixian'
+        add_headers = {'Accept':'application/json, text/javascript, */*; q=0.01','Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Origin':'http://wap.nonghaoyou.cn','Referer':'http://wap.nonghaoyou.cn/Member/tixian?xapp-target=blank','Cookie':self.cookie}
+        data = 'price=20'
+        res = await self.request(url,'post',data=data,add_headers=add_headers)
+        if not res:
+            print(f"[用户{self.index}]:请求提现失败,因为啥都没返回")
+        print(res)
+
 
 
     async def run(self,index, ck):#

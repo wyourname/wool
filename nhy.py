@@ -148,7 +148,7 @@ class template:
         res = await self.request(url,'post',data=data,add_headers=add_headers)
         if not res:
             print(f"[用户{self.index}]:请求提现失败,因为啥都没返回")
-        print(res)
+        print(f"[用户{self.index}]:{res}")
 
 
 

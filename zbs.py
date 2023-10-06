@@ -1,8 +1,22 @@
+"""
+代码请勿用于非法盈利,若用于非法盈利或私自修改代码所造成的损失一切与本人无关,该代码仅用于学习交流,请下载阅览的24小时内删除代码
+使用前请认真阅读仓库声明
+微信小程序:植白说商城
+new Env("植白说")
+cron 1 8 * * *
+export zbscks='x-dts-token的值'  
+多账户就@分割
+并发就
+export zbs_multi='true'
+
+"""
+
+
 import asyncio
 import aiohttp
 from typing import Optional, Dict 
 from urllib.parse import urlparse
-import time,random
+import random
 from datetime import datetime
 import os
 

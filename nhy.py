@@ -166,7 +166,6 @@ async def get_msg():
 async def check_env():
     # 这里可以写完善一点的获取环境变量功能
     cks = os.getenv('nhycks')
-    cks = '13232153728#123456789com'
     if cks is None:
         print("你没有填写nhycks")
         exit()

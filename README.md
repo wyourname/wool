@@ -11,6 +11,6 @@
 
 ## 使用就下载py在青龙就好了，看py说明
 ### 个人的GitHub下载代理: https://git.anhjq3.workers.dev 拉取单文件的时候添加到代理处就行 末尾不要加上/就行
-### 本仓库的脚本需要用上的在requirements.txt,需要就前晚安装吧
+### 本仓库的脚本需要用上的在requirements.txt,都安装吧
 
 

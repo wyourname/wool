@@ -93,7 +93,7 @@ class template:
         # Here you can write some code.
         pass
 
-    async def run(self,index, ck):#
+    async def run(self,index, ck:str):#
         # This is the starting point of the program.
         # You can call functions inside the class here.
         # Here you can write some code.

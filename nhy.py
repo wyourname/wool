@@ -1,3 +1,6 @@
+# cython: language_level=3
+# author@ wangquanfugui233
+
 """
 代码请勿用于非法盈利,若用于非法盈利或私自修改代码所造成的损失一切与本人无关,该代码仅用于学习交流,请下载阅览的24小时内删除代码
 使用前请认真阅读仓库声明
@@ -8,207 +11,51 @@ export nhycks='手机号#密码@...'
 
 """
 
-
 import asyncio
-import aiohttp
-from typing import Optional, Dict 
-from urllib.parse import urlparse
-import random,re,json
+import platform
+import sys
 import os
+import subprocess
 
 
-
-class template:
-    def __init__(self) -> None:
-        """
-        new model
-         
-        """
-        self.sessions = aiohttp.ClientSession()
-
-    
-    async def close(self):
-        await self.sessions.close()
-
-    async def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None, dtype='json', max_retries=3):
-        host = urlparse(url).netloc
-        _default_headers = {
-            'Host': host,
-            'User-Agent': 'Mozilla/5.0 (Linux; Android 13; M2012K11AC Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/117.0.0.0 Mobile Safari/537.36  XiaoMi/MiuiBrowser/10.8.1 LT-APP/45/104/YM-RT/',
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language':'zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Cookie':''
-        }
-        retries = 0
-        while retries < max_retries:
-            try:
-                request_headers = headers or _default_headers
-                if add_headers:
-                    request_headers.update(add_headers)
-                async with getattr(self.sessions, method)(url, headers=request_headers, data=data) as response:
-                    if response.status == 200:
-                        if dtype == 'json':
-                            return await response.json()
-                        elif dtype == 'obj':
-                            return response
-                        else:
-                            return await response.text()
-                    else:
-                        print(f"请求失败状态码：{response.status}")
-                        # 可以选择休眠一段时间再重试，以避免频繁请求
-                        await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
-            except Exception as e:
-                print(f"请求出现错误：{e}")
-                await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
-            retries += 1
-        print(f"无法完成请求，已达到最大重试次数 ({max_retries})")
-        return None    
-
-    async def login(self, phone, passwd):
-        add_headers = {'Origin':'http://wap.nonghaoyou.cn','Referer':'http://wap.nonghaoyou.cn/Public/login','Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'}
-        data = f'username={phone}&password={passwd}&xieyi=on'
-        url = 'http://wap.nonghaoyou.cn/Public/login'
-        response = await self.request(url, 'post', data=data, add_headers=add_headers,dtype='obj')
-        if not response:
-            print(f"[用户{self.index}]:登录失败!")
-            return False
-        cookies = response.headers.getall('Set-Cookie')
-        # print(cookies)
-    # 使用正则表达式提取BJYADMIN和token的值
-        bjyadmin = next((re.search(r'BJYADMIN=([^;]+)', cookie).group(1) for cookie in cookies if 'BJYADMIN=' in cookie), None)
-        token = next((re.search(r'token=([^;]+)', cookie).group(1) for cookie in cookies if 'token=' in cookie), None)
-        if bjyadmin is not None and token is not None:
-            self.cookie = f'BJYADMIN={bjyadmin}; token={token};'
-            print(f"[用户{self.index}]:登录成功")
-            return True
-        else:
-            print('未找到BJYADMIN或token')
-            return False
-    
-    async def signinfo(self):
-        add_headers = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7','Cookie':self.cookie}
-        url = 'http://wap.nonghaoyou.cn/Member/signin?xapp-target=blank'
-        res = await self.request(url,add_headers=add_headers,dtype='text')
-        if not res:
-            print(f"[用户{self.index}]:获取签到uid失败")
-            return 
-        if '<div class="signin-btn" onclick="toSign()">立即签到' in res:
-            match = re.search(r"var uid = '([^']+)';", res)
-            if match:
-                uid = match.group(1)
-                print(f"[用户{self.index}]:获取签到uid {uid}")
-                await self.complete_sign(uid,url)
-            else:
-                print("未找到uid值")
-        else:
-            print(f"[用户{self.index}]:今日已完成签到")
-
-    async def complete_sign(self, uid, referer_url):
-        url = 'http://wap.nonghaoyou.cn/Member/ad_video_api'
-        add_headers = {'Accept':'application/json, text/javascript, */*; q=0.01','Origin':'http://wap.nonghaoyou.cn','Referer':referer_url,'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Cookie':self.cookie}
-        data = f'uid={uid}'
-        res = await self.request(url,'post',data=data,add_headers=add_headers, dtype='text')
-        if not res:
-            print(f"[用户{self.index}]:签到失败,返回None") 
-        res = json.loads(res)
-        # print(res)
-        if res['status'] == 1:
-            print(f"[用户{self.index}]:签到成功第{res['num']}次")
-            if res['num'] != '9':
-                ts = random.randint(15,20)
-                print(f"[用户{self.index}]:休息{ts}秒")
-                await asyncio.sleep(ts)
-                await self.complete_sign(uid, referer_url)
-        else:
-            print(f"[用户{self.index}]:签到失败第{res}")
+def check_environment(file_name):
+    v, o, a = sys.version_info, platform.system(), platform.machine()
+    print(f"Python版本: {v.major}.{v.minor}.{v.micro}, 操作系统类型: {o}, 处理器架构: {a}")
+    if (v.minor in [10]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8']:
+        print("符合运行要求,arm8没试过不知道行不行")
+        check_so_file(file_name, v.minor, a)
+    else:
+        if not (v.minor in [10]):
+            print("不符合要求: Python版本不是3.10")
+        if o != 'Linux':
+            print("不符合要求: 操作系统类型不是Linux")
+        if a != 'x86_64':
+            print("不符合要求: 处理器架构不是x86_64 aarch64 armv8")
 
 
-    async def user_info(self):
-        url = 'http://wap.nonghaoyou.cn/Member/index'
-        add_headers = {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',"X-Requested-With":"com.cb.tiaoma.nhy",'Referer':'http://wap.nonghaoyou.cn/','Cookie':self.cookie}
-        res = await self.request(url,add_headers=add_headers,dtype='text')
-        pattern = r'<div class="my-number">([\d.]+)</div>\s*<div class="my-text">(余额|预估收益|积分)</div>'
-        # 使用正则表达式查找匹配的内容
-        matches = re.findall(pattern, res)
-        # 提取匹配的值
-        values = {}
-        for match in matches:
-            value, item = match
-            values[item] = value
-        print(f"[用户{self.index}]:余额 {values.get('余额','未找到')}|预估收益 {values.get('预估收益','未找到')}|当前积分 {values.get('积分','未找到')}")
-        money = values.get('余额','0.0')
-        if float(money) >= 20.0:
-            await self.withdraw()
-
-    async def withdraw(self):
-        url = 'http://wap.nonghaoyou.cn/Member/tixian'
-        add_headers = {'Accept':'application/json, text/javascript, */*; q=0.01','Content-Type':'application/x-www-form-urlencoded; charset=UTF-8','Origin':'http://wap.nonghaoyou.cn','Referer':'http://wap.nonghaoyou.cn/Member/tixian?xapp-target=blank','Cookie':self.cookie}
-        data = 'price=20'
-        res = await self.request(url,'post',data=data,add_headers=add_headers)
-        if not res:
-            print(f"[用户{self.index}]:请求提现失败,因为啥都没返回")
-        print(f"[用户{self.index}]:{res}")
+def check_so_file(filename, py_v, cpu_info):
+    if os.path.exists(filename):
+        print(f"{filename} 存在")
+        import nhy as n
+        asyncio.run(n.main())
+    else:
+        print(f"{filename} 不存在,前往下载文件")
+        download_so_file(filename, py_v, cpu_info)
 
 
-
-    async def run(self,index, ck):#
-        self.index = index
-        phone,passwd = ck.split('#')
-        if await self.login(phone,passwd):
-            await asyncio.sleep(random.randint(3,5))
-            await self.user_info()
-            await asyncio.sleep(random.randint(3,5))
-            await self.signinfo()
-            await asyncio.sleep(random.randint(3,5))
-            await self.user_info()
-        await self.close()
-
-
-async def get_msg():
-    url = 'http://api.doudoudou.fun/other/message?name=nhy'
-    async with aiohttp.ClientSession() as client:
-        async with client.get(url) as res:
-            if res.status ==200:
-                res = await res.json()
-                print(f"【公告信息】:{res['messages']}")
-                # print(res)
-                return res['run']
-            else:
-                print("获取脚本信息失败！！！")
-                return False
-
-async def check_env():
-    # 这里可以写完善一点的获取环境变量功能
-    cks = os.getenv('nhycks')
-    if cks is None:
-        print("你没有填写nhycks")
-        exit()
-    correct_data = []
-    for index ,ck in enumerate(cks.split("@")):
-        # 也许这里可以添加你的变量检测是否合规
-        # Here you can write some code.
-        if len(ck.split('#'))!=2:
-            print(f"账号{index+1}:你确定你填对了嘛！")
-        else:
-            correct_data.append(ck)
-    return correct_data
-
-async def main():
-    await get_msg()
-    cks_list = await check_env()
-    # 检查是否存在环境变量 multi
-    use_concurrency = os.environ.get('nhy_multi', 'false').lower() == 'true'
-    tasks = []
-    for index, ck in enumerate(cks_list):
-        abc = template()
-        task = abc.run(index+1, ck)
-        tasks.append(task)
-    if use_concurrency:  # 如果是true 那么就执行并发
-        await asyncio.gather(*tasks)  # 并发执行任务
-    else:  # 如果是false 那么就串行执行
-        for task in tasks:
-            await task  
+def download_so_file(filename, py_v, cpu_info):
+    file_base_name = os.path.splitext(filename)[0]
+    if cpu_info in ['aarch64', 'armv8']:
+        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
+    if cpu_info == 'x86_64':
+        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'
+    # print(github_url)
+    result = subprocess.run(['curl', '-o', filename, github_url])
+    if result.returncode == 0:
+        print(f"下载完成：{filename},调用check_so_file funtion")
+        check_so_file(filename,py_v,cpu_info)
+    else:
+        print(f"下载失败：{filename}")
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    check_environment('nhy.so')

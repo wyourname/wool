@@ -7,212 +7,51 @@ export boxcks='手机号#密码@手机号#密码'
 我的本大部分的并发格式 box_multi='true'
 
 """
-
-
-
 import asyncio
-from typing import Optional, Dict
-from urllib.parse import urlparse
-import aiohttp
-import time
+import platform
+import sys
 import os
+import subprocess
 
 
-class Box:
-    def __init__(self) -> None:
-        self.sessions = aiohttp.ClientSession()
-        # self.token = ''
-
-    async def close(self):
-        await self.sessions.close()
-
-    async def request(self, url, method='get', add_headers: Optional[Dict[str, str]] = None, data=None, headers=None):
-        host = urlparse(url).netloc
-        _default_headers = {
-            'Host': host,
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'user-agent': 'Mozilla/5.0 (Linux; Android 13; Mi 10 Build/TKQ1.221114.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/108.0.5359.128 Mobile Safari/537.36 uni-app Html5Plus/1.0 (Immersed/32.727272)',
-        }
-        try:
-            request_headers = headers or _default_headers
-            if add_headers:
-                request_headers.update(add_headers)
-
-            async with getattr(self.sessions, method)(url, headers=request_headers, data=data) as response:
-                if response.status == 200:
-                    return await response.json()  # 返回text或json 看情况
-                else:
-                    print(f"请求失败状态码：{response.status}")
-                    return await response.json()
-        except Exception as e:
-            print(e)
-            return None
-
-    async def user_info(self):
-        url = f'https://www.57box.cn/app/index.php?i=2&t=0&v=1&from=wxapp&c=entry&a=wxapp&do=getuserinfo&m=greatriver_lottery_operation&token={self.token}&source=app'
-        try:
-            res = await self.request(url=url)
-            if res['errno'] == 0:
-                print(f"[信息][用户{self.index}]: {res['data']['nickname']} 积分: {res['data']['integral']}")
-                if int(float(res['data']['integral'])) >= 120:
-                    await self.open_the_box()
-            else:
-                print(f"[错误][用户{self.index}]:获取用户信息失败")
-        except Exception as e:
-            print(e)
-            print("[异常] 获取用户信息时发生异常")
-
-    async def get_task(self):
-        url = f'https://www.57box.cn/app/index.php?i=2&t=0&v=1&from=wxapp&c=entry&a=wxapp&do=getstarparameter&m=greatriver_lottery_operation&token={self.token}'
-        task_list = []
-        try:
-            res = await self.request(url=url)
-            if res['errno'] == 0:
-                task_list = res['data']['tasklist']
-                print(f"[信息][用户{self.index}]:获取任务列表成功")
-                filtered_tasks = [task for task in task_list if 'state' in task and task['state'] == 0 and task['task_type'] in ['5', '6', '7']]
-                # print(filtered_tasks)
-                # for i in task_list:
-                    # print(i)
-                for task in filtered_tasks:
-                    # print(task)
-                    await self.complete_task(task)
-                    await asyncio.sleep(2)
-            else:
-                print(f"[错误][用户{self.index}]:获取任务列表失败")
-        except Exception as e:
-            print(e)
-            print(f"[异常][用户{self.index}]: 获取任务列表时发生异常")
-
-    async def complete_task(self, task):
-        for _ in range(int(task['valid_day_times'])):
-            print(f"[信息][用户{self.index}] 开始任务: {task['task_title']}")
-            url = f'https://www.57box.cn/app/index.php?i=2&t=0&v=1&from=wxapp&c=entry&a=wxapp&do=uptaskinfo&token={self.token}'
-            if task['id'] in ["35","39"]:
-                data = {
-                'm': 'greatriver_lottery_operation',
-                'id': task['id'],
-                'answer': ''
-                }
-            if task['id'] == "26":
-                data = {
-                'm': 'greatriver_lottery_operation',
-                'id': task['id'],
-                'answer': '669988'
-                }
-            if task['id'] == "30":
-                data = {
-                'm': 'greatriver_lottery_operation',
-                'id': task['id'],
-                'answer': '普通物品不可分解'
-                }
-            # print(data)
-            try:
-                res = await self.request(url=url, method='post', data=data)
-                # print(res)
-                if res['errno'] == 0:
-                    print(f"[通知][用户{self.index}]:{task['task_title']}: {res['message']}")
-                    time.sleep(3)
-                else:
-                    # print(res)
-                    print(f"[错误][用户{self.index}]:做任务{task['task_title']}时失败")
-                    time.sleep(3)
-                    break
-            except Exception as e:
-                print(e)
-                print(f"[异常][用户{self.index}]:做任务{task['task_title']}时发生异常")
-            # break
-    
-    async def open_the_box(self):
-        url = f'https://www.57box.cn/app/index.php?i=2&t=0&v=1&from=wxapp&c=entry&a=wxapp&do=openthebox&m=greatriver_lottery_operation&box_id=303&paytype=1&zhonglvtool_id=&zhonglvtool_choiceprize=&num=1&token={self.token}&source=app'
-        res = await self.request(url)
-        if not res:
-            print(f"[盲盒][用户{self.index}]:请求出错")
-        if res['errno'] == 0:
-            try:
-                print(f"[盲盒][用户{self.index}]:抽到{res['data']['prizes_data'][0]['complete_prize_title']}")
-            except Exception as e:
-                print(f"[盲盒][用户{self.index}]:error {e}")
-                print(f"[盲盒][用户{self.index}]:{res['data']}")
-        else:
-            print(f"[盲盒][用户{self.index}]:开盒失败{res['message']}")
+def check_environment(file_name):
+    v, o, a = sys.version_info, platform.system(), platform.machine()
+    print(f"Python版本: {v.major}.{v.minor}.{v.micro}, 操作系统类型: {o}, 处理器架构: {a}")
+    if (v.minor in [10]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8']:
+        print("符合运行要求,arm8没试过不知道行不行")
+        check_so_file(file_name, v.minor, a)
+    else:
+        if not (v.minor in [10]):
+            print("不符合要求: Python版本不是3.10")
+        if o != 'Linux':
+            print("不符合要求: 操作系统类型不是Linux")
+        if a != 'x86_64':
+            print("不符合要求: 处理器架构不是x86_64 aarch64 armv8")
 
 
-
-    async def get_token(self, phone, passwd):
-        data = f'mobile={phone}&password={passwd}&password2=&code=&invite_uid=0&source=app'    
-            
-        url = 'https://www.57box.cn/app/index.php?i=2&t=0&v=1&from=wxapp&c=entry&a=wxapp&do=login&m=greatriver_lottery_operation'
-        add_headers = {'Content-Length':str(len(data)),'Accept-Encoding':'gzip'}
-        # print(add_headers)
-        res = await self.request(url,'post',data=data,)
-        if not res:
-            print(f"[用户{self.index}]登录获取token失败")
-            return None
-        if res['errno'] == 0:
-            print(f"[登录][用户{self.index}]:{res['message']}")
-            self.token=res['data']['token']
-        else:
-            print(f"[登录][用户{self.index}]:失败{res}")
-        
+def check_so_file(filename, py_v, cpu_info):
+    if os.path.exists(filename):
+        print(f"{filename} 存在")
+        import box_57 as box
+        asyncio.run(box.main())
+    else:
+        print(f"{filename} 不存在,前往下载文件")
+        download_so_file(filename, py_v, cpu_info)
 
 
-    async def run(self,index, ck):
-        self.index = index
-        phone,passwd = ck.split('#')
-        await self.get_token(phone,passwd)
-        await self.user_info()
-        await self.get_task()
-        await self.user_info()
-        await self.close()
-
-
-async def get_msg():
-    url = 'http://api.doudoudou.fun/other/message?name=57box'
-    async with aiohttp.ClientSession() as client:
-        async with client.get(url) as res:
-            if res.status ==200:
-                res = await res.json()
-                print(f"【公告信息】:{res['messages']}")
-                # print(res)
-                return res['run']
-            else:
-                print("获取脚本信息失败！！！")
-                return False
-
-async def check_env():
-    # 这里可以写完善一点的获取环境变量功能
-    cks = os.getenv('boxcks')
-    if cks is None:
-        print("你没有填写boxcks")
-        exit()
-    correct_data = []
-    for index ,ck in enumerate(cks.split("@")):
-        # 也许这里可以添加你的变量检测是否合规
-        # Here you can write some code.
-        if len(ck.split('#')) != 2:
-            print(f"账号{index+1}的格式填写错误应为:手机号#密码")
-        else:
-            correct_data.append(ck)
-        print(correct_data)
-    return correct_data
-
-async def main():
-    await get_msg()
-    cks_list = await check_env()
-    # 检查是否存在环境变量 multi
-    use_concurrency = os.environ.get('box_multi', 'false').lower() == 'true'
-    tasks = []
-    for index, ck in enumerate(cks_list):
-        abc = Box()
-        task = abc.run(index+1, ck)
-        tasks.append(task)
-    if use_concurrency:  # 如果是true 那么就执行并发
-        await asyncio.gather(*tasks)  # 并发执行任务
-    else:  # 如果是false 那么就串行执行
-        for task in tasks:
-            await task  
-
+def download_so_file(filename, py_v, cpu_info):
+    file_base_name = os.path.splitext(filename)[0]
+    if cpu_info in ['aarch64', 'armv8']:
+        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
+    if cpu_info == 'x86_64':
+        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'
+    # print(github_url)
+    result = subprocess.run(['curl', '-o', filename, github_url])
+    if result.returncode == 0:
+        print(f"下载完成：{filename},调用check_so_file funtion")
+        check_so_file(filename,py_v,cpu_info)
+    else:
+        print(f"下载失败：{filename}")
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    check_environment('box_57.so')

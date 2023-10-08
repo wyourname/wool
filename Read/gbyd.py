@@ -270,16 +270,16 @@ class Gbyd:
                 </style>
             </head>
             <body>
-                <div class="title">钢镚阅读检测，务必在一分钟内点击阅读</div>
+                <div class="title">用户a钢镚阅读检测,务必在一分钟内点击阅读</div>
                 <div class='button'><a href="self.aol/redirect?user=uuu&value=1&timestamp=tsone&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
-                    <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                    <p>请留意消息推送,时间按照你的定时看</p>
                 </div><br>
             </body>
         </html>
         '''
-        content = content.replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
+        content = content.replace('用户a',f'用户{self.index}').replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,

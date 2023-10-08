@@ -6,7 +6,8 @@ export WXPUSER_TOKEN="AT_aYF2532tqjrD4dX90OrJsuiflscRureX"
 export WXPUSER_UID="UID_xxxxx"
 ||||||
 微信阅读:小阅阅
-链接:https://wi29252.masx.top:10262/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=wi29252.masx.top:10262&codeuserid=2&time=1694233111
+邀请链接:https://ot43562.tvtg.top:10259/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=ot43562.tvtg.top:10259&codeuserid=2&time=1696733275
+走不走我邀请都无所谓的,写代码只是爱好,你能用我写的本我就很开心了
 抓  wi29252.masx.top下的 cookie: ysmuid=xxxxx;
 只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'
@@ -230,7 +231,7 @@ class Xyy:
             self.check_data = dict(res['check_dict'])
             print(f"【用户{self.index}】:初始化状态成功")
         else:
-            print(f"索取字典出现错误:{res},休息5秒")
+            print(f"【用户{self.index}】:索取字典出现错误{res},休息5秒")
             time.sleep(5)
             self.init_chekc_dict()
     
@@ -311,16 +312,16 @@ class Xyy:
                 </style>
             </head>
             <body>
-                <div class="title">小阅阅阅读检测，务必在一分半钟内点击阅读</div>
+                <div class="title">用户a小阅阅,务必在一分半钟内点击阅读</div>
                 <div class='button'><a href="self.aol/redirect?user=uuu&value=0&timestamp=tsone&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
-                    <p>请留意消息推送时间点(9, 11, 13, 15, 17, 19, 21)</p>
+                    <p>请留意消息推送时间点依照你的定时计划</p>
                 </div><br>
             </body>
         </html>
         '''
-        content = content.replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
+        content = content.replace('用户a',f'用户{self.index}').replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,

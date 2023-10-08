@@ -3,7 +3,7 @@ export rrbcks='手机号&uid&token' # 自动提现，提前绑定支付宝,每�
 
 我不推荐玩这个和三合一，太坑了，但是脚本都写了没办法
 
-邀请链接http://ebb.nianshuiyong.cloud/user/index.html?mid=1700837019170766848任务类型多，综合收益高；简单易上手，提现秒到账；拉新推广，享受永久分成；大额提现，享受专属客服（若链接打不开，可复制到手机浏览器里打开）
+邀请链接http://ebb1696759962921.maisucaiya.cloud/user/index.html?mid=1700837019170766848任务类型多，综合收益高；简单易上手，提现秒到账；拉新推广，享受永久分成；大额提现，享受专属客服（若链接打不开，可复制到手机浏览器里打开）
 
 必要推送:WXPUSER  前往网站https://wxpusher.zjiecode.com/docs/#/?id=%e6%b3%a8%e5%86%8c%e5%b9%b6%e4%b8%94%e5%88%9b%e5%bb%ba%e5%ba%94%e7%94%a8
 查看注册推送教程
@@ -442,7 +442,8 @@ class Rrbyd:
             else:
                 exit()
 
-    async def run(self, ck,wxpuser_uid,topicid,wxpuser_token,a_url):
+    async def run(self, ck:str, wxpuser_uid, topicid, wxpuser_token, a_url):
+        print("==============【开始任务】===============")
         self.un,self.uid,self.cookie = ck.split('&')
         self.aol = a_url
         self.wxpuser_token = wxpuser_token
@@ -452,31 +453,61 @@ class Rrbyd:
         await self.user_info()
         await self.sign_status()
         await self.start()
-        await self.souhu()
+        # await self.souhu()
         await self.close()
+        print("==============【结束任务】===============")
 
 async def check_env():
-    wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    topicid = os.getenv("WXPUSER_TOPICID")
-    wxpuser_uid = os.getenv("WXPUSER_UID")
-    cks = os.getenv('rrbcks')
+    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
+    topicid = None
+    wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079@UID_eDYvNdBwz7hV0JnXlCou1wAok079'
+    cks = '15775053330&1700837019170766848&c02ea73b330f65fdebffa5f0a4e67dab'
+    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    # topicid = os.getenv("WXPUSER_TOPICID")
+    # wxpuser_uid = os.getenv("WXPUSER_UID")
+    # cks = os.getenv('rrbcks')
     if cks is None:
-        print("人人帮ck为空，请去抓包格式:'手机号&uid&token' 多账户请用@分割")
+        print("人人帮ck为空,请去抓包格式:'手机号&uid&token' 多账户请用@分割")
         exit()
     if wxpuser_token is None:
-        print("wxpuser的apptoken为空，前往官网注册创建一个app")
+        print("wxpuser的apptoken为空,前往官网注册创建一个app")
         exit()
     if topicid is None and wxpuser_uid is None:
-        print("wxpuser的topicid和WXPUSER_UID都为空，请至少填写其中一个")
+        print("wxpuser的topicid和WXPUSER_UID都为空,请至少填写其中一个")
         exit()
     return cks.split("@") , wxpuser_uid.split('@'), topicid, wxpuser_token
 
 
+async def test_api(url):
+    print("开始测试检测服务可用性")
+    api_url = url + '/read/announcement'
+    async with aiohttp.ClientSession() as client:
+        async with client.get(api_url) as res:
+            if res.status ==200:
+                result = await res.json()
+                print(f"【公告】:{result['messages']}")
+                return True
+            else:
+                return False
+
 async def main():
-    cks,wx_uid,topicidid,wxpuser_token =  await check_env()
-    for ck in cks:
-        abc = Rrbyd()
-        await abc.run(ck,wx_uid[cks.index(ck)],topicidid,wxpuser_token,'http://api.doudoudou.fun')  
+    if await test_api('http://api.doudoudou.fun'):
+        print(f"当前服务器可用")
+    else:
+        print(f"当前服务器不可用,可能作者家停电断网了,请稍后再试")
+        exit()
+    cks_list, wx_uids,topicid,wxpuser_token = await check_env()
+    use_concurrency = os.environ.get('multi_rrb', 'false').lower() == 'true'
+    if use_concurrency:
+        tasks = []
+        for index, ck in enumerate(cks_list):
+            abc = Rrbyd()
+            tasks.append(abc.run(ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, a_url='http://api.doudoudou.fun'))
+        await asyncio.gather(*tasks)
+    else:
+        for index, ck in enumerate(cks_list):
+            abc = Rrbyd()
+            await abc.run(ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, a_url='http://api.doudoudou.fun')
         
 
 if __name__ == '__main__':

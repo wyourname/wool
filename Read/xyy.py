@@ -76,7 +76,7 @@ class Xyy:
         url = 'http://1695471164.snak.top?cate=0'
         res = self.request(url,dtype='text')
         if not res:
-            print("【用户{self.index}】【用户】:初始化请求获取失败")
+            print(f"【用户{self.index}】【用户】:初始化请求获取失败")
             return
         # print(res)
         pattern = r'href="(http://[^"]+)"'

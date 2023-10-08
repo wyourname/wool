@@ -458,14 +458,10 @@ class Rrbyd:
         print("==============【结束任务】===============")
 
 async def check_env():
-    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
-    topicid = None
-    wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079@UID_eDYvNdBwz7hV0JnXlCou1wAok079'
-    cks = '15775053330&1700837019170766848&c02ea73b330f65fdebffa5f0a4e67dab'
-    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    # topicid = os.getenv("WXPUSER_TOPICID")
-    # wxpuser_uid = os.getenv("WXPUSER_UID")
-    # cks = os.getenv('rrbcks')
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('rrbcks')
     if cks is None:
         print("人人帮ck为空,请去抓包格式:'手机号&uid&token' 多账户请用@分割")
         exit()

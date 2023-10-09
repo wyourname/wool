@@ -390,10 +390,13 @@ async def check_env():
 
 async def main():
     aol = []
-    for url in ['http://api.doudoudou.fun','http://api.hwayla.top']:
+    for url in ['http://api.doudoudou.fun']:
         if await test_api(url):
             print(f"{url} 联通性测试通过")
             aol.append(url)
+    if len(aol) == 0:
+        print("当前检测服务不可用,请稍后再试")
+        exit()
     cks_list, wx_uids,topicid,wxpuser_token = await check_env()
     use_concurrency = os.environ.get('multi_gbyd', 'false').lower() == 'true'
     from random import choice

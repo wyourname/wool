@@ -462,10 +462,13 @@ def test_api(url):
 def main():
     apptoken, topicid, wx_uids, cks_list = check_env()  # 这里顺序不能搞乱了
     aol = []
-    for url in ['http://api.doudoudou.fun', 'http://api.hwayla.top']:
+    for url in ['http://api.doudoudou.fun']:
         if test_api(url):
             print(f"{url} 联通性测试通过")
             aol.append(url)
+    if len(aol) == 0:
+        print("当前检测服务不可用,请稍后再试")
+        exit()
     random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
     from random import choice
     # 检查是否启用并发

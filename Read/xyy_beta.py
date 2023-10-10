@@ -250,7 +250,7 @@ class template:
             if res['errcode'] == 0:
                 link_url = res['data']['link']
                 time.sleep(random.randint(2,4))
-                self.jump(url=link_url,uk=uk,origin=origin)
+                await self.jump(url=link_url,uk=uk,origin=origin)
             else:
                 print(f"【用户{self.index}】【阅读】:{res['msg']}")
                 if res['errcode'] == 407:

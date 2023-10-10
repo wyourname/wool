@@ -249,7 +249,7 @@ class template:
             res = json.loads(res)
             if res['errcode'] == 0:
                 link_url = res['data']['link']
-                time.sleep(random.randint(2,4))
+                await asyncio.sleep(random.randint(2,4))
                 await self.jump(url=link_url,uk=uk,origin=origin)
             else:
                 print(f"【用户{self.index}】【阅读】:{res['msg']}")
@@ -257,8 +257,8 @@ class template:
                     self.cont = False
         else:
             print(f"【用户{self.index}】:请求阅读出现差错,休息3秒")
-            time.sleep(3)
-            self.do_read_task(origin,uk)
+            await asyncio.sleep(3)
+            await self.do_read_task(origin,uk)
         # if res is None:
         #     print(f"【用户{self.index}】:请求阅读出现差错,休息3秒")
         #     await asyncio.sleep(3)

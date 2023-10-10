@@ -144,7 +144,7 @@ class template:
         else:
             print(f"[用户{self.index}]:索取字典出现错误{res},休息5秒")
             await asyncio.sleep(5)
-            self.init_chekc_dict()
+            await self.init_chekc_dict()
     
     async def get_read_state(self, max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=0'

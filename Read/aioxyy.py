@@ -158,9 +158,9 @@ class template:
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = await self.request(wxpuser_url,'post',data=json.dumps(data), headers={"Content-Type":"application/json"})
         if res['success'] == True:
-            print(f"[用户{self.index}][通知]:检测发送成功！")
+            print(f"[用户{self.index}][通知]: 检测发送成功！")
         else:
-            print(f"[用户{self.index}][通知]:发送失败！！！！！")
+            print(f"[用户{self.index}][通知]: 发送失败！！！！！")
     
     async def init_chekc_dict(self):
         print(f"[用户{self.index}][init]: 初始化阅读后台检测状态")
@@ -443,7 +443,7 @@ class template:
         self.aol = check_url
         self.index = index
         if sleep_time:
-            print(f"[用户{self.index}]: 随机休息{sleep_time}秒，我怕你点不了那么多")
+            print(f"[用户{self.index}][等待]: 随机休息{sleep_time}秒，我怕你点不了那么多")
             await asyncio.sleep(sleep_time)
         print(f"[用户{self.index}][开始]===========第{index}个的账号===========")
         self.cont = True

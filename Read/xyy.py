@@ -172,7 +172,6 @@ class Xyy:
             'Cookie': self.cookie
         }
         res = requests.get(url,headers=headers,allow_redirects=False)
-        # print(res.status_code)
         location= res.headers.get('Location')
         if self.varification(location):
             ts = random.randint(8,16)
@@ -437,6 +436,14 @@ def check_env():
         print("小悦悦ck为空,请去抓包格式:cookie:'ysmuid=xxxxx.....'只要xxxxx 多账户请用@分割")
         print("cookie填写,export xyycks='xxxxxx'")
         exit()
+    correct_data = []
+    for index ,ck in enumerate(cks.split("@")):
+        # 也许这里可以添加你的变量检测是否合规
+        # Here you can write some code.
+        if 'ysmuid=' in ck:
+            print(f"账号[{index+1}]:请手动去除cookie里面的ysmuid=")
+        else:
+            correct_data.append(ck)
     if wxpuser_token is None:
         print("wxpuser的apptoken为空,前往官网注册创建一个app,复制应用token和微信关注wxpuser公众号获取uid")
         print("获取完请在配置文件填写:export WXPUSER_TOKEN=AT_aYF2.....\nexport WXPUSER_UID=UID_....")
@@ -444,7 +451,7 @@ def check_env():
     if topicid is None and wxpuser_uid is None:
         print("wxpuser的topicid和WXPUSER_UID都为空,请至少填写其中一个")
         exit()
-    return wxpuser_token, topicid, wxpuser_uid.split('@'), cks.split("@")
+    return wxpuser_token, topicid, wxpuser_uid.split('@'), correct_data
 
 
 def test_api(url):

@@ -1,4 +1,5 @@
 """
+阅读走不走我的邀请都行,能用我的本就是给面子我了
 微信阅读:钢镚
 这是我的WXPUSER_TOKEN,你可以直接拿来用
 export WXPUSER_TOKEN="AT_aYF2532tqjrD4dX90OrJsuiflscRureX"

@@ -229,7 +229,7 @@ class template:
             return 
         res = json.loads(res)
         if res['errcode'] == 0:
-            print(f"[用户{self.index}]:金币 {res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
+            print(f"[用户{self.index}][信息]: 金币 {res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
             if res['data']['remain_read'] >0:
                 print(f"[用户{self.index}][信息]: 获取第1篇文章url")
                 await asyncio.sleep(3)

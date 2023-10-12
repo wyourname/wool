@@ -128,7 +128,7 @@ class Gbyd:
             print("请求出现了问题,无法获得信息")
     
     async def do_read_task(self):
-        await asyncio.sleep(random.randint(2,5))
+        await asyncio.sleep(random.randint(2,4))
         for i in range(1,31):
             print(f"【用户{self.index}】【阅读】:开始第{i}次阅读")
             ts = int(time.time())
@@ -138,7 +138,7 @@ class Gbyd:
             if res['code'] == 0:
                 link = res['data']['link']
                 if await self.varification(link):
-                    random_sleep = random.randint(8,15)
+                    random_sleep = random.randint(7,13)
                     print(f"【用户{self.index}】【等待】:{random_sleep}秒")
                     await asyncio.sleep(random_sleep)
                     ts1 = int(time.time())
@@ -161,15 +161,16 @@ class Gbyd:
         data = f'time={ts}&sign={sign}'
         add_header = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8','Origin': f'http://{urlparse(url).netloc}','Content-Length': str(len(data))}
         res = await self.request(url,'post', data=data, add_headers=add_header)
-        if res:
-            if res['code'] == 0:
-                print(f"【用户{self.index}】【奖励】:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
-                return True
-            else:
-                print(f"【用户{self.index}】【阅读】:失败 {res}")
-        else:
+        if not res:
             print(f"【用户{self.index}】【错误】:发生意外 {res}")
             await self.complete_task()
+
+        if res['code'] == 0:
+            print(f"【用户{self.index}】【奖励】:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
+            return True
+        else:
+            print(f"【用户{self.index}】【阅读】:失败 {res}")
+            
 
 
     async def varification(self,url):
@@ -205,13 +206,12 @@ class Gbyd:
             sign = await self.create_sign(ts)
             url = self.url + f"withdraw/wechat?time={ts}&sign={sign}"
             res = await self.request(url)
-            if res:
-                if res['code'] == 0:
-                    print(f"【用户{self.index}】【提现】:{res['message']}")
-                else:
-                    print(f"【用户{self.index}】【提现】:{res['message']}")
+            if not res:
+                print(f"【用户{self.index}】【提现】:提现出错了")
+            if res['code'] == 0:
+                print(f"【用户{self.index}】【提现】:{res['message']}")
             else:
-                print("提现出差错了")
+                print(f"【用户{self.index}】【提现】:{res['message']}")  
         else:
             print(f"【用户{self.index}】【提现】: 未达到提现金额，暂不提现")
 
@@ -329,8 +329,13 @@ class Gbyd:
             async with client.get(url) as res:
                 if res.status ==200:
                     res1 = await res.json()
-                    self.check_data = dict(res1['check_dict'])
-                    print(f"【用户{self.index}】:初始化状态成功")
+                    if res1['status'] == 200:
+                        self.check_data = dict(res1['check_dict'])
+                        print(f"【用户{self.index}】【init】:初始化状态成功")
+                        return True
+                    if res1['status'] == 207:
+                        print(f"【用户{self.index}】【init】:{res1['warning']}")
+                        return False
                 else:
                     if maxretry >0:
                         print(f"【用户{self.index}】:初始化阅读后台检测状态失败")
@@ -350,12 +355,12 @@ class Gbyd:
         self.topicid=topicid
         self.cookie = ck
         self.wxpuser_uid = wxpuser_uid
-        await self.init_check_dict()
-        await self.valid_auth()
-        await self.user_info()
-        await self.do_read_task()
-        balance = await self.read_info()
-        await self.with_draw(balance=balance)
+        if await self.init_check_dict():
+            await self.valid_auth()
+            await self.user_info()
+            await self.do_read_task()
+            balance = await self.read_info()
+            await self.with_draw(balance=balance)
         await self.close()
         print(f"【用户{self.index}】【结束】:{'='*10}结束执行{'='*10}")
 

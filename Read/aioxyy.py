@@ -167,13 +167,17 @@ class template:
         print(f"[用户{self.index}][init]: 初始化阅读后台检测状态")
         url = self.aol + f'/check_dict?user={self.cookie}&value=0'
         res = await self.request(url)
-        if res and res['status'] == 200:
-            self.check_data = dict(res['check_dict'])
-            print(f"[用户{self.index}][init]: 初始化状态成功")
-        else:
-            print(f"[用户{self.index}][error]: 索取字典出现错误{res}一定是服务器的问题,休息5秒")
+        if not res:
+            print(f"[用户{self.index}][错误]: 索取字典出现错误{res}一定是服务器的问题,休息5秒")
             await asyncio.sleep(5)
             await self.init_chekc_dict()
+        if res['status'] == 200:
+            self.check_data = dict(res['check_dict'])
+            print(f"[用户{self.index}][init]: 初始化状态成功")
+            return True
+        if res['status'] == 207:
+            print(f"[用户{self.index}][init]: {res['warning']}")
+            return False
     
     async def get_read_state(self, max_retry=3):
         url = self.aol + f'/read/state?user={self.cookie}&value=0'
@@ -309,7 +313,7 @@ class template:
             async with session.get(url, headers=headers, allow_redirects=False) as response:
                     location = response.headers.get('Location')
                     if await self.varification(location):
-                        ts = random.randint(7, 15)
+                        ts = random.randint(7, 14)
                         print(f"[用户{self.index}][等待]: 休息{ts}秒")
                         await asyncio.sleep(ts)
                         await self.complete_task(uk, ts, origin)
@@ -452,10 +456,10 @@ class template:
         self.wxpuser_token = app_token
         self.wxpuser_uid = wx_uid
         self.cookie = f'ysmuid={ck}'
-        await self.init_chekc_dict()
-        await self.init_read()
-        await self.account()
-        await self.user_gold()
+        if await self.init_chekc_dict():
+            await self.init_read()
+            await self.account()
+            await self.user_gold()
         await self.close()
         print(f"[用户{self.index}][结束]============第{index}个账号===========")
 

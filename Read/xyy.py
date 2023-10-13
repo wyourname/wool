@@ -1,4 +1,5 @@
 """
+阅读走不走我的邀请都行,能用我的本就是给面子我了
 这是我的WXPUSER_TOKEN,你可以直接拿来用
 export WXPUSER_TOKEN="AT_aYF2532tqjrD4dX90OrJsuiflscRureX"
 微信打开链接:https://wxpusher.zjiecode.com/wxuser/?type=1&id=50341#/follow
@@ -8,8 +9,7 @@ export WXPUSER_UID="UID_xxxxx"
 微信阅读:小阅阅
 邀请链接:https://ot43562.tvtg.top:10259/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=ot43562.tvtg.top:10259&codeuserid=2&time=1696733275
 走不走我邀请都无所谓的,写代码只是爱好,你能用我写的本我就很开心了
-抓  wi29252.masx.top下的 cookie: ysmuid=xxxxx;
-只要xxxxxx
+抓  wi29252.masx.top下的 cookie: ysmuid=xxxxx;   只要xxxxxx
 export xyycks='xxxxxxxx@xxxxxxxx'
 export multi_xyy='true'  # 并发开关，可以不填
 你不想用我的WXPUSER_TOKEN,这是你的自行注册的教程
@@ -21,28 +21,31 @@ export WXPUSER_TOKEN='AT_XXXXXA...'
 export WXPUSER_TOPICID='1111111'   # 这个可以不填,不推荐这个
 export WXPUSER_UID='UID_xxxxx@UID_XXXX' WXPUSER_TOPICID和WXPUSER_UID二选一即可 WXPUSER_UID要和cookie数量一致,WXPUSER_UID可以重复填
 比如我2个微信阅读只想推送给一个微信 那就export WXPUSER_UID='UID_123456@UID_123456'
-
 前者群发，后者单推个人，推荐后者
 
-new Env('小阅阅阅读')
+new Env('小阅阅-异步并发')
+cron 40 9-21/2 * * *
 """
 
-import requests
-import time
-import random
-import os,threading,re
+
+import asyncio
+import aiohttp
 from typing import Optional, Dict 
 from urllib.parse import urlparse, parse_qs,quote
+import time,random,json,re
+import os
 
 
-class Xyy:
+class template:
     def __init__(self) -> None:
-        """
-        """
-        self.url = 'http://1695469567.snak.top/yunonline/'     
-             
-        
-    def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None,dtype='json'):
+        self.url = 'http://1695469567.snak.top/yunonline/'  
+        self.sessions = aiohttp.ClientSession()
+
+    
+    async def close(self):
+        await self.sessions.close()
+
+    async def request(self, url, method='get', data=None, add_headers: Optional[Dict[str, str]] = None, headers=None, dtype='json', max_retries=3):
         host = urlparse(url).netloc
         _default_headers = {
             'Host': host,
@@ -53,32 +56,158 @@ class Xyy:
             "Accept-Language": "zh-CN,zh",
             "cookie":f"{self.cookie}"
         }
+        # retries = 0
+        # while retries < max_retries:
         try:
             request_headers = headers or _default_headers
             if add_headers:
                 request_headers.update(add_headers)
-            # print(request_headers)
-            with requests.request(method, url, headers=request_headers, data=data) as response:
-                if response.status_code == 200:
+            async with getattr(self.sessions, method)(url, headers=request_headers, data=data) as response:
+                if response.status == 200:
                     if dtype == 'json':
-                        return response.json()  # 返回JSON数据
-                        
+                        return await response.json()
                     else:
-                        return response.text
+                        return await response.text()
                 else:
-                    print(f"请求失败状态码:{response.status_code}")
-                    return None
+                    print(f"[用户{self.index}]:请求失败状态码：{response.status}")
+                    # 可以选择休眠一段时间再重试，以避免频繁请求
+                    await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
         except Exception as e:
-            print(e)
-            return None
-        
-    def init_read(self):
-        url = 'http://1695471164.snak.top?cate=0'
-        res = self.request(url,dtype='text')
+            print(f"[用户{self.index}]:请求出现错误：{e}")
+            await asyncio.sleep(random.randint(3,5))  # 休眠1秒钟
+        # retries += 1
+        # print(f"无法完成请求，已达到最大重试次数 ({max_retries})")
+        # return None    
+
+    async def wxpuser(self,title,url):
+        content = '''
+            <!DOCTYPE html>
+            <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>TITLE</title>
+                    <style type=text/css>
+                        body {
+                            background-image: linear-gradient(120deg, #fdfbfb 0%, #a5d0e5 100%);
+                            background-size: 300%;
+                            animation: bgAnimation 6s linear infinite;
+                        }
+                        @keyframes bgAnimation {
+                            0% {
+                                background-position: 0% 50%;
+                            }
+                        
+                            50% {
+                                background-position: 100% 50%;
+                            }
+                        
+                            100% {
+                                background-position: 0% 50%;
+                            }
+                        }
+                        .title {
+                            text-align: center;
+                            font-size: 25px;
+                            display: block;
+                        }
+                        .button {
+                            background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
+                            text-align: center;
+                            transition: 0.5s;
+                            background-size: 200% auto;
+                            border-radius: 10px;
+                            width: 50%;
+                            margin: 25px auto;
+                        }
+                        .button a {
+                            padding: 15px 45px;
+                            display: block;
+                            text-decoration: none;
+                            color: white;
+                        }
+                        .tips {
+                            text-align: center;
+                            margin: auto;
+                            padding: 10px 0px;
+                            box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="title">用户a小阅阅,务必在一分半钟内点击阅读</div>
+                    <div class='button'><a href="self.aol/redirect?user=uuu&value=0&timestamp=tsone&wxurl=link">点击阅读检测文章</a></div>
+                    <div class="tips">
+                        <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
+                        <p>请留意消息推送时间点依照你的定时计划</p>
+                    </div><br>
+                </body>
+            </html>
+        '''
+        content = content.replace('用户a',f'用户{self.index}').replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
+        data = {
+            "appToken": self.wxpuser_token,
+            "content": content,
+            "summary": title,
+            "contentType": 2,
+        }
+        if self.topicid is not None:
+            data["topicIds"] = [int(self.topicid)]
+        if self.wxpuser_uid is not None:
+            data["uids"] = [self.wxpuser_uid]
+        # print(content)
+
+        wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
+        res = await self.request(wxpuser_url,'post',data=json.dumps(data), headers={"Content-Type":"application/json"})
+        if res['success'] == True:
+            print(f"[用户{self.index}][通知]: 检测发送成功！")
+        else:
+            print(f"[用户{self.index}][通知]: 发送失败！！！！！")
+    
+    async def init_chekc_dict(self):
+        print(f"[用户{self.index}][init]: 初始化阅读后台检测状态")
+        url = self.aol + f'/check_dict?user={self.cookie}&value=0'
+        res = await self.request(url)
         if not res:
-            print(f"【用户{self.index}】:初始化请求获取失败")
+            print(f"[用户{self.index}][错误]: 索取字典出现错误{res}一定是服务器的问题,休息5秒")
+            await asyncio.sleep(5)
+            await self.init_chekc_dict()
+        if res['status'] == 200:
+            self.check_data = dict(res['check_dict'])
+            print(f"[用户{self.index}][init]: 初始化状态成功")
+            return True
+        if res['status'] == 207:
+            print(f"[用户{self.index}][init]: {res['warning']}")
+            return False
+    
+    async def get_read_state(self, max_retry=3):
+        url = self.aol + f'/read/state?user={self.cookie}&value=0'
+        try:
+            async with aiohttp.ClientSession() as client:
+                async with client.get(url) as res:
+                    if res.status ==200:
+                        res1 = await res.json()
+                        if res1['status'] == True:
+                            return True
+                        else:
+                            if res1['status'] == '-1' and max_retry>0:
+                                await asyncio.sleep(5)
+                                await self.get_read_state(max_retry-1)
+                            return False
+                    else:
+                        return False
+        except Exception as e:
+            print(f"捕获到请求状态异常:{e}")
+            if max_retry == 0:
+                return False
+            await asyncio.sleep(3)
+            await self.get_read_state(max_retry-1)
+
+    async def init_read(self):
+        url = 'http://1695471164.snak.top?cate=0'
+        res = await self.request(url, dtype='text')
+        if res is None:
+            print(f"[用户{self.index}][init]: 初始化请求获取失败")
             return
-        # print(res)
         pattern = r'href="(http://[^"]+)"'
         match = re.search(pattern, res)
         pattern = r'href="([^"]+)"[^>]*>提现</a>'
@@ -93,70 +222,79 @@ class Xyy:
             self.request_id = query_params.get('request_id', [])[0] if 'request_id' in query_params else None
         else:
             print("No URL found")
-
-
-    def account(self):
-        add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie}
+    
+    async def account(self):
+        add_header = {'Accept':'application/json, text/javascript, */*; q=0.01'}
         ts = int(time.time()*1000)
         url = self.url + f'v1/gold?time={ts}&unionid={self.unionid}'
         # print(url)
-        res = self.request(url,add_headers=add_header)
-        if res and res['errcode'] == 0:
-            print(f"【用户{self.index}】:金币 {res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
+        res = await self.request(url, add_headers=add_header, dtype='text')
+        if res is None:
+            print(f"[用户{self.index}][错误]: 获取剩余文章出错了")
+            return 
+        res = json.loads(res)
+        if res['errcode'] == 0:
+            print(f"[用户{self.index}][信息]: 金币 {res['data']['day_gold']}, 剩余文章{res['data']['remain_read']}")
             if res['data']['remain_read'] >0:
-                print(f"【用户{self.index}】:获取开篇文章url")
-                time.sleep(3)
-                urla = self.start()
-                self.request(urla,dtype='text')
+                print(f"[用户{self.index}][信息]: 获取第1篇文章url")
+                await asyncio.sleep(3)
+                urla = await self.start()
+                await self.request(urla,dtype='text')
                 host = urlparse(urla).netloc
                 query_parameters = parse_qs(urlparse(urla).query)
                 uk = query_parameters.get('uk', [])[0] if query_parameters.get('uk') else None
                 if uk:
                     for i in range(1,res['data']['remain_read']+1):
-                        print(f"【用户{self.index}】【阅读】:第{i}篇文章")
-                        self.do_read_task(host,uk=uk)
+                        print(f"[用户{self.index}][阅读]: 第{i}篇文章,休息5秒起步")
+                        await asyncio.sleep(random.randint(5,7))
+                        await self.do_read_task(host, uk=uk)
                         if self.cont == False:
                             break
-                        time.sleep(random.randint(1,3))
+                        await asyncio.sleep(1)
                 else:
-                    print("没有发现uk")
+                    print(f"[用户{self.index}]: 没有发现可用的uk")
             else:
-                print(f"没有可阅读的文章了")
+                print(f"[用户{self.index}]: 今天没有可阅读的文章了")
         else:
-            print(f"出错了:{res}")
+            print(f"[用户{self.index}]: 出错了:{res}")
     
-    def start(self):
+    async def start(self):
         url = self.url+'v1/wtmpdomain'
         data = f'unionid={self.unionid}'
         add_headers = {"Content-Lenght": str(len(data)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":"http://1695469567.snak.top","Referer":"http://1695469567.snak.top/"}
-        res = self.request(url,'post',data=data, add_headers=add_headers)
+        res = await self.request(url, 'post', data=data, add_headers=add_headers, dtype='text')
+        if res is None:
+            print(f"[用户{self.index}][文章]: url加载不了")
+            return
+        res = json.loads(res)
         if res['errcode'] == 0:
-            print(f"【用户{self.index}】【文章】: url加载成功")
+            print(f"[用户{self.index}][文章]: url加载成功")
             return res['data']['domain']
         else:
             return None
-
     
-    def do_read_task(self,origin,uk):
+    async def do_read_task(self, origin, uk):
         url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/do_read?uk={uk}'
-        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
-        res = self.request(url,add_headers=add_header)
+        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site','Sec-Fetch-Mode': 'cors','Sec-Fetch-Dest': 'empty'}
+        res = await self.request(url,add_headers=add_header, dtype='text')
         if res:
+            res = json.loads(res)
             if res['errcode'] == 0:
                 link_url = res['data']['link']
-                time.sleep(random.randint(2,4))
-                self.jump(url=link_url,uk=uk,origin=origin)
+                await asyncio.sleep(random.randint(1,3))
+                await self.jump(url=link_url,uk=uk,origin=origin)
             else:
-                print(f"【用户{self.index}】【阅读】:{res['msg']}")
+                print(f"[用户{self.index}][阅读]: {res['msg']}")
                 if res['errcode'] == 407:
                     self.cont = False
         else:
-            print("发生了点意外,休息3秒")
-            time.sleep(3)
-            self.do_read_task(origin,uk)
+            print(f"[用户{self.index}][错误]: 请求阅读出现差错,休息5秒")
+            await asyncio.sleep(random.randint(5,6))
+            await self.do_read_task(origin,uk)
 
-
-    def jump(self,url, uk,origin):
+            
+    
+    async def jump(self,url, uk,origin):
         url = url+'?/'
         host = urlparse(url).netloc
         headers = {
@@ -171,209 +309,100 @@ class Xyy:
             "Accept-Encoding":"gzip, deflate",
             'Cookie': self.cookie
         }
-        res = requests.get(url,headers=headers,allow_redirects=False)
-        location= res.headers.get('Location')
-        if self.varification(location):
-            ts = random.randint(8,16)
-            print(f"【用户{self.index}】【等待】:休息{ts}秒")
-            time.sleep(ts)
-            self.complete_task(uk,ts,origin)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, allow_redirects=False) as response:
+                    location = response.headers.get('Location')
+                    if await self.varification(location):
+                        ts = random.randint(7, 14)
+                        print(f"[用户{self.index}][等待]: 休息{ts}秒")
+                        await asyncio.sleep(ts)
+                        await self.complete_task(uk, ts, origin)
 
-    def complete_task(self,uk,ts, origin):
-        tsp = int(time.time())
-        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
-        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}000'
-        res = self.request(url,add_headers=add_header)
-        if res and res['errcode'] == 0:
-            print(f"【用户{self.index}】【奖励】:{res['msg']}, +{res['data']['gold']}币,今天阅读数:{res['data']['day_read']},剩余{res['data']['remain_read']}")
-            if res['data']['gold'] == 0:
-                self.cont = False
-        else:
-            # print(res)
-            print(f"【用户{self.index}】:领取阅读币失败{res['msg']}")
-            if res['errcode'] == 407:
-                self.cont = False
-    
-    def varification(self,url):
+    async def varification(self,url):
         parsed_url = urlparse(url)
         query_parameters = parse_qs(parsed_url.query)
         if '__biz' in query_parameters:
             biz_value = query_parameters['__biz'][0]
             if biz_value in self.check_data:
-                print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]}公众号")
+                print(f"[用户{self.index}][文章]: 出现检测{self.check_data[biz_value][0]}公众号！")
                 encoded_url = quote(url)
-                self.wxpuser(f"小阅阅【用户{self.index}】检测,请90秒内点击阅读",encoded_url)
-                print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
+                await self.wxpuser(f"小阅阅[用户{self.index}]检测,请90秒内点击阅读",encoded_url)
+                print(f"[用户{self.index}][等待]: 请手动前往wxpuser点击阅读")
                 start_time = int(time.time())
                 while True:
-                    if self.get_read_state():
-                        print(f"【用户{self.index}】【阅读】:已手动阅读,休息3秒")
-                        time.sleep(3)
+                    if await self.get_read_state():
+                        print(f"[用户{self.index}][阅读]: 已手动阅读,休息3秒")
+                        await asyncio.sleep(3)
                         return True
                     if int(time.time()) - start_time > 90:
-                        print(f"【用户{self.index}】【阅读】:超时未阅读，终止本次阅读")
+                        print(f"[用户{self.index}][警告]: 超时未阅读，终止本次阅读")
                         self.cont = False
                         return False
-                    time.sleep(1)
+                    await asyncio.sleep(1)
             else:
-                print(f"【用户{self.index}】【文章】:没有检测")
+                print(f"[用户{self.index}][文章]: 没有检测")
                 return True
         else:
-            print(f"【用户{self.index}】【文章】:__biz parameter not found in the URL")
+            print(f"[用户{self.index}][文章]:__biz parameter not found in the URL")
             return True
-
-    def init_chekc_dict(self):
-        print(f"【用户{self.index}】:初始化阅读后台检测状态")
-        url = self.aol + f'/check_dict?user={self.cookie}&value=0'
-        res = self.request(url)
-        if res and res['status'] == 200:
-            self.check_data = dict(res['check_dict'])
-            print(f"【用户{self.index}】:初始化状态成功")
+        
+    async def complete_task(self,uk,ts, origin):
+        tsp = int(time.time())
+        add_header= {'origin': f'https://{origin}','accept':'application/json, text/javascript, */*; q=0.01','sec-fetch-site':'cross-site'}
+        url = f'https://nsr.zsf2023e458.cloud/yunonline/v1/get_read_gold?uk={uk}&time={ts}&timestamp={tsp}000'
+        res = await self.request(url,add_headers=add_header,dtype='text')
+        if res is None:
+            print(f"[用户{self.index}]: 请求领取阅读币失败{res}")
+            return
+        res = json.loads(res)
+        if res['errcode'] == 0:
+            print(f"[用户{self.index}][奖励]: {res['msg']}, +{res['data']['gold']}币,今天阅读数:{res['data']['day_read']},剩余{res['data']['remain_read']}")
+            if res['data']['gold'] == 0:
+                self.cont = False
         else:
-            print(f"【用户{self.index}】:索取字典出现错误{res},休息5秒")
-            time.sleep(5)
-            self.init_chekc_dict()
+            # print(res)
+            print(f"[用户{self.index}]: 领取阅读币失败原因是{res['msg']}")
+            if res['errcode'] == 407:
+                self.cont = False
     
-    def get_read_state(self, max_retry=3):
-        url = self.aol + f'/read/state?user={self.cookie}&value=0'
-        try:
-            res = requests.get(url)
-            if res.status_code == 200:
-                res = res.json()
-                if res['status'] == True:
-                    return True
-                else:
-                    if res['status'] == '-1' and max_retry>0:
-                        time.sleep(5)
-                        self.get_read_state(max_retry-1)
-                    return False
-            else:
-                return False
-        except Exception as e:
-            print(f"捕获到请求状态异常：{e}")
-            if max_retry == 0:
-                return False
-            time.sleep(3)
-            self.get_read_state(max_retry-1)
-
-    def wxpuser(self,title,url):
-        content = '''
-    <!DOCTYPE html>
-        <html lang="zh-CN">
-            <head>
-                <meta charset="UTF-8">
-                <title>TITLE</title>
-                <style type=text/css>
-                    body {
-                        background-image: linear-gradient(120deg, #fdfbfb 0%, #a5d0e5 100%);
-                        background-size: 300%;
-                        animation: bgAnimation 6s linear infinite;
-                    }
-                    @keyframes bgAnimation {
-                        0% {
-                            background-position: 0% 50%;
-                        }
-                    
-                        50% {
-                            background-position: 100% 50%;
-                        }
-                    
-                        100% {
-                            background-position: 0% 50%;
-                        }
-                    }
-                    .title {
-                        text-align: center;
-                        font-size: 25px;
-                        display: block;
-                    }
-                    .button {
-                        background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
-                        text-align: center;
-                        transition: 0.5s;
-                        background-size: 200% auto;
-                        border-radius: 10px;
-                        width: 50%;
-                        margin: 25px auto;
-                    }
-                    .button a {
-                        padding: 15px 45px;
-                        display: block;
-                        text-decoration: none;
-                        color: white;
-                    }
-                    .tips {
-                        text-align: center;
-                        margin: auto;
-                        padding: 10px 0px;
-                        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="title">用户a小阅阅,务必在一分半钟内点击阅读</div>
-                <div class='button'><a href="self.aol/redirect?user=uuu&value=0&timestamp=tsone&wxurl=link">点击阅读检测文章</a></div>
-                <div class="tips">
-                    <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
-                    <p>请留意消息推送时间点依照你的定时计划</p>
-                </div><br>
-            </body>
-        </html>
-        '''
-        content = content.replace('用户a',f'用户{self.index}').replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
-        data = {
-            "appToken": self.wxpuser_token,
-            "content": content,
-            "summary": title,
-            "contentType": 2,
-        }
-        if self.topicid is not None:
-            data["topicIds"] = [int(self.topicid)]
-        if self.wxpuser_uid is not None:
-            data["uids"] = [self.wxpuser_uid]
-        # print(content)
-        wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
-        res = requests.post(wxpuser_url, json=data).json()
-        if res['success'] == True:
-            print(f"【用户{self.index}】【通知】:检测发送成功！")
-        else:
-            print(f"【用户{self.index}】【通知】:发送失败！！！！！")
-
-    def user_gold(self):
+    async def user_gold(self):
         add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie,'Referer':'http://1695469567.snak.top/?cate=0'}
         ts = int(time.time()*1000)
         url = self.url + f'v1/gold?unionid={self.unionid}&time={ts}'
-        res = self.request(url,add_headers=add_header)
+        res = await self.request(url, add_headers=add_header,dtype='text')
+        if res is None:
+            print(f"[用户{self.index}]: 没有获取到提现所需要的内容{res}")
+            return
+        res = json.loads(res)
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
-            print(f"【用户{self.index}】【余额】:{current_gold}金币")
+            print(f"[用户{self.index}][余额]: {current_gold}金币")
             tag = 8000
             if int(current_gold) >= tag:
                 gold = int(int(current_gold)/1000)*1000
-                unionid,request_id = self.exchange()
+                unionid,request_id = await self.exchange()
                 if unionid and request_id:
                     # print(unionid,request_id)
-                    self.with_draw(unionid=unionid,request_id=request_id,gold=gold)
+                    await self.with_draw(unionid=unionid,request_id=request_id,gold=gold)
                 else:
-                    print(f"【用户{self.index}】:没有获取到提现的参数，待修复")
+                    print(f"[用户{self.index}]: 没有获取到提现的参数，待修复")
             else:
-                print(f"【用户{self.index}】【余额】:{current_gold} < {tag} ,不满足条件")
+                print(f"[用户{self.index}][余额]: {current_gold} < {tag} ,不满足条件")
         else:
-            print("出现一些问题")
-        
-    def exchange(self):
+            print(f"[用户{self.index}]: 出现一些问题")
+
+    async def exchange(self):
         host = urlparse(self.exchange_url).netloc
         add_headers = {"Referer":f'http://{host}/?cate=0'}
-        res = self.request(self.exchange_url,add_headers=add_headers,dtype='text')
-        if not res:
-            print(f"【用户{self.index}】【用户】:获取unionid, snid出错")
+        res = await self.request(self.exchange_url, add_headers=add_headers,dtype='text')
+        if res is None:
+            print(f"[用户{self.index}][用户]: 获取unionid, snid出错")
             return None,None
         pattern_unionid = r'var unionid = \'(.*?)\';'
         pattern_request_id = r'var request_id = "(.*?)";'
         match_unionid = re.search(pattern_unionid, res, re.DOTALL)
         match_request_id = re.search(pattern_request_id, res, re.DOTALL)
         # print(match_request_id,match_unionid)
-        
         if match_unionid:
             unionid_value = match_unionid.group(1)
         else:
@@ -386,48 +415,68 @@ class Xyy:
             return unionid_value,request_id_value
         else:
             return None,None
-
-
-    def with_draw(self, unionid,request_id,gold):
+        
+    async def with_draw(self, unionid, request_id, gold):
         host = urlparse(self.exchange_url).netloc
         url1 = f"http://{host}/yunonline/v1/user_gold"
         host = urlparse(self.exchange_url).netloc
         data1 = f"unionid={unionid}&request_id={request_id}&gold={gold}"
         add_headers = {"Content-Lenght": str(len(data1)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url,'X-Requested-With': 'XMLHttpRequest'}
-        res = self.request(url1,'post',data=data1,add_headers=add_headers)
+        res = await self.request(url1,'post',data=data1,add_headers=add_headers,dtype='text')
+        if res is None:
+            print(f"[用户{self.index}]: 请求提现出错{res}")
+            return
+        res = json.loads(res)
         if res['errcode'] == 0:
-            print(f"【用户{self.index}】【提现】:{res['data']['money']}元")
+            print(f"[用户{self.index}][提现]: {res['data']['money']}元")
             url2 = self.url+'v1/withdraw'
             data2 = f"unionid={unionid}&signid={request_id}&ua=2&ptype=0&paccount=&pname="
             {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url}
-            res = self.request(url2,'post', data=data2,add_headers=add_headers)
-            if res['errcode'] == 0:
-                print(f"【用户{self.index}】【提现】:{res['msg']}")
+            res1 = await self.request(url2,'post', data=data2,add_headers=add_headers,dtype='text')
+            if not res1:
+                print(f"[用户{self.index}]: 请求提现出错{res1}")
+                return
+            res1 = json.loads(res1)
+            if res1['errcode'] == 0:
+                print(f"[用户{self.index}][提现]: {res1['msg']}")
             else:
-                print(f"提现失败 原因:{res['msg']}")
+                print(f"[用户{self.index}][提现]: 失败,原因{res1['msg']}")
         else:
-            print(res)
-    
-    def run(self, index, ck, app_token, wx_uid, topicid, check_url, sleep_time=None):
+            print(f"[用户{self.index}]: 未知错误{res}")
+
+    async def run(self, index, ck:str, app_token, wx_uid, topicid, check_url, sleep_time=None):
         self.aol = check_url
         self.index = index
         if sleep_time:
-            print(f"【用户{self.index}】:随机休息{sleep_time}秒，我怕你点不了那么多")
-            time.sleep(sleep_time)
-        print(f"【用户{self.index}】【开始任务】: 第{index}个的账号")
+            print(f"[用户{self.index}][等待]: 随机休息{sleep_time}秒，我怕你点不了那么多")
+            await asyncio.sleep(sleep_time)
+        print(f"[用户{self.index}][开始]===========第{index}个的账号===========")
         self.cont = True
         self.topicid = topicid
         self.wxpuser_token = app_token
         self.wxpuser_uid = wx_uid
         self.cookie = f'ysmuid={ck}'
-        self.init_chekc_dict()
-        self.init_read()
-        self.account()
-        self.user_gold()
-        print(f"【用户{self.index}】【结束任务】: 第{index}个 账号")
+        if await self.init_chekc_dict():
+            await self.init_read()
+            await self.account()
+            await self.user_gold()
+        await self.close()
+        print(f"[用户{self.index}][结束]============第{index}个账号===========")
 
+async def test_api(url):
+    print("开始测试检测服务可用性")
+    api_url = url + '/read/announcement'
+    async with aiohttp.ClientSession() as client:
+        async with client.get(api_url) as res:
+            if res.status ==200:
+                result = await res.json()
+                print(f"[公告]:{result['messages']}")
+                return True
+            else:
+                return False
+    
 
-def check_env():
+async def check_env():
     wxpuser_token = os.getenv("WXPUSER_TOKEN")
     topicid = os.getenv("WXPUSER_TOPICID")
     wxpuser_uid = os.getenv("WXPUSER_UID")
@@ -453,24 +502,12 @@ def check_env():
         exit()
     return wxpuser_token, topicid, wxpuser_uid.split('@'), correct_data
 
-
-def test_api(url):
-    print("开始测试检测服务可用性")
-    api_url = url + '/read/announcement'
-    res = requests.get(api_url)
-    if res.status_code == 200:
-        result = res.json()
-        print(f"【公告】:{result['messages']}")
-        return True
-    else:
-        return False
-
-
-def main():
-    apptoken, topicid, wx_uids, cks_list = check_env()  # 这里顺序不能搞乱了
+async def main():
+    apptoken, topicid, wx_uids, cks_list = await check_env()
+    # 检查是否存在环境变量 multi
     aol = []
     for url in ['http://api.doudoudou.fun']:
-        if test_api(url):
+        if await test_api(url):
             print(f"{url} 联通性测试通过")
             aol.append(url)
     if len(aol) == 0:
@@ -479,23 +516,17 @@ def main():
     random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
     from random import choice
     # 检查是否启用并发
-    multi = os.environ.get("multi_xyy")
-    if multi and multi.lower() == "true":
-        threads = []
-        for index, ck in enumerate(cks_list):
-            xyy = Xyy()
-            thread = threading.Thread(target=xyy.run, args=(index + 1, ck, apptoken, wx_uids[index], topicid, choice(aol), random_sleep_list[index]))
-            threads.append(thread)
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-    else:
-        for index, ck in enumerate(cks_list):
-            xyy = Xyy()
-            xyy.run(index + 1, ck, apptoken, wx_uids[index], topicid, choice(aol))
-
-
+    use_concurrency = os.environ.get('multi_xyy', 'false').lower() == 'true'
+    tasks = []
+    for index, ck in enumerate(cks_list):
+        abc = template()
+        task = abc.run(index + 1, ck, apptoken, wx_uids[index], topicid, choice(aol), random_sleep_list[index])
+        tasks.append(task)
+    if use_concurrency:  # 如果是true 那么就执行并发
+        await asyncio.gather(*tasks)  # 并发执行任务
+    else:  # 如果是false 那么就串行执行
+        for task in tasks:
+            await task  
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

@@ -167,9 +167,13 @@ class Gbyd:
 
         if res['code'] == 0:
             print(f"【用户{self.index}】【奖励】:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
+            if int(res['data']['gain']) < 50:
+                print(f"【用户{self.index}】【警告】:单价低于50币,低收入状态,停止执行")
+                return False
             return True
         else:
             print(f"【用户{self.index}】【阅读】:失败 {res}")
+            return False
             
 
 
@@ -395,28 +399,27 @@ async def check_env():
     return cks.split("@") , wxpuser_uid.split('@'), topicid, wxpuser_token
 
 async def main():
-    aol = []
-    for url in ['http://api.doudoudou.fun']:
-        if await test_api(url):
-            print(f"{url} 联通性测试通过")
-            aol.append(url)
-    if len(aol) == 0:
-        print("当前检测服务不可用,请稍后再试")
+    api_url = 'http://api.doudoudou.fun'
+    if await test_api(api_url):
+        print(f"api:{api_url}服务当前可用")
+    else:
+        print(f"api:{api_url}服务当前不可用,可能服务器断电、断网了,稍后再来吧")
         exit()
     cks_list, wx_uids,topicid,wxpuser_token = await check_env()
     use_concurrency = os.environ.get('multi_gbyd', 'false').lower() == 'true'
-    from random import choice
+    from random import choice,shuffle
+    shuffle(cks_list)
     if use_concurrency:
         tasks = []
         random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
         for index, ck in enumerate(cks_list):
             abc = Gbyd()
-            tasks.append(abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=choice(aol),sleep_time=random_sleep_list[index]))
+            tasks.append(abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=api_url,sleep_time=random_sleep_list[index]))
         await asyncio.gather(*tasks)
     else:
         for index, ck in enumerate(cks_list):
             abc = Gbyd()
-            await abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=choice(aol))
+            await abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=api_url)
   
 
 if __name__ == '__main__':

@@ -186,6 +186,7 @@ class Gbyd:
             if biz_value in self.check_data:
                 print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
+                print(encoded_url)
                 await self.wxpuser(f"钢镚【用户{self.index}】检测,请90秒内点击阅读",encoded_url)
                 print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
                 start_time = int(time.time())
@@ -284,7 +285,7 @@ class Gbyd:
             </body>
         </html>
         '''
-        content = content.replace('用户a',f'用户{self.index}').replace('self.aol',self.aol).replace('uuu',self.cookie).replace('link',url).replace('tsone',str(int(time.time())))
+        content = content.replace('用户a',f'用户{self.index}').replace('self.aol',self.aol).replace('uuu',quote(self.cookie)).replace('link',url).replace('tsone',str(int(time.time())))
         data = {
             "appToken": self.wxpuser_token,
             "content": content,

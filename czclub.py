@@ -77,12 +77,12 @@ class template:
             print(f"[用户{self.index}]:今天尚未签到")
             await self.sign_in()
             return
-        if 'details' in res:
-            if today_timestamp <= int(res['details'][-1]['lotteryTime']/1000):
-                print(f"[用户{self.index}]:今天已经签到了")
-            else:
-                print(f"[用户{self.index}]:今天尚未签到")
-                await self.sign_in()
+        # if 'details' in res:
+        #     if today_timestamp <= int(res['details'][-1]['lotteryTime']/1000):
+        #         print(f"[用户{self.index}]:今天已经签到了")
+        #     else:
+        #         print(f"[用户{self.index}]:今天尚未签到")
+        await self.sign_in()
 
     
     async def sign_in(self):

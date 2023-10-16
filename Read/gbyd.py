@@ -371,14 +371,17 @@ class Gbyd:
 async def test_api(url):
     print("开始测试检测服务可用性")
     api_url = url + '/read/announcement'
-    async with aiohttp.ClientSession() as client:
-        async with client.get(api_url) as res:
-            if res.status ==200:
-                result = await res.json()
-                print(f"【公告】:{result['messages']}")
-                return True
-            else:
-                return False
+    try:
+        async with aiohttp.ClientSession() as client:
+            async with client.get(api_url) as res:
+                if res.status ==200:
+                    result = await res.json()
+                    print(f"[公告]:{result['messages']}")
+                    return True
+                else:
+                    return False
+    except Exception as e:
+        print(f"出错了,稍后再来:{e}")
 
 async def check_env():
     wxpuser_token = os.getenv("WXPUSER_TOKEN")

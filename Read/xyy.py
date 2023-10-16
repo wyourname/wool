@@ -323,6 +323,7 @@ class template:
         query_parameters = parse_qs(parsed_url.query)
         if '__biz' in query_parameters:
             biz_value = query_parameters['__biz'][0]
+            print(f"[用户{self.index}]: {biz_value}")
             if biz_value in self.check_data:
                 print(f"[用户{self.index}][文章]: 出现检测{self.check_data[biz_value][0]}公众号！")
                 encoded_url = quote(url)
@@ -505,22 +506,22 @@ async def check_env():
 async def main():
     apptoken, topicid, wx_uids, cks_list = await check_env()
     # 检查是否存在环境变量 multi
-    aol = []
-    for url in ['http://api.doudoudou.fun']:
-        if await test_api(url):
-            print(f"{url} 联通性测试通过")
-            aol.append(url)
-    if len(aol) == 0:
-        print("当前检测服务不可用,请稍后再试")
+    api_url = 'http://api.doudoudou.fun'
+    if await test_api(api_url):
+        print(f"api:{api_url}服务当前可用")
+    else:
+        print(f"api:{api_url}服务当前不可用,可能服务器断电、断网了,稍后再来吧")
         exit()
+    mapping = dict(zip(cks_list, wx_uids))
     random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
-    from random import choice
-    # 检查是否启用并发
+    from random import shuffle
+    shuffle(cks_list)
+    wx_uids = [mapping[item] for item in cks_list]
     use_concurrency = os.environ.get('multi_xyy', 'false').lower() == 'true'
     tasks = []
     for index, ck in enumerate(cks_list):
         abc = template()
-        task = abc.run(index + 1, ck, apptoken, wx_uids[index], topicid, choice(aol), random_sleep_list[index])
+        task = abc.run(index + 1, ck, apptoken, wx_uids[index], topicid, api_url, random_sleep_list[index])
         tasks.append(task)
     if use_concurrency:  # 如果是true 那么就执行并发
         await asyncio.gather(*tasks)  # 并发执行任务

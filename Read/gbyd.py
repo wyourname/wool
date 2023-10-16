@@ -406,9 +406,11 @@ async def main():
         print(f"api:{api_url}服务当前不可用,可能服务器断电、断网了,稍后再来吧")
         exit()
     cks_list, wx_uids,topicid,wxpuser_token = await check_env()
+    mapping = dict(zip(cks_list, wx_uids))
     use_concurrency = os.environ.get('multi_gbyd', 'false').lower() == 'true'
-    from random import choice,shuffle
+    from random import shuffle
     shuffle(cks_list)
+    wx_uids = [mapping[item] for item in cks_list]
     if use_concurrency:
         tasks = []
         random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]

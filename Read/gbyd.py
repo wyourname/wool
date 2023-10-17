@@ -304,7 +304,7 @@ class Gbyd:
             print(f"【用户{self.index}】【通知】:发送失败！！！！！") 
 
     async def get_read_state(self,max_retry=3):
-        url = self.aol + f'/read/state?user={self.cookie}&value=1'
+        url = self.aol + f'/read/state?user={quote(self.cookie)}&value=1'
         try:
             async with aiohttp.ClientSession() as client:
                 async with client.get(url) as res:
@@ -328,7 +328,7 @@ class Gbyd:
         
     async def init_check_dict(self, maxretry=3):
         print(f"【用户{self.index}】:初始化阅读后台检测状态")
-        url = self.aol + f'/check_dict?user={self.cookie}&value=1'
+        url = self.aol + f'/check_dict?user={quote(self.cookie)}&value=1'
         async with aiohttp.ClientSession() as client:
             async with client.get(url) as res:
                 if res.status ==200:

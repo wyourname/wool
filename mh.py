@@ -2,7 +2,7 @@
 new Env("密盒")
 cron: 1 8 * * *
 export mhcks='sessionid#提现目标#支付宝号#名字'
-邀请: https://download.chiguavod.com/#/?inviteCode=Z1X649
+https://download.chiguavod.com/
 
 """
 

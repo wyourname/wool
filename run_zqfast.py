@@ -5,6 +5,8 @@
 # 抓userinfo? 只要问号后面的参数就行 
 # 变量    自动提现： 1是微信 0是支付宝，不填不行,多账户就@分开
 # export zqurl='zzzzzz#1@cccccccccc#0'
+# 如果想提高一点收益可以 export zq_open='true' 可不填
+# github上的so为旧版
 
 
 import asyncio
@@ -42,11 +44,11 @@ def check_so_file(filename, py_v, cpu_info):
 def download_so_file(filename, py_v, cpu_info):
     file_base_name = os.path.splitext(filename)[0]
     if cpu_info in ['aarch64', 'armv8']:
-        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
+        url = f'https://files.doudoudou.fun/?f=/script/others/{file_base_name}_3{py_v}_aarch64.so'
     if cpu_info == 'x86_64':
-        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'
+        url = f'https://files.doudoudou.fun/?f=/script/others/{file_base_name}_3{py_v}_{cpu_info}.so'
     # print(github_url)
-    result = subprocess.run(['curl', '-o', filename, github_url])
+    result = subprocess.run(['curl', '-o', filename, url])
     if result.returncode == 0:
         print(f"下载完成：{filename},调用check_so_file funtion")
         check_so_file(filename,py_v,cpu_info)

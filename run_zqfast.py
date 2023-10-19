@@ -7,6 +7,8 @@
 # export zqurl='zzzzzz#1@cccccccccc#0'
 # 如果想提高一点收益可以 export zq_open='true' 可不填
 # github上的so为旧版
+# new Env("中青快应用")
+# cron: 1 12 * * *
 
 
 import asyncio

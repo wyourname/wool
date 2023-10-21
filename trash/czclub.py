@@ -1,5 +1,5 @@
 """
-
+不用玩了
 new Env("纯甄粉俱乐部")
 cron: 8 8 * * *
 export czcks='authorization#serialid'

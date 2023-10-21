@@ -1,4 +1,4 @@
-# 中青快应用 邀请code http://kyy.baertt.com/h5/fastAppWeb/invite/invite_ground_2.html?share_uid=1040776341&channel=c8000
+# 中青快应用 邀请code https://user.youth.cn/h5/fastAppWeb/invite/invite_ground_2.html?share_uid=1038191728&channel=c8000&nickname=%E5%91%A8%E6%A0%91%E4%BA%BA%E9%B2%81%E8%BF%85&avatar=http%3A%2F%2Fres.youth.cn%2Favatar_202203_28_28n_6241677754c3f1038191728m.jpg&v=1697879197
 # author @wangquanfugui233
 # cron 一天一次 一次3毛，自动提现 微信支付宝都可以
 # python3.10.X 64位可以运行，别的没适配

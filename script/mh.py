@@ -50,8 +50,7 @@ def run_command(command):
         if "%" in line:
             print(line)
     process.wait()
-    return 0
-
+    return process.returncode
 
 def download_so_file(filename, py_v, cpu_info):
     file_base_name = os.path.splitext(filename)[0]

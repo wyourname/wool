@@ -1,13 +1,11 @@
 """
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
-new Env("57box")
-app 57box
-export boxcks='手机号#密码@手机号#密码' 不开盲盒的填法
-export boxcks='手机号#密码#1@手机号#密码#1' 开盲盒的填法
-手机号#密码#1@手机号#密码#1 只认1 填其他内容不开
-# 顺序不要颠倒
-我的本大部分的并发格式 box_multi='true'
-
+new Env("枫以影视")
+app 枫以影视
+export fycks='整条url' 
+export fy_delay='true' 怕黑号看视频加延迟的开关,ture为打开延迟 不填默认关闭
+大部分的并发格式 fy_multi='true'
+cron: 8 8 * * *
 """
 import asyncio
 import platform
@@ -34,8 +32,8 @@ def check_environment(file_name):
 def check_so_file(filename, py_v, cpu_info):
     if os.path.exists(filename):
         print(f"{filename} 存在")
-        import box_57 as box
-        asyncio.run(box.main())
+        import fyys as fy
+        asyncio.run(fy.main())
     else:
         print(f"不存在{filename}文件,准备下载文件")
         download_so_file(filename, py_v, cpu_info)
@@ -73,4 +71,4 @@ def download_so_file(filename, py_v, cpu_info):
         print(f"下载失败：{filename}")
 
 if __name__ == '__main__':
-    check_environment('box_57.so')
+    check_environment('fyys.so')

@@ -39,19 +39,36 @@ def check_so_file(filename, py_v, cpu_info):
         import nhy as n
         asyncio.run(n.main())
     else:
-        print(f"{filename} 不存在,前往下载文件")
+        print(f"不存在{filename}文件,准备下载文件")
         download_so_file(filename, py_v, cpu_info)
+
+def run_command(command):
+    process = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, 
+        text=True  
+    )
+    for line in process.stdout:
+        line = line.strip()
+        if "%" in line:
+            print(line)
+    process.wait()
+    return 0
 
 
 def download_so_file(filename, py_v, cpu_info):
     file_base_name = os.path.splitext(filename)[0]
     if cpu_info in ['aarch64', 'armv8']:
-        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
+        url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
     if cpu_info == 'x86_64':
-        github_url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'
+        url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'
     # print(github_url)
-    result = subprocess.run(['curl', '-o', filename, github_url])
-    if result.returncode == 0:
+    # 您的命令，使用 -# 参数显示下载进度
+    command = ['curl', '-#', '-o', filename, url]
+    # 执行命令并处理输出
+    result = run_command(command)
+    if result == 0:
         print(f"下载完成：{filename},调用check_so_file funtion")
         check_so_file(filename,py_v,cpu_info)
     else:

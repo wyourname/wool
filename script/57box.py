@@ -3,8 +3,8 @@
 new Env("57box")
 app 57box
 export boxcks='手机号#密码@手机号#密码' 不开盲盒的填法
-export boxcks='手机号#密码#1@手机号#密码#1' 开盲盒的填法
-手机号#密码#1@手机号#密码#1 只认1 填其他内容不开
+export boxcks='手机号#密码#1@手机号#密码#boxid' 开盲盒的填法
+手机号#密码#1@手机号#密码#boxid 只认存在的boxid 填其他内容不开,boxid运行脚本可看见 
 # 顺序不要颠倒
 我的本大部分的并发格式 box_multi='true'
 

@@ -2,8 +2,8 @@
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
 new Env("枫以影视")
 app 枫以影视
-export fycks='整条url' 
-export fy_delay='true' 怕黑号看视频加延迟的开关,ture为打开延迟 不填默认关闭
+export fycks='整条url' # tv.palmestore.com 域名来的
+export fy_delay='true' 怕黑号看视频加延迟的开关,ture为打开延迟 不填默认关闭,打开将耗费很长时间
 大部分的并发格式 fy_multi='true'
 cron: 8 8 * * *
 """

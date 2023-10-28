@@ -2,7 +2,6 @@
 阅读走不走我的邀请都行,能用我的本就是给面子我了
 微信阅读:钢镚
 这是我的WXPUSER_TOKEN,你可以直接拿来用
-export WXPUSER_TOKEN="AT_aYF2532tqjrD4dX90OrJsuiflscRureX"
 微信打开链接:https://wxpusher.zjiecode.com/wxuser/?type=1&id=50341#/follow
 关注wxpuser app 订阅公众号就能获取你的uid
 export WXPUSER_UID="UID_xxxxx"
@@ -11,8 +10,19 @@ export WXPUSER_UID="UID_xxxxx"
 链接:http://2488240.ceu.gbl.6rt3sup6c4iy.cloud/?p=2488240
 抓 2488240.ceu.. 下的 cookie: gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx,
 把cookie完整复制下来就行
-export gbydcks='cookie1@cookie2' 单账号就export gbydcks='cookie'就行了
-export multi_gbyd='true'  # 并发开关，可以不填
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!【cookie不用你裁剪之类的,你就直接复制粘贴就行了】！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+第一步配置文件填写:export WXPUSER_TOKEN="AT_aYF2532tqjrD4dX90OrJsuiflscRureX"
+第二部配置文件填写:export WXPUSER_UID="你的uid"  # 多号就export WXPUSER_UID="你的uid1@你的uid2@...."  uid获取方式看上面！！！！！！
+第三步配置文件填写:export gbydcks='gfsessionid=............' 
+# 多号就 export gbydcks='gfsessionid=...........@gfsessionid=.........'
+cookie就是你的完整cookie都行!!!!!! 
+
+
+export multi_gbyd='true'  # 并发开关，可以不填，不填就默认不并发！！！！！
+并发两个账户间隔延迟 export gbyd_delay='0' 0代表 间隔延迟0-15秒 10代表间隔10-25秒 不填该变量默认 延迟30-45秒
+
+
 你不想用我的WXPUSER_TOKEN,这是你的自行注册的教程
 如果你是让别人代挂的,你可以让代挂的给你扫一下wxpuser的码,再把uid发送给他就行
 必要推送:WXPUSER  前往网站https://wxpusher.zjiecode.com/docs/#/?id=%e6%b3%a8%e5%86%8c%e5%b9%b6%e4%b8%94%e5%88%9b%e5%bb%ba%e5%ba%94%e7%94%a8
@@ -40,8 +50,13 @@ import os
 
 
 class Gbyd:
-    def __init__(self) -> None:
+    def __init__(self, check_url:str, index:int, wxpuser_token:str, topicid:str, wxpuser_uid:str) -> None:
         self.sessions = aiohttp.ClientSession()
+        self.aol = check_url
+        self.index = index
+        self.wxpuser_token = wxpuser_token
+        self.topicid=topicid
+        self.wxpuser_uid = wxpuser_uid
         self.url = 'http://2478987.hqtu4dwdhi2pet.xcgh.qb33ict7e0mj.cloud/'
 
     async def close(self):
@@ -92,10 +107,10 @@ class Gbyd:
             print("valid 的方法错误,联系开发者吧")
             return 
         if res['code'] == 0:
-            print(f"【用户{self.index}】【登录】:模拟登录{res['message']}")
+            print(f"[用户{self.index}][登录]:模拟登录{res['message']}")
             await asyncio.sleep(3)
         else:
-            print(f"【用户{self.index}】【登录】:模拟登录{res['message']}")
+            print(f"[用户{self.index}][登录]:模拟登录{res['message']}")
 
     async def user_info(self):
         ts = int(time.time())
@@ -106,11 +121,13 @@ class Gbyd:
         res1 = await self.request(url1)
         if res:
             if res['code'] == 0:
-                print(f"【用户{self.index}】【信息】:id {res['data']['uid']}")
-                print(f"【用户{self.index}】【通知】:{res1['data']['msg']}")
+                print(f"[用户{self.index}][信息]:id {res['data']['uid']}")
+                print(f"[用户{self.index}]==========>变更为:[用户{res['data']['uid']}]")
+                self.index = str(res['data']['uid'])
+                print(f"[用户{self.index}][通知]:{res1['data']['msg']}")
                 await self.read_info()
             else:
-                print(f"【用户{self.index}】【错误】:获取用户信息失败 {res}")
+                print(f"[用户{self.index}][错误]:获取用户信息失败 {res}")
         else:
             print("请求出现了问题，稍后再来看吧")
     
@@ -122,7 +139,7 @@ class Gbyd:
         res = await self.request(url)
         if res:
             if res['code'] == 0:
-               print(f"【用户{self.index}】【收入】:今天收入 {res['data']['gold']}, 阅读 {res['data']['read']},当前余额 {res['data']['remain']}金币") 
+               print(f"[用户{self.index}][收入]:今天收入 {res['data']['gold']}, 阅读 {res['data']['read']},当前余额 {res['data']['remain']}金币") 
                return res['data']['remain']
         else:
             print("请求出现了问题,无法获得信息")
@@ -130,7 +147,7 @@ class Gbyd:
     async def do_read_task(self):
         await asyncio.sleep(random.randint(2,4))
         for i in range(1,31):
-            print(f"【用户{self.index}】【阅读】:开始第{i}次阅读")
+            print(f"[用户{self.index}][阅读]:开始第{i}次阅读")
             ts = int(time.time())
             sign = await self.create_sign(ts)
             url = self.url + f"read/task?time={ts}&sign={sign}"
@@ -139,7 +156,7 @@ class Gbyd:
                 link = res['data']['link']
                 if await self.varification(link):
                     random_sleep = random.randint(7,13)
-                    print(f"【用户{self.index}】【等待】:{random_sleep}秒")
+                    print(f"[用户{self.index}][等待]:{random_sleep}秒")
                     await asyncio.sleep(random_sleep)
                     ts1 = int(time.time())
                     url1 = self.url+ f"user/msg?time={ts1}&sign={sign}"
@@ -151,7 +168,7 @@ class Gbyd:
                     break
                 await asyncio.sleep(random.randint(1,3))
             else:
-                print(f"【用户{self.index}】【结果】:{res['message']}")
+                print(f"[用户{self.index}][结果]:{res['message']}")
                 break
 
     async def complete_task(self):
@@ -162,17 +179,17 @@ class Gbyd:
         add_header = {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8','Origin': f'http://{urlparse(url).netloc}','Content-Length': str(len(data))}
         res = await self.request(url,'post', data=data, add_headers=add_header)
         if not res:
-            print(f"【用户{self.index}】【错误】:发生意外 {res}")
+            print(f"[用户{self.index}][错误]:发生意外 {res}")
             await self.complete_task()
 
         if res['code'] == 0:
-            print(f"【用户{self.index}】【奖励】:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
+            print(f"[用户{self.index}][奖励]:获得{res['data']['gain']} 已读{res['data']['read']}篇,当前金币 {res['data']['remain']}")
             if int(res['data']['gain']) < 50:
-                print(f"【用户{self.index}】【警告】:单价低于50币,低收入状态,停止执行")
+                print(f"[用户{self.index}][警告]:单价低于50币,低收入状态,停止执行")
                 return False
             return True
         else:
-            print(f"【用户{self.index}】【阅读】:失败 {res}")
+            print(f"[用户{self.index}][阅读]:失败 {res}")
             return False
             
 
@@ -184,22 +201,22 @@ class Gbyd:
         if '__biz' in query_parameters:
             biz_value = query_parameters['__biz'][0]
             if biz_value in self.check_data:
-                print(f"【用户{self.index}】【检测】: {self.check_data[biz_value][0]}公众号")
+                print(f"[用户{self.index}][检测]:{self.check_data[biz_value][0]}公众号")
                 encoded_url = quote(url)
-                await self.wxpuser(f"钢镚【用户{self.index}】检测,请90秒内点击阅读",encoded_url)
-                print(f"【用户{self.index}】【等待】:请手动前往wxpuser点击阅读")
+                await self.wxpuser(f"钢镚[用户{self.index}]检测,请90秒内点击阅读",encoded_url)
+                print(f"[用户{self.index}][等待]:请手动前往wxpuser点击阅读")
                 start_time = int(time.time())
                 while True:
                     if await self.get_read_state():
-                        print(f"【用户{self.index}】【阅读】:已手动阅读,稍微延迟3秒钟")
+                        print(f"[用户{self.index}][阅读]:已手动阅读,稍微延迟3秒钟")
                         await asyncio.sleep(3)
                         return True
                     if int(time.time())- start_time > 90:
-                        print(f"【用户{self.index}】【警告】:90秒到啦,终止本次阅读")
+                        print(f"[用户{self.index}][警告]:90秒到啦,终止本次阅读")
                         return False
                     time.sleep(1)
             else:
-                print(f"【用户{self.index}】【文章】:没有检测")
+                print(f"[用户{self.index}][文章]:没有检测")
                 return True
         else:
             print("__biz parameter not found in the URL")
@@ -211,13 +228,13 @@ class Gbyd:
             url = self.url + f"withdraw/wechat?time={ts}&sign={sign}"
             res = await self.request(url)
             if not res:
-                print(f"【用户{self.index}】【提现】:提现出错了")
+                print(f"[用户{self.index}][提现]:提现出错了")
             if res['code'] == 0:
-                print(f"【用户{self.index}】【提现】:{res['message']}")
+                print(f"[用户{self.index}][提现]:{res['message']}")
             else:
-                print(f"【用户{self.index}】【提现】:{res['message']}")  
+                print(f"[用户{self.index}][提现]:{res['message']}")  
         else:
-            print(f"【用户{self.index}】【提现】: 未达到提现金额，暂不提现")
+            print(f"[用户{self.index}][提现]: 未达到提现金额，暂不提现")
 
 
     async def wxpuser(self,title,url):
@@ -275,7 +292,7 @@ class Gbyd:
                 </style>
             </head>
             <body>
-                <div class="title">用户a钢镚阅读检测,务必在一分钟内点击阅读</div>
+                <div class="title">用户a钢镚阅读检测,务必在90s内点击阅读</div>
                 <div class='button'><a href="self.aol/redirect?user=uuu&value=1&timestamp=tsone&wxurl=link">点击阅读检测文章</a></div>
                 <div class="tips">
                     <p>如果错过时间未能阅读, 会导致当天收益下降或者没有收益</p>
@@ -299,9 +316,9 @@ class Gbyd:
         wxpuser_url = 'http://wxpusher.zjiecode.com/api/send/message'
         res = await self.request(wxpuser_url,'post',data=json_data, headers={"Content-Type":"application/json"})
         if res['success'] == True:
-            print(f"【用户{self.index}】【通知】:检测发送成功！")
+            print(f"[用户{self.index}][通知]:检测发送成功！")
         else:
-            print(f"【用户{self.index}】【通知】:发送失败！！！！！") 
+            print(f"[用户{self.index}][通知]:发送失败！！！！！") 
 
     async def get_read_state(self,max_retry=3):
         url = self.aol + f'/read/state?user={quote(self.cookie)}&value=1'
@@ -327,7 +344,7 @@ class Gbyd:
             await self.get_read_state(max_retry-1)
         
     async def init_check_dict(self, maxretry=3):
-        print(f"【用户{self.index}】:初始化阅读后台检测状态")
+        print(f"[用户{self.index}][init]:开始初始化阅读后台检测状态")
         url = self.aol + f'/check_dict?user={quote(self.cookie)}&value=1'
         async with aiohttp.ClientSession() as client:
             async with client.get(url) as res:
@@ -335,30 +352,25 @@ class Gbyd:
                     res1 = await res.json()
                     if res1['status'] == 200:
                         self.check_data = dict(res1['check_dict'])
-                        print(f"【用户{self.index}】【init】:初始化状态成功")
+                        print(f"[用户{self.index}][init]:初始化状态成功")
                         return True
                     if res1['status'] == 207:
-                        print(f"【用户{self.index}】【init】:{res1['warning']}")
+                        print(f"[用户{self.index}][init]:{res1['warning']}")
                         return False
                 else:
                     if maxretry >0:
-                        print(f"【用户{self.index}】:初始化阅读后台检测状态失败")
+                        print(f"[用户{self.index}][init]:初始化阅读后台检测状态失败")
                         await self.init_check_dict(maxretry-1)
                     else:
                         exit()
 
 
-    async def process_account(self,index, ck, wxpuser_uid, wxpuser_token, topicid , check_url, sleep_time=None):
-        self.aol = check_url
-        self.index = index
-        if sleep_time:
-            print(f"【用户{self.index}】:随机休息{sleep_time}秒，我怕你点不了那么多")
-            await asyncio.sleep(sleep_time)
-        print(f"【用户{self.index}】【开始】:{'='*10}执行任务{'='*10}")
-        self.wxpuser_token = wxpuser_token
-        self.topicid=topicid
+    async def process_account(self,ck,sleep_time=None):
         self.cookie = ck
-        self.wxpuser_uid = wxpuser_uid
+        if sleep_time:
+            print(f"[用户{self.index}][等待]:{sleep_time}秒,加点延迟是最好的")
+            await asyncio.sleep(sleep_time)
+        print(f"[用户{self.index}][开始]:{'='*15}执行任务{'='*15}")
         if await self.init_check_dict():
             await self.valid_auth()
             await self.user_info()
@@ -366,7 +378,7 @@ class Gbyd:
             balance = await self.read_info()
             await self.with_draw(balance=balance)
         await self.close()
-        print(f"【用户{self.index}】【结束】:{'='*10}结束执行{'='*10}")
+        print(f"[用户{self.index}][结束]:{'='*15}结束执行{'='*15}")
 
 async def test_api(url):
     print("开始测试检测服务可用性")
@@ -416,15 +428,16 @@ async def main():
     wx_uids = [mapping[item] for item in cks_list]
     if use_concurrency:
         tasks = []
-        random_sleep_list = [i * random.randint(50, 65) for i in range(len(cks_list))]
+        delay = os.getenv("gbyd_delay",'30')
+        random_sleep_list = [i * random.randint(int(delay), int(delay)+15) for i in range(len(cks_list))]
         for index, ck in enumerate(cks_list):
-            abc = Gbyd()
-            tasks.append(abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=api_url,sleep_time=random_sleep_list[index]))
+            abc = Gbyd(api_url, index+1, wxpuser_token, topicid, wxpuser_uid=wx_uids[index])
+            tasks.append(abc.process_account(ck, sleep_time=random_sleep_list[index]))
         await asyncio.gather(*tasks)
     else:
         for index, ck in enumerate(cks_list):
-            abc = Gbyd()
-            await abc.process_account(index+1, ck, wx_uids[index], wxpuser_token=wxpuser_token, topicid=topicid, check_url=api_url)
+            abc = Gbyd(api_url, index+1, wxpuser_token, topicid, wxpuser_uid=wx_uids[index])
+            await abc.process_account(ck)
   
 
 if __name__ == '__main__':

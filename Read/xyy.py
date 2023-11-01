@@ -406,7 +406,7 @@ class template:
         if res['errcode'] == 0:
             current_gold = res['data']['last_gold']
             print(f"[用户{self.index}][余额]: {current_gold}金币")
-            tag = 8000
+            tag = 6000
             if int(current_gold) >= tag:
                 gold = int(int(current_gold)/1000)*1000
                 unionid,request_id = await self.exchange()

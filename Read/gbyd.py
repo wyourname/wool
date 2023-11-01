@@ -6,7 +6,7 @@
 关注wxpuser app 订阅公众号就能获取你的uid
 export WXPUSER_UID="UID_xxxxx"
 ||||||
-微信阅读:小阅阅
+钢镚阅读
 链接:http://2488240.ceu.gbl.6rt3sup6c4iy.cloud/?p=2488240
 抓 2488240.ceu.. 下的 cookie: gfsessionid=o-0fIvztHxxxxx; zzbb_info=xxxxxxxxxxx,
 把cookie完整复制下来就行

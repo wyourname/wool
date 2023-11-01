@@ -201,7 +201,7 @@ class Gbyd:
         if '__biz' in query_parameters:
             biz_value = query_parameters['__biz'][0]
             if biz_value in self.check_data:
-                print(f"[用户{self.index}][检测]:{self.check_data[biz_value][0]}公众号")
+                print(f"[用户{self.index}][检测]:██████████{self.check_data[biz_value][0]}公众号██████████")
                 encoded_url = quote(url)
                 await self.wxpuser(f"钢镚[用户{self.index}]检测,请90秒内点击阅读",encoded_url)
                 print(f"[用户{self.index}][等待]:请手动前往wxpuser点击阅读")

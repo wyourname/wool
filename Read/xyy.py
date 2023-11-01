@@ -46,8 +46,12 @@ import os
 
 
 class template:
-    def __init__(self) -> None:
-        self.url = 'http://1698834958.cyaip.top/'  
+    def __init__(self, check_url:str, index:int, wxpuser_token:str, topicid:str, wxpuser_uid:str) -> None:
+        self.aol = check_url
+        self.index = index
+        self.wxpuser_token = wxpuser_token
+        self.topicid=topicid
+        self.wxpuser_uid = wxpuser_uid
         self.sessions = aiohttp.ClientSession()
 
     
@@ -211,8 +215,37 @@ class template:
             await asyncio.sleep(3)
             await self.get_read_state(max_retry-1)
 
+    async def get_params(self):
+        url = 'https://ot26017.a197.top:10261/yunonline/v1/auth/31cf5cf7e3f49fd7ce1738ac295dcc4f?codeurl=ot26017.a197.top:10261&codeuserid=2&time=1698839542'
+        host = urlparse(url).netloc
+        headers = {
+            "Host":host,
+            "Connection":"keep-alive",
+            "Upgrade-Insecure-Requests":"1",
+            "User-Agent":"Mozilla/5.0 (Linux; Android 13; M2012K11AC Build/TKQ1.220829.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/115.0.5790.166 Mobile Safari/537.36 MMWEBID/2651 MicroMessenger/8.0.40.2420(0x28002851) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64",
+            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Encoding":"gzip, deflate",
+            "X-Requested-With":"com.tencent.mm",
+            "Accept-Language":"zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding":"gzip, deflate",
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, allow_redirects=False) as response:
+                res = await response.text()
+                pattern = r'href="([^"]+)"'
+                match = re.search(pattern, res)
+                if match:
+                    link = match.group(1)
+                    # print(link)
+                    host = urlparse(link).netloc
+                    self.url = 'http://'+host
+                    # print(self.url)
+                else:
+                    print(f"[用户{self.index}]:未找到主链接")
+
     async def init_read(self):
-        url = 'http://1698834958.cyaip.top/'
+        ''
+        url = self.url +'/?cate=0'
         res = await self.request(url, dtype='text')
         if res is None:
             print(f"[用户{self.index}][init]: 初始化请求获取失败")
@@ -234,7 +267,7 @@ class template:
     async def account(self):
         add_header = {'Accept':'application/json, text/javascript, */*; q=0.01'}
         ts = int(time.time()*1000)
-        url = self.url + f'yunonline/v1/gold?time={ts}&unionid={self.unionid}'
+        url = self.url + f'/yunonline/v1/gold?time={ts}&unionid={self.unionid}'
         # print(url)
         res = await self.request(url, add_headers=add_header, dtype='text')
         if res is None:
@@ -267,7 +300,7 @@ class template:
             print(f"[用户{self.index}]: 出错了:{res}")
     
     async def start(self):
-        url = self.url+'yunonline/v1/wtmpdomain'
+        url = self.url+'/yunonline/v1/wtmpdomain'
         data = f'unionid={self.unionid}'
         add_headers = {"Content-Lenght": str(len(data)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":"http://1695469567.snak.top","Referer":"http://1695469567.snak.top/"}
         res = await self.request(url, 'post', data=data, add_headers=add_headers, dtype='text')
@@ -397,7 +430,7 @@ class template:
     async def user_gold(self):
         add_header = {'Accept':'application/json, text/javascript, */*; q=0.01','cookie':self.cookie,'Referer':'http://1695469567.snak.top/?cate=0'}
         ts = int(time.time()*1000)
-        url = self.url + f'yunonline/v1/gold?unionid={self.unionid}&time={ts}'
+        url = self.url + f'/yunonline/v1/gold?unionid={self.unionid}&time={ts}'
         res = await self.request(url, add_headers=add_header,dtype='text')
         if res is None:
             print(f"[用户{self.index}]: 没有获取到提现所需要的内容{res}")
@@ -458,7 +491,7 @@ class template:
         res = json.loads(res)
         if res['errcode'] == 0:
             print(f"[用户{self.index}][提现]: {res['data']['money']}元")
-            url2 = self.url+'yunonline/v1/withdraw'
+            url2 = self.url+'/yunonline/v1/withdraw'
             data2 = f"unionid={unionid}&signid={request_id}&ua=2&ptype=0&paccount=&pname="
             {"Content-Lenght": str(len(data2)),"Content-Type":"application/x-www-form-urlencoded; charset=UTF-8","Origin":f"http://{host}","Referer":self.exchange_url}
             res1 = await self.request(url2,'post', data=data2,add_headers=add_headers,dtype='text')
@@ -473,24 +506,20 @@ class template:
         else:
             print(f"[用户{self.index}]: 未知错误{res}")
 
-    async def run(self, index, ck:str, app_token, wx_uid, topicid, check_url, sleep_time=None):
-        self.aol = check_url
-        self.index = index
+    async def run(self, ck:str, sleep_time=None):
         if sleep_time:
             print(f"[用户{self.index}][等待]: 随机休息{sleep_time}秒,避免并发响应过多反应不过来")
             await asyncio.sleep(sleep_time)
-        print(f"[用户{self.index}][开始]===========第{index}个的账号===========")
+        print(f"[用户{self.index}][开始]===========第{self.index}个的账号===========")
         self.cont = True
-        self.topicid = topicid
-        self.wxpuser_token = app_token
-        self.wxpuser_uid = wx_uid
         self.cookie = f'ysmuid={ck}'
         if await self.init_chekc_dict():
+            await self.get_params()
             await self.init_read()
             await self.account()
             await self.user_gold()
         await self.close()
-        print(f"[用户{self.index}][结束]============第{index}个账号===========")
+        print(f"[用户{self.index}][结束]============第{self.index}个账号===========")
 
 async def test_api(url):
     print("开始测试检测服务可用性")
@@ -509,10 +538,14 @@ async def test_api(url):
     
 
 async def check_env():
-    wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    topicid = os.getenv("WXPUSER_TOPICID")
-    wxpuser_uid = os.getenv("WXPUSER_UID")
-    cks = os.getenv('xyycks')
+    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    # topicid = os.getenv("WXPUSER_TOPICID")
+    # wxpuser_uid = os.getenv("WXPUSER_UID")
+    # cks = os.getenv('xyycks')
+    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
+    topicid = None
+    wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079@UID_eDYvNdBwz7hV0JnXlCou1wAok079'
+    cks = '3eace20bcb736f4cfe35d7efa0781dae@482c499f45fb71aad697c05710c9c305'
     if cks is None:
         print("小悦悦ck为空,请去抓包格式:cookie:'ysmuid=xxxxx.....'只要xxxxx 多账户请用@分割")
         print("cookie填写,export xyycks='xxxxxx'")
@@ -541,7 +574,7 @@ async def main():
     if await test_api(api_url):
         print(f"[测试]:{api_url}服务当前可用")
     else:
-        print(f"api:{api_url}服务当前不可用,可能服务器断电、断网了,稍后再来吧")
+        print(f"[测试]:{api_url}服务当前不可用,可能服务器断电、断网了,稍后再来吧")
         exit()
     mapping = dict(zip(cks_list, wx_uids))
     random_sleep_list = [i * random.randint(30, 45) for i in range(len(cks_list))]
@@ -551,8 +584,8 @@ async def main():
     use_concurrency = os.environ.get('multi_xyy', 'false').lower() == 'true'
     tasks = []
     for index, ck in enumerate(cks_list):
-        abc = template()
-        task = abc.run(index + 1, ck, apptoken, wx_uids[index], topicid, api_url, random_sleep_list[index])
+        abc = template(api_url, index+1, apptoken, topicid, wx_uids[index])
+        task = abc.run(ck, random_sleep_list[index])
         tasks.append(task)
     if use_concurrency:  # 如果是true 那么就执行并发
         await asyncio.gather(*tasks)  # 并发执行任务

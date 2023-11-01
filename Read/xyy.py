@@ -538,14 +538,10 @@ async def test_api(url):
     
 
 async def check_env():
-    # wxpuser_token = os.getenv("WXPUSER_TOKEN")
-    # topicid = os.getenv("WXPUSER_TOPICID")
-    # wxpuser_uid = os.getenv("WXPUSER_UID")
-    # cks = os.getenv('xyycks')
-    wxpuser_token = 'AT_aYF2532tqjrD4dX90OrJsuiflscRureX'
-    topicid = None
-    wxpuser_uid = 'UID_eDYvNdBwz7hV0JnXlCou1wAok079@UID_eDYvNdBwz7hV0JnXlCou1wAok079'
-    cks = '3eace20bcb736f4cfe35d7efa0781dae@482c499f45fb71aad697c05710c9c305'
+    wxpuser_token = os.getenv("WXPUSER_TOKEN")
+    topicid = os.getenv("WXPUSER_TOPICID")
+    wxpuser_uid = os.getenv("WXPUSER_UID")
+    cks = os.getenv('xyycks')
     if cks is None:
         print("小悦悦ck为空,请去抓包格式:cookie:'ysmuid=xxxxx.....'只要xxxxx 多账户请用@分割")
         print("cookie填写,export xyycks='xxxxxx'")

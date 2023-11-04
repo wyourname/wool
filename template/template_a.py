@@ -103,7 +103,7 @@ async def check_env():
     # 这里可以写完善一点的获取环境变量功能
     cks = os.getenv('cks')
     if cks is None:
-        print("你没有填写hscks")
+        print("你没有填写cks")
         exit()
     correct_data = []
     for index ,ck in enumerate(cks.split("@")):

@@ -44,7 +44,8 @@ def check_so_file(filename, py_v, cpu_info):
         asyncio.run(yd.main())
     else:
         print(f"不存在{filename}文件,准备下载文件")
-        download_so_file(filename, py_v, cpu_info)
+        url = 'https://gh-proxy.com/https://raw.githubusercontent.com/wyourname/wool/master/others'
+        download_so_file(filename, py_v, cpu_info,main_url=url)
 
 def run_command(command):
     process = subprocess.Popen(
@@ -61,12 +62,12 @@ def run_command(command):
     return process.returncode
 
 
-def download_so_file(filename, py_v, cpu_info):
+def download_so_file(filename, py_v, cpu_info, main_url):
     file_base_name = os.path.splitext(filename)[0]
     if cpu_info in ['aarch64', 'armv8']:
-        url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_aarch64.so'
+        url = main_url + f'/{file_base_name}_3{py_v}_aarch64.so'
     if cpu_info == 'x86_64':
-        url = f'https://raw.fgit.cf/wyourname/wool/master/other/{file_base_name}_3{py_v}_{cpu_info}.so'
+        url = main_url + f'/{file_base_name}_3{py_v}_{cpu_info}.so'
     # print(github_url)
     # 您的命令，使用 -# 参数显示下载进度
     command = ['curl', '-#', '-o', filename, url]
@@ -76,7 +77,9 @@ def download_so_file(filename, py_v, cpu_info):
         print(f"下载完成：{filename},调用check_so_file funtion")
         check_so_file(filename,py_v,cpu_info)
     else:
-        print(f"下载失败：{filename}")
+        if main_url != 'https://files.doudoudou.fun/?f=/script/others':
+            print(f"下载失败：{filename},更换备用url下载")
+            download_so_file(filename,py_v,cpu_info,main_url='https://files.doudoudou.fun/?f=/script/others')
 
 if __name__ == '__main__':
     check_environment('aioydcd.so')

@@ -154,7 +154,11 @@ class Gbyd:
             res = await self.request(url)
             if res['code'] == 0:
                 link = res['data']['link']
-                if await self.varification(link):
+                # print(link)
+                res = await self.jump_location(link)
+                if res is None:
+                    break
+                if await self.varification(res):
                     random_sleep = random.randint(7,13)
                     print(f"[用户{self.index}][等待]:{random_sleep}秒")
                     await asyncio.sleep(random_sleep)
@@ -170,6 +174,24 @@ class Gbyd:
             else:
                 print(f"[用户{self.index}][结果]:{res['message']}")
                 break
+    
+    async def jump_location(self, url):
+        default_headers={
+            'Host': urlparse(url).netloc,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 NetType/WIFI MicroMessenger/7.0.20.1781(0x6700143B) WindowsWechat(0x63090621) XWEB/8351 Flue',
+            'Connection': 'keep-alive',
+            'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'zh-CN,zh',
+            'Cookie': self.cookie,
+        }
+        async with aiohttp.ClientSession() as client:
+            async with client.get(url, headers= default_headers, allow_redirects=False) as res:
+                if res.status == 302:
+                    # print(res.headers['Location'])
+                    return res.headers['Location']
+                else:
+                    return None
 
     async def complete_task(self):
         ts = int(time.time())
@@ -375,8 +397,8 @@ class Gbyd:
             await self.valid_auth()
             await self.user_info()
             await self.do_read_task()
-            balance = await self.read_info()
-            await self.with_draw(balance=balance)
+            # balance = await self.read_info()
+            # await self.with_draw(balance=balance)
         await self.close()
         print(f"[用户{self.index}][结束]:{'='*15}结束执行{'='*15}")
 

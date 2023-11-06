@@ -155,9 +155,12 @@ class Gbyd:
             if res['code'] == 0:
                 link = res['data']['link']
                 # print(link)
-                res = await self.jump_location(link)
-                if res is None:
-                    break
+                if '__biz' not in link:
+                    res = await self.jump_location(link)
+                    if res is None:
+                        break
+                else:
+                    res = link
                 if await self.varification(res):
                     random_sleep = random.randint(7,13)
                     print(f"[用户{self.index}][等待]:{random_sleep}秒")

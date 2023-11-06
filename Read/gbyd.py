@@ -397,8 +397,8 @@ class Gbyd:
             await self.valid_auth()
             await self.user_info()
             await self.do_read_task()
-            # balance = await self.read_info()
-            # await self.with_draw(balance=balance)
+            balance = await self.read_info()
+            await self.with_draw(balance=balance)
         await self.close()
         print(f"[用户{self.index}][结束]:{'='*15}结束执行{'='*15}")
 

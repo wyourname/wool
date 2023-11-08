@@ -2,7 +2,9 @@
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
 new Env("枫以影视")
 app 枫以影视
-export fycks='整条url' # tv.palmestore.com 域名来的
+第一种填法普通收益 export fycks='整条url' # tv.palmestore.com 域名来的
+第二种填法激进刷金币 export fycks='整条url#true#15'   # 意思是 url#打开提高收益开关#提现目标金额(也需要等待签到天数足够才可以提)
+第三种填法普通收益存起来一次提 export fycks='整条url#false#15'  # 意思是 url#关闭提高收益开关#提现目标金额(也需要等待签到天数足够才可以提)
 export fy_delay='true' 怕黑号看视频加延迟的开关,ture为打开延迟 不填默认关闭,打开将耗费很长时间
 大部分的并发格式 fy_multi='true'
 cron: 8 8 * * *

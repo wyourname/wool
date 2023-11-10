@@ -20,7 +20,7 @@ def check_environment(file_name):
     v, o, a = sys.version_info, platform.system(), platform.machine()
     print(f"Python版本: {v.major}.{v.minor}.{v.micro}, 操作系统类型: {o}, 处理器架构: {a}")
     if (v.minor in [10]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8']:
-        print("符合运行要求,arm8没试过不知道行不行")
+        print("符合运行要求,arm8没试过不知道行不行,仓库加密的脚本均不支持青龙模块")
         check_so_file(file_name, v.minor, a)
     else:
         if not (v.minor in [10]):

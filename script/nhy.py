@@ -40,7 +40,7 @@ def check_so_file(filename, py_v, cpu_info):
         asyncio.run(n.main())
     else:
         print(f"不存在{filename}文件,准备下载文件")
-        url = 'https://gh-proxy.com/https://raw.githubusercontent.com/wyourname/wool/master/others'
+        url = 'https://gh-proxy.com/https://raw.githubusercontent.com/wyourname/wool/master/other'
         download_so_file(filename, py_v, cpu_info,main_url=url)
 
 def run_command(command):

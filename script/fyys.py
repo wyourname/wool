@@ -1,6 +1,6 @@
 """
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
-new Env("枫以影视")
+new Env("fyys啊")
 app 枫以影视
 第一种填法普通收益 export fycks='整条url' # tv.palmestore.com 域名来的
 第二种填法激进刷金币 export fycks='整条url#true#15'   # 意思是 url#打开提高收益开关#提现目标金额(也需要等待签到天数足够才可以提)

@@ -1,4 +1,6 @@
 """
+# new Env("七猫免费小说")
+# cron: 1 9,16-22 * * *
 通用代码
 只需要修改  asyncio.run(common.main("qimao"))  "qimao"代表七猫脚本 "ydcd"代表 有道词典，现有hkread ,speedread,fyys,shengdu,kgyy,qimao
 5.13开放一天

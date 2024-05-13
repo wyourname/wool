@@ -18,7 +18,6 @@ dict.youdao.com下的cookie
 """
 通用代码
 只需要修改  asyncio.run(common.main("qimao"))  "qimao"代表七猫脚本 "ydcd"代表 有道词典，现有hkread ,speedread,fyys,shengdu,kgyy,qimao
-5.13开放一天
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
 """
 import asyncio

@@ -20,7 +20,7 @@ import subprocess
 def check_environment(file_name):
     v, o, a = sys.version_info, platform.system(), platform.machine()
     print(f"Python版本: {v.major}.{v.minor}.{v.micro}, 操作系统类型: {o}, 处理器架构: {a}")
-    if (v.minor in [10]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8']:
+    if (v.minor in [9,10,11,12]) and o == 'Linux' and a in ['x86_64', 'aarch64', 'armv8', 'armv7l']:
         print("符合运行要求,ARMv7,ARMv8请自行尝试")
         check_so_file(file_name, v.minor, a)
     else:
@@ -30,8 +30,8 @@ def check_environment(file_name):
         if o != 'Linux':
             print("不符合要求: 操作系统类型不是Linux")
             return
-        if a not in ['x86_64','aarch64', 'armv8', 'armv7']:
-            print("不符合要求: 处理器架构不是x86_64 aarch64 armv8 armv7中的一种,如果你是armv7l,试着在脚本25行修改armv7为armv7l,其他同理")
+        if a not in ['x86_64','aarch64', 'armv8', 'armv7l']:
+            print("不符合要求: 处理器架构不是x86_64 aarch64 armv8 armv7中的一种")
             return
 
 
@@ -68,7 +68,7 @@ def download_so_file(filename, py_v, cpu_info, main_url):
     if cpu_info == 'x86_64':
         url = main_url + f'/{file_base_name}_3{py_v}_{cpu_info}.so'
     if 'armv7' in cpu_info:
-        url = main_url + f'/{file_base_name}_3{py_v}_{cpu_info}.so'
+        url = main_url + f'/{file_base_name}_3{py_v}_armv7.so'
     # print(github_url)
     # 您的命令，使用 -# 参数显示下载进度
     command = ['curl', '-#', '-o', filename, url]

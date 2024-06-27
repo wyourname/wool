@@ -1,9 +1,9 @@
 """
 通用代码
-只需要修改  asyncio.run(common.main("qimao"))  "qimao"代表七猫脚本 "ydcd"代表 有道词典，现有hkread ,speedread,fyys,shengdu,kgyy,qimao
+这是一份傻逼代码，使用说明 https://t.me/+kUrl7zJAQv5jOTQ1
 代码请勿用于非法盈利，一切与本人无关，该代码仅用于学习交流，请阅览下载24小时内删除代码
 """
-SCRIPT_NAME = "qimao"   # 脚本名称 记得修改这里
+SCRIPT_NAME = "test"   # 脚本名称 记得修改这里
 
 
 import asyncio

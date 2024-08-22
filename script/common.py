@@ -6,8 +6,8 @@
 SCRIPT_NAME = "test"  # 脚本名称 记得修改这里
 
 
-DOWNLOAD_URL = 'https://files.doudoudou.top/?f=/script/others'
-DOWNLOAD_URL2 = 'https://raw.githubusercontent.com/wyourname/wool/master/others'
+DOWNLOAD_URL2 = 'https://files.doudoudou.top/?f=/script/others'
+DOWNLOAD_URL = 'https://git.doudoudou.top/https://raw.githubusercontent.com/wyourname/wool/master/others'
 import logging
 import asyncio
 import platform

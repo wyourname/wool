@@ -71,7 +71,7 @@ def download_so_file(filename, py_v, cpu_info):
     command = ['curl', '-#', '-o', filename, '-w', '%{http_code}', url]
     result, stdout = run_command(command)
     if stdout == '200' and result == 0:
-        logging.info(f"本仓库通用文件下载成功: {filename}")
+        logging.info(f"文件下载成功: {filename}")
         check_so_file(filename, py_v, cpu_info)
     else:
         logging.info(f"{filename}下载失败,请手动切换到备用下载url:{DOWNLOAD_URL2} 将DOWNLOAD_URL2改为DOWNLOAD_URL即可")

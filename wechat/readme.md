@@ -12,3 +12,5 @@ linux执行
 3.本地部署后在青龙配置文件添加 export WECHAT_SERVER='http://你部署的ip:8011' 
 
 4.当前可用脚本:wxkele (可乐)、wxyidian(壹点联盟)、search_reward(搜搜小奖) 变量看公告即可
+
+5. 试用3天,第三天才打钱,没打钱我就删token就行了

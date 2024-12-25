@@ -77,7 +77,7 @@ check_container_exists
 
 # 第六步：创建并启动容器
 log "正在创建并启动容器..."
-docker run -d -p 8011:8011 --name wechatloader wechatloader:latest
+docker run -d -p 8011:8011 --restart=always --name wechatloader wechatloader:latest
 
 # 检查容器是否成功启动
 if [ $? -ne 0 ]; then

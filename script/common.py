@@ -5,9 +5,16 @@
 """
 SCRIPT_NAME = "test"  # 脚本名称 记得修改这里
 
+PROXY_URL = ''
 
-DOWNLOAD_URL2 = 'https://files.doudoudou.top/?f=/script/others'
-DOWNLOAD_URL = 'https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/master/others'
+
+if not PROXY_URL:
+    DOWNLOAD_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others'
+else:
+    if not PROXY_URL.endswith('/'):
+        PROXY_URL += '/'
+    DOWNLOAD_URL = PROXY_URL + 'https://raw.githubusercontent.com/wyourname/wool/master/others'
+
 import logging
 import asyncio
 import platform
@@ -74,7 +81,7 @@ def download_so_file(filename, py_v, cpu_info):
         logging.info(f"文件下载成功: {filename}")
         check_so_file(filename, py_v, cpu_info)
     else:
-        logging.info(f"{filename}下载失败,请手动切换到备用下载url:{DOWNLOAD_URL2} 将DOWNLOAD_URL2改为DOWNLOAD_URL即可")
+        logging.info(f"{filename}下载失败,自己找个加速的代理放在脚本上吧")
         if os.path.exists(filename):
             os.remove(filename)
 

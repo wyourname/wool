@@ -14,6 +14,6 @@ linux执行
 
 4.本地部署后在青龙配置文件添加 export WECHAT_SERVER='http://你部署的ip:8011' 
 
-5.当前可用脚本:wxkele (可乐)、wxyidian(壹点联盟)、search_reward(搜搜小奖)、ddz(点点赚) 变量看公告即可
+5.当前可用脚本:wxkele (可乐已黑号停止维护)、wxyidian(壹点联盟)、search_reward(搜搜小奖，已黑号停止维护，尚能用)、ddz(点点赚)  ddlm(叮叮联盟)脚本说明运行起来就能看到了
 
 6. 试用3天,第三天才打钱,没打钱我就删token就行了

@@ -28,7 +28,7 @@ linux执行,支持Debian ，使用前安装curl wget docker 再运行命令
 
 4. 复制脚本https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/script/common.py 到青龙脚本目录，新建一个文件夹，名字随意，然后把common.py文件复制进去保存即可。
 
-5. 将common.py文件的内容复制创建一个新文件，名字随意，比如我要跑可乐阅读 则命名为kele.py 将 kele.py 脚本内的SCRIPT_NAME='test'修改为SCRIPT_NAME='wxkele',依次类推【wxkele (可乐已黑号)、wxyidian(壹点联盟)、search_reward(搜搜小奖，已黑号停止维护，尚能用)、ddz(点点赚)  ddlm(叮叮联盟)】
+5. 将common.py文件的内容复制创建一个新文件，名字随意，比如我要跑可乐阅读 则命名为kele.py 将 kele.py 脚本内的SCRIPT_NAME='test'修改为SCRIPT_NAME='wxkele',依次类推【wxkele (可乐已黑号)、wxyidian(壹点联盟)、search_reward(搜搜小奖，已黑号停止维护，尚能用)、ddz(点点赚)  ddlm(叮叮联盟)、sillydog(傻狗阅读)】
 
 6. 阅读类任务定时 一天8次即可 2小时一次。
 

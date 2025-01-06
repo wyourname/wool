@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 设置脚本的日志文件
+# 设置脚本的日志文件 
 LOG_FILE="install_wechatloader.log"
 echo "脚本开始执行 $(date)" > $LOG_FILE
 

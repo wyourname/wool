@@ -205,26 +205,31 @@ main() {
 
     if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         log "发现已存在的容器"
-        printf "请选择操作：\n1. 修补容器\n2. 重装容器\n"
-        printf "输入选择 (1/2): "
-        read choice </dev/tty
         
-        log "用户选择: $choice"  # 添加日志
-        
-        case "$choice" in
-            "1")
-                log "开始执行修补操作..."
-                patch_container
-                ;;
-            "2")
-                log "开始执行重装操作..."
-                reinstall_container
-                ;;
-            *)
-                log "无效的选择: $choice"
-                exit 1
-                ;;
-        esac
+        # 直接提示用户输入
+        while true; do
+            echo
+            echo "请选择操作："
+            echo "1. 修补容器"
+            echo "2. 重装容器"
+            read -p "输入选择 (1/2): " choice
+            
+            case "$choice" in
+                1)
+                    log "执行修补操作"
+                    patch_container
+                    break
+                    ;;
+                2)
+                    log "执行重装操作"
+                    reinstall_container
+                    break
+                    ;;
+                *)
+                    echo "无效的选择，请重新输入"
+                    ;;
+            esac
+        done
     else
         log "未发现已存在的容器，开始全新安装"
         install_container

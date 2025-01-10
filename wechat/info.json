@@ -1,1 +1,1 @@
-{"layers": 1.08, "main": 1.04, "status": 200, "message":"对部分特殊微信号增加拓张策略（数据量大的情况下增加cpu、内存消耗）"}
+{"layers": 1.10, "main": 1.05, "status": 200, "message":"layers:优化调度策略，调整接口策略;main:改善redis的操作性能;html:增加性能消耗界面更直观，适配手机显示,优化结构,需要修补程序-运行：wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/install_wechatloader.sh && chmod +x install_wechatloader.sh && sudo ./install_wechatloader.sh"}

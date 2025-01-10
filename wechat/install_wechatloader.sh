@@ -116,6 +116,13 @@ patch_container() {
     docker cp "layers-${arch_suffix}" "$CONTAINER_NAME:/app/layers-${arch_suffix}"
     docker cp "main-${arch_suffix}" "$CONTAINER_NAME:/app/main-${arch_suffix}"
 
+    docker exec "$CONTAINER_NAME" bash -c "
+        chown -R root:root /app/static
+        chmod -R 755 /app/static
+        chown root:root /app/layers-${arch_suffix} /app/main-${arch_suffix}
+        chmod 755 /app/layers-${arch_suffix} /app/main-${arch_suffix}
+    "
+
     # 重启容器
     docker restart "$CONTAINER_NAME"
     
@@ -123,7 +130,7 @@ patch_container() {
     cd - > /dev/null
     rm -rf "$temp_dir"
     
-    log "容器修补完成"
+    log "容器更新完成"
 }
 
 # 函数：重装容器
@@ -162,38 +169,6 @@ start_container() {
     log "容器启动成功"
 }
 
-get_user_choice() {
-    # 检查是否为交互式终端
-    if [ ! -t 0 ]; then
-        # 如果不是交互式终端，重新以交互式方式执行脚本
-        log "检测到非交互式环境，切换到交互式模式..."
-        # 保存脚本到临时文件
-        TMP_SCRIPT="/tmp/wechatloader_install_tmp.sh"
-        cat > "$TMP_SCRIPT" << 'EOF'
-#!/bin/bash
-# 这里是整个脚本的内容
-EOF
-        chmod +x "$TMP_SCRIPT"
-        exec bash "$TMP_SCRIPT"
-        exit 0
-    fi
-
-    while true; do
-        printf "请选择操作：\n1. 修补容器\n2. 重装容器\n"
-        printf "输入选择 (1/2): "
-        read choice </dev/tty
-        
-        case "$choice" in
-            "1"|"2")
-                echo "$choice"
-                return 0
-                ;;
-            *)
-                echo "无效的选择，请输入 1 或 2"
-                ;;
-        esac
-    done
-}
 
 # 主程序
 main() {

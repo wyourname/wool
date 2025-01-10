@@ -157,6 +157,23 @@ start_container() {
     log "容器启动成功"
 }
 
+get_user_choice() {
+    # 确保从终端读取输入
+    exec < /dev/tty
+    
+    while true; do
+        echo "请选择操作："
+        echo "1. 修补容器"
+        echo "2. 重装容器"
+        read -p "输入选择 (1/2): " choice
+        
+        case $choice in
+            1|2) echo "$choice"; return ;;
+            *) echo "无效的选择，请重新输入" ;;
+        esac
+    done
+}
+
 # 主程序
 main() {
     check_root
@@ -170,7 +187,7 @@ main() {
         echo "请选择操作："
         echo "1. 修补容器"
         echo "2. 重装容器"
-        read -p "输入选择 (1/2): " choice
+        choice=$(get_user_choice)
         
         case $choice in
             1) patch_container ;;

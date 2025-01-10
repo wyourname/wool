@@ -135,7 +135,11 @@ reinstall_container() {
     docker rm "$CONTAINER_NAME" 2>/dev/null || true
     docker rmi "$IMAGE_NAME" 2>/dev/null || true
 
-    # 下载并加载新镜像
+    install_container
+}
+
+install_container(){
+  # 下载并加载新镜像
     download_file "$DOWNLOAD_URL" "wechatloader.tar.gz"
     tar xzf wechatloader.tar.gz
     docker load < wechatloader.tar
@@ -146,6 +150,7 @@ reinstall_container() {
     # 清理文件
     rm -f wechatloader.tar.gz wechatloader.tar
 }
+
 
 # 函数：启动容器
 start_container() {
@@ -159,17 +164,18 @@ start_container() {
 
 get_user_choice() {
     # 确保从终端读取输入
-    exec < /dev/tty
-    
     while true; do
-        echo "请选择操作："
-        echo "1. 修补容器"
-        echo "2. 重装容器"
-        read -p "输入选择 (1/2): " choice
+        printf "请选择操作：\n1. 修补容器\n2. 重装容器\n"
+        printf "输入选择 (1/2): "
+        read choice </dev/tty
         
-        case $choice in
-            "1"|"2") echo "$choice"; return ;;
-            *) echo "无效的选择，请重新输入" ;;
+        case "$choice" in
+            "1"|"2")
+                return "$choice"
+                ;;
+            *)
+                echo "无效的选择，请输入 1 或 2"
+                ;;
         esac
     done
 }
@@ -184,19 +190,17 @@ main() {
 
     if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         log "发现已存在的容器"
-        echo "请选择操作："
-        echo "1. 修补容器"
-        echo "2. 重装容器"
-        choice=$(get_user_choice)
+        get_user_choice
+        choice=$?
         
-        case $choice in
-            1) patch_container ;;
-            2) reinstall_container ;;
-            *) log "无效的选择"; exit 1 ;;
-        esac
+        if [ "$choice" -eq 1 ]; then
+            patch_container
+        elif [ "$choice" -eq 2 ]; then
+            reinstall_container
+        fi
     else
         log "未发现已存在的容器，开始全新安装"
-        reinstall_container
+        install_container
     fi
 
     log "安装完成，容器状态："

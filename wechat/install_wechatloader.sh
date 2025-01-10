@@ -163,6 +163,21 @@ start_container() {
 }
 
 get_user_choice() {
+    # 检查是否为交互式终端
+    if [ ! -t 0 ]; then
+        # 如果不是交互式终端，重新以交互式方式执行脚本
+        log "检测到非交互式环境，切换到交互式模式..."
+        # 保存脚本到临时文件
+        TMP_SCRIPT="/tmp/wechatloader_install_tmp.sh"
+        cat > "$TMP_SCRIPT" << 'EOF'
+#!/bin/bash
+# 这里是整个脚本的内容
+EOF
+        chmod +x "$TMP_SCRIPT"
+        exec bash "$TMP_SCRIPT"
+        exit 0
+    fi
+
     while true; do
         printf "请选择操作：\n1. 修补容器\n2. 重装容器\n"
         printf "输入选择 (1/2): "
@@ -170,8 +185,8 @@ get_user_choice() {
         
         case "$choice" in
             "1"|"2")
-                echo "你选择了 $choice"  # 使用echo输出选择
-                return 0  # 返回成功状态
+                echo "$choice"
+                return 0
                 ;;
             *)
                 echo "无效的选择，请输入 1 或 2"

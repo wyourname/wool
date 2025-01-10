@@ -1,245 +1,190 @@
 #!/bin/bash
 
+# 设置严格模式
+set -euo pipefail
+
 # 设置脚本的日志文件 
-LOG_FILE="install_wechatloader.log"
-echo "脚本开始执行 $(date)" > $LOG_FILE
+LOG_FILE="/tmp/install_wechatloader.log"
+CONTAINER_NAME="wechatloader"
+WORK_DIR="/tmp/wechatloader_install"
+
+# 函数：检查root权限
+check_root() {
+    if [ "$EUID" -ne 0 ]; then
+        echo "请使用 root 权限运行此脚本"
+        exit 1
+    fi
+}
+
+# 函数：初始化工作目录
+init_workspace() {
+    mkdir -p "$WORK_DIR"
+    cd "$WORK_DIR"
+    echo "脚本开始执行 $(date)" > "$LOG_FILE"
+    chmod 644 "$LOG_FILE"
+}
 
 # 函数：输出日志
 log() {
-  echo "$1" | tee -a $LOG_FILE
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
 
-# 函数：检查 Docker 是否安装
-check_docker() {
-  log "检查 Docker 是否已安装..."
-  command -v docker >/dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    log "Docker 未安装，请先安装 Docker！"
-    exit 1
-  else
-    log "Docker 已安装！"
-  fi
+# 函数：检查必要的命令
+check_requirements() {
+    local requirements="docker wget tar unzip"
+    for cmd in $requirements; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            log "正在安装 $cmd..."
+            apt-get update && apt-get install -y "$cmd"
+        fi
+    done
 }
 
-# 函数：检查容器是否已经存在
-check_container_exists() {
-  CONTAINER_NAME="wechatloader"
-  log "检查容器 $CONTAINER_NAME 是否已存在..."
-  docker ps -a --format '{{.Names}}' | grep -w $CONTAINER_NAME >/dev/null 2>&1
-  return $?
+# 函数：检查 Docker 服务状态
+check_docker_service() {
+    log "检查 Docker 服务状态..."
+    if ! systemctl is-active --quiet docker; then
+        log "Docker 服务未运行，正在启动..."
+        systemctl start docker
+        sleep 3
+    fi
 }
 
 # 函数：获取系统架构并选择镜像
 select_image() {
-  ARCH=$(uname -m)
-  log "当前系统架构: $ARCH"
+    ARCH=$(uname -m)
+    log "当前系统架构: $ARCH"
 
-  case $ARCH in
-    "aarch64")
-      IMAGE_NAME="wechatloader-arm64:latest"
-      DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.0.5/wechatloader-arm64.tar.gz"
-      ;;
-    "x86_64")
-      IMAGE_NAME="wechatloader:latest"
-      DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.0.5/wechatloader-amd64.tar.gz"
-      ;;
-    "armv7l")
-      IMAGE_NAME="wechatloader-arm:latest"
-      log "系统架构为 arm32，暂不支持。如果需要，请联系作者适配 wechatloader-arm.tar.gz..."
-      exit 1
-      ;;
-    *)
-      log "不支持的架构：$ARCH"
-      exit 1
-      ;;
-  esac
+    case $ARCH in
+        "aarch64")
+            IMAGE_NAME="wechatloader-arm64:latest"
+            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.0.5/wechatloader-arm64.tar.gz"
+            LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
+            MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
+            ;;
+        "x86_64")
+            IMAGE_NAME="wechatloader:latest"
+            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.0.5/wechatloader-amd64.tar.gz"
+            LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-amd64"
+            MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-amd64"
+            ;;
+        *)
+            log "不支持的系统架构: $ARCH"
+            exit 1
+            ;;
+    esac
 }
 
 # 函数：下载文件
 download_file() {
-  log "正在下载镜像文件..."
-  wget $DOWNLOAD_URL -O wechatloader.tar.gz
-  if [ $? -ne 0 ]; then
-    log "下载失败，请检查网络连接或下载地址！"
-    exit 1
-  else
-    log "下载完成：wechatloader.tar.gz"
-  fi
-}
-
-# 函数：解压下载的文件
-extract_file() {
-  log "正在解压下载的文件..."
-  tar -xzvf wechatloader.tar.gz
-  if [ $? -ne 0 ]; then
-    log "解压失败，请检查文件是否完整！"
-    exit 1
-  else
-    log "解压完成：wechatloader.tar"
-  fi
-}
-
-# 函数：导入镜像到 Docker
-load_docker_image() {
-  log "正在导入镜像到 Docker..."
-  docker load < wechatloader.tar
-  if [ $? -ne 0 ]; then
-    log "镜像导入失败，请检查 Docker 是否安装并配置正确！"
-    exit 1
-  else
-    log "镜像导入成功！"
-  fi
+    local url="$1"
+    local output="$2"
+    log "正在下载: $output"
+    if ! wget --timeout=10 --tries=3 -q "$url" -O "$output"; then
+        log "下载失败: $output"
+        return 1
+    fi
+    return 0
 }
 
 # 函数：修补容器
 patch_container() {
-  log "正在更新容器 $CONTAINER_NAME..."
-  
-  ARCH=$(uname -m)
-  log "当前系统架构: $ARCH"
+    log "开始更新容器..."
+    
+    # 获取架构相关的文件后缀
+    local arch_suffix
+    case $(uname -m) in
+        "x86_64")  arch_suffix="amd64" ;;
+        "aarch64") arch_suffix="arm64" ;;
+        *) log "不支持的架构"; exit 1 ;;
+    esac
+    
+    # 创建临时目录
+    local temp_dir=$(mktemp -d)
+    cd "$temp_dir"
 
-  # 根据架构选择下载的二进制文件
-  case $ARCH in
-    "aarch64")
-      LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
-      MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
-      ;;
-    "x86_64")
-      LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-amd64"
-      MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-amd64"
-      ;;
-    "armv7l")
-      LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
-      MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
-      log "系统架构为 arm32，暂不支持修补功能。如果需要，请联系作者适配 static-arm.zip..."
-      exit 1
-      ;;
-    *)
-      log "不支持的架构：$ARCH"
-      exit 1
-      ;;
-  esac
-  log "正在下载 layers 和main 文件..."
-  wget $LAYERS_URL
-  if [ $? -ne 0 ]; then
-    log "下载 layers 失败，请检查网络连接！"
-    exit 1
-  fi
-  wget $MAIN_URL
-  if [ $? -ne 0 ]; then
-    log "下载 main 失败，请检查网络连接！"
-    exit 1
-  fi
+    # 下载所需文件（保留原始文件名）
+    download_file "$LAYERS_URL" "layers-${arch_suffix}"
+    download_file "$MAIN_URL" "main-${arch_suffix}"
+    download_file "https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/static.zip" "static.zip"
 
-  # 下载 static.zip 文件
-  log "正在下载 static.zip 文件..."
-  wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/static.zip -O static.zip
-  if [ $? -ne 0 ]; then
-    log "下载 static.zip 失败，请检查网络连接！"
-    exit 1
-  fi
+    # 解压并复制文件
+    unzip -q static.zip
+    
+    # 复制文件到容器（使用正确的文件名）
+    docker cp static/. "$CONTAINER_NAME:/app/static/"
+    docker cp "layers-${arch_suffix}" "$CONTAINER_NAME:/app/layers-${arch_suffix}"
+    docker cp "main-${arch_suffix}" "$CONTAINER_NAME:/app/main-${arch_suffix}"
 
-  # 解压 static.zip
-  log "正在解压 static.zip..."
-  apt install -y unzip
-  unzip static.zip -d static
-  if [ $? -ne 0 ]; then
-    log "解压 static.zip 失败！"
-    exit 1
-  fi
-
-  # 将解压的文件拷贝到容器的 /app/static 目录
-  log "正在将 static 文件拷贝到容器..."
-  docker cp static/. $CONTAINER_NAME:/app/static/
-  docker cp layers-* $CONTAINER_NAME:/app/
-  docker cp main-* $CONTAINER_NAME:/app/
-  if [ $? -ne 0 ]; then
-    log "拷贝文件失败，请检查容器路径！"
-    exit 1
-  else
-    log "更新容器完成！"
-  fi
+    # 重启容器
+    docker restart "$CONTAINER_NAME"
+    
+    # 清理临时文件
+    cd - > /dev/null
+    rm -rf "$temp_dir"
+    
+    log "容器修补完成"
 }
 
 # 函数：重装容器
 reinstall_container() {
-  log "重装容器流程："
-  
-  # 停止并删除现有容器
-  log "停止并删除容器 $CONTAINER_NAME..."
-  docker stop $CONTAINER_NAME
-  docker rm $CONTAINER_NAME
-  
-  # 删除镜像
-  log "删除镜像 $IMAGE_NAME..."
-  docker rmi $IMAGE_NAME
+    log "开始重装容器..."
+    
+    # 停止并删除现有容器
+    docker stop "$CONTAINER_NAME" 2>/dev/null || true
+    docker rm "$CONTAINER_NAME" 2>/dev/null || true
+    docker rmi "$IMAGE_NAME" 2>/dev/null || true
 
-  # 重新下载文件、导入镜像并启动容器
-  download_file
-  extract_file
-  load_docker_image
-  start_container
+    # 下载并加载新镜像
+    download_file "$DOWNLOAD_URL" "wechatloader.tar.gz"
+    tar xzf wechatloader.tar.gz
+    docker load < wechatloader.tar
+    
+    # 启动新容器
+    start_container
+    
+    # 清理文件
+    rm -f wechatloader.tar.gz wechatloader.tar
 }
 
-# 函数：创建并启动容器
+# 函数：启动容器
 start_container() {
-  log "正在创建并启动容器..."
-  docker run -d -p 8011:8011 --restart=always --name wechatloader $IMAGE_NAME
-
-  # 检查容器是否成功启动
-  if [ $? -ne 0 ]; then
-    log "容器启动失败，请检查 Docker 配置或者日志！"
-    exit 1
-  else
-    log "容器启动成功，端口 8011 已映射。"
-  fi
+    log "正在启动容器..."
+    if ! docker run -d -p 8011:8011 --restart=always --name "$CONTAINER_NAME" "$IMAGE_NAME"; then
+        log "容器启动失败"
+        exit 1
+    fi
+    log "容器启动成功"
 }
 
-# 函数：输出当前正在运行的容器列表
-list_running_containers() {
-  log "当前正在运行的容器："
-  docker ps
+# 主程序
+main() {
+    check_root
+    init_workspace
+    check_requirements
+    check_docker_service
+    select_image
+
+    if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        log "发现已存在的容器"
+        echo "请选择操作："
+        echo "1. 修补容器"
+        echo "2. 重装容器"
+        read -p "输入选择 (1/2): " choice
+        
+        case $choice in
+            1) patch_container ;;
+            2) reinstall_container ;;
+            *) log "无效的选择"; exit 1 ;;
+        esac
+    else
+        log "未发现已存在的容器，开始全新安装"
+        reinstall_container
+    fi
+
+    log "安装完成，容器状态："
+    docker ps | grep "$CONTAINER_NAME"
 }
 
-# 主程序开始
-log "脚本开始执行 $(date)"
-
-# 第一步：检查 Docker 是否已安装
-check_docker
-
-# 第二步：根据系统架构选择镜像和下载文件
-select_image
-
-# 第三步：检查容器是否存在
-check_container_exists
-if [ $? -eq 0 ]; then
-  log "容器 $CONTAINER_NAME 已存在！"
-  
-  # 询问用户是否修补容器或重装容器
-  echo "容器 $CONTAINER_NAME 已存在，请选择操作："
-  echo "1. 修补容器"
-  echo "2. 重装容器"
-  read -p "请输入选择 (1/2): " action_choice
-  
-  case $action_choice in
-    1)
-      patch_container
-      ;;
-    2)
-      reinstall_container
-      ;;
-    *)
-      log "无效的选择！"
-      exit 1
-      ;;
-  esac
-else
-  log "容器不存在，正在创建并启动新容器..."
-  start_container
-fi
-
-# 第四步：输出正在运行的容器
-list_running_containers
-
-# 输出脚本结束时间
-log "脚本执行完成 $(date)"
+# 执行主程序
+main "$@"

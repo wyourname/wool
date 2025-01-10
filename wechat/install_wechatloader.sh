@@ -93,11 +93,47 @@ load_docker_image() {
 
 # 函数：修补容器
 patch_container() {
-  log "正在修补容器 $CONTAINER_NAME..."
+  log "正在更新容器 $CONTAINER_NAME..."
   
+  ARCH=$(uname -m)
+  log "当前系统架构: $ARCH"
+
+  # 根据架构选择下载的二进制文件
+  case $ARCH in
+    "aarch64")
+      LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
+      MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
+      ;;
+    "x86_64")
+      LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-amd64"
+      MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-amd64"
+      ;;
+    "armv7l")
+      LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
+      MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
+      log "系统架构为 arm32，暂不支持修补功能。如果需要，请联系作者适配 static-arm.zip..."
+      exit 1
+      ;;
+    *)
+      log "不支持的架构：$ARCH"
+      exit 1
+      ;;
+  esac
+  log "正在下载 layers 和main 文件..."
+  wget $LAYERS_URL
+  if [ $? -ne 0 ]; then
+    log "下载 layers 失败，请检查网络连接！"
+    exit 1
+  fi
+  wget $MAIN_URL
+  if [ $? -ne 0 ]; then
+    log "下载 main 失败，请检查网络连接！"
+    exit 1
+  fi
+
   # 下载 static.zip 文件
   log "正在下载 static.zip 文件..."
-  wget https://git.kfc50.us.kg/https:// -O static.zip
+  wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/static.zip -O static.zip
   if [ $? -ne 0 ]; then
     log "下载 static.zip 失败，请检查网络连接！"
     exit 1
@@ -105,6 +141,7 @@ patch_container() {
 
   # 解压 static.zip
   log "正在解压 static.zip..."
+  apt install -y unzip
   unzip static.zip -d static
   if [ $? -ne 0 ]; then
     log "解压 static.zip 失败！"
@@ -114,11 +151,13 @@ patch_container() {
   # 将解压的文件拷贝到容器的 /app/static 目录
   log "正在将 static 文件拷贝到容器..."
   docker cp static/. $CONTAINER_NAME:/app/static/
+  docker cp layers-* $CONTAINER_NAME:/app/
+  docker cp main-* $CONTAINER_NAME:/app/
   if [ $? -ne 0 ]; then
     log "拷贝文件失败，请检查容器路径！"
     exit 1
   else
-    log "修补完成！"
+    log "更新容器完成！"
   fi
 }
 

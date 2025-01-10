@@ -168,7 +168,7 @@ get_user_choice() {
         read -p "输入选择 (1/2): " choice
         
         case $choice in
-            1|2) echo "$choice"; return ;;
+            "1"|"2") echo "$choice"; return ;;
             *) echo "无效的选择，请重新输入" ;;
         esac
     done

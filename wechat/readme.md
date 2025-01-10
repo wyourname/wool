@@ -1,4 +1,5 @@
 第一步：mkdir -p wechat && cd wechat
+
 第二步：wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/install_wechatloader.sh && chmod +x install_wechatloader.sh && sudo ./install_wechatloader.sh
 
 linux执行,支持Debian ，使用前安装curl wget docker 再运行命令

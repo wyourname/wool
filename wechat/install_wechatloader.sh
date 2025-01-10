@@ -163,7 +163,6 @@ start_container() {
 }
 
 get_user_choice() {
-    # 确保从终端读取输入
     while true; do
         printf "请选择操作：\n1. 修补容器\n2. 重装容器\n"
         printf "输入选择 (1/2): "
@@ -171,7 +170,8 @@ get_user_choice() {
         
         case "$choice" in
             "1"|"2")
-                return "$choice"
+                echo "你选择了 $choice"  # 使用echo输出选择
+                return 0  # 返回成功状态
                 ;;
             *)
                 echo "无效的选择，请输入 1 或 2"
@@ -190,14 +190,15 @@ main() {
 
     if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         log "发现已存在的容器"
-        get_user_choice
-        choice=$?
-        
-        if [ "$choice" -eq 1 ]; then
-            patch_container
-        elif [ "$choice" -eq 2 ]; then
-            reinstall_container
-        fi
+        choice=$(get_user_choice)  # 捕获输出而不是返回值  
+        case "$choice" in
+            "1")
+                patch_container
+                ;;
+            "2")
+                reinstall_container
+                ;;
+        esac
     else
         log "未发现已存在的容器，开始全新安装"
         install_container

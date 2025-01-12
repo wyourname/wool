@@ -56,12 +56,17 @@ select_image() {
     log "当前系统架构: $ARCH"
 
     case $ARCH in
-        "aarch64")
+        "arm64" | "aarch64")
             IMAGE_NAME="wechatloader-arm64:latest"
             DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-arm64.tar.gz"
             LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
             MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
             ;;
+        "armv7" | "armv7l" | "armv7a" | "armv7b" | "arm")
+            IMAGE_NAME="wechatloader-arm32:latest"
+            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-arm32.tar.gz"
+            LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
+            MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
         "x86_64")
             IMAGE_NAME="wechatloader:latest"
             DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-amd64.tar.gz"
@@ -96,6 +101,7 @@ patch_container() {
     case $(uname -m) in
         "x86_64")  arch_suffix="amd64" ;;
         "aarch64") arch_suffix="arm64" ;;
+        "armv7" | "armv7l" | "armv7a" | "armv7b" | "arm" )   arch_suffix="arm" ;;
         *) log "不支持的架构"; exit 1 ;;
     esac
     
@@ -185,11 +191,16 @@ main() {
         while true; do
             echo
             echo "请选择操作："
+            echo "0. 退出"
             echo "1. 修补容器"
             echo "2. 重装容器"
             read -p "输入选择 (1/2): " choice
             
             case "$choice" in
+                0)
+                    log "退出安装"
+                    exit 0
+                    ;;
                 1)
                     log "执行修补操作"
                     patch_container

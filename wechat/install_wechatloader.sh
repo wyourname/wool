@@ -67,6 +67,7 @@ select_image() {
             DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-arm32.tar.gz"
             LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
             MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
+            ;;
         "x86_64")
             IMAGE_NAME="wechatloader:latest"
             DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-amd64.tar.gz"

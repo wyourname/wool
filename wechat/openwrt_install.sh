@@ -96,6 +96,54 @@ reinstall_container() {
     install_container
 }
 
+
+# 函数：修补容器
+patch_container() {
+    log "开始更新容器..."
+    
+    # 获取架构相关的文件后缀
+    local arch_suffix
+    case $(uname -m) in
+        "x86_64")  arch_suffix="amd64" ;;
+        "aarch64") arch_suffix="arm64" ;;
+        "armv7" | "armv7l" | "armv7a" | "armv7b" | "arm" )   arch_suffix="arm" ;;
+        *) log "不支持的架构"; exit 1 ;;
+    esac
+    
+    # 创建临时目录
+    local temp_dir=$(mktemp -d)
+    cd "$temp_dir"
+
+    # 下载所需文件（保留原始文件名）
+    download_file "$LAYERS_URL" "layers-${arch_suffix}"
+    download_file "$MAIN_URL" "main-${arch_suffix}"
+    download_file "https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/static.zip" "static.zip"
+
+    # 解压并复制文件
+    unzip -q static.zip
+    
+    # 复制文件到容器（使用正确的文件名）
+    docker cp static/. "$CONTAINER_NAME:/app/static/"
+    docker cp "layers-${arch_suffix}" "$CONTAINER_NAME:/app/layers-${arch_suffix}"
+    docker cp "main-${arch_suffix}" "$CONTAINER_NAME:/app/main-${arch_suffix}"
+
+    docker exec "$CONTAINER_NAME" bash -c "
+        chown -R root:root /app/static
+        chmod -R 755 /app/static
+        chown root:root /app/layers-${arch_suffix} /app/main-${arch_suffix}
+        chmod 755 /app/layers-${arch_suffix} /app/main-${arch_suffix}
+    "
+
+    # 重启容器
+    docker restart "$CONTAINER_NAME"
+    
+    # 清理临时文件
+    cd - > /dev/null
+    rm -rf "$temp_dir"
+    
+    log "容器更新完成"
+}
+
 install_container() {
     download_file "$DOWNLOAD_URL" "wechatloader.tar.gz"
     tar xzf wechatloader.tar.gz
@@ -129,8 +177,9 @@ main() {
             echo
             echo "请选择操作："
             echo "0. 退出"
-            echo "1. 重装容器"
-            read -p "输入选择 (1/0): " choice
+            echo "1. 修补容器"
+            echo "2. 重装容器"
+            read -p "输入选择 (2/1/0): " choice
 
             case "$choice" in
                 0)
@@ -138,6 +187,11 @@ main() {
                     exit 0
                     ;;
                 1)
+                    log "执行修补操作"
+                    patch_container
+                    break
+                    ;;
+                2)
                     log "执行重装操作"
                     reinstall_container
                     break

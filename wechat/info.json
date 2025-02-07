@@ -1,1 +1,1 @@
-{"layers": 1.11, "main": 1.06, "status": 200, "message":"x64机型可更新 layers:三方app授权接口;main:修复log输出错误,新增本地log存储,提示更新失败可以用脚本修补"}
+{"layers": 2.02, "main": 1.06, "status": 200, "message":"x64机型可更新 layers:三方app授权接口;main:修复log输出错误,新增本地log存储,提示更新失败可以用脚本修补"}

@@ -51,19 +51,19 @@ select_image() {
     case $ARCH in
         "arm64" | "aarch64")
             IMAGE_NAME="wechatloader-arm64:latest"
-            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-arm64.tar.gz"
+            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-arm64.tar.gz"
             LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
             MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
             ;;
         "armv7" | "armv7l" | "armv7a" | "armv7b" | "arm")
             IMAGE_NAME="wechatloader-arm32:latest"
-            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-arm32.tar.gz"
+            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-arm32.tar.gz"
             LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
             MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
             ;;
         "x86_64")
             IMAGE_NAME="wechatloader:latest"
-            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v1.1.0/wechatloader-amd64.tar.gz"
+            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-amd64.tar.gz"
             LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-amd64"
             MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-amd64"
             ;;

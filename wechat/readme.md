@@ -19,9 +19,9 @@ A user must possess the qualities of being adventurous, diligent, resilient, met
 
 1. mkdir -p wechat && cd wechat
 
-2. wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/install_wechatloader.sh && chmod +x install_wechatloader.sh && sudo ./install_wechatloader.sh
+2. wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/install_wechatloader.sh -O install_wechatloader.sh && chmod +x install_wechatloader.sh && sudo ./install_wechatloader.sh
 
-(openwrt 安装wechatloader 则用 wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/openwrt_install.sh && chmod +x openwrt_install.sh && sudo ./openwrt_install.sh)
+(openwrt 安装wechatloader 则用 wget https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/openwrt_install.sh -O openwrt_install.sh && chmod +x openwrt_install.sh && sudo ./openwrt_install.sh)
 
 linux ssh 执行,支持Debian ，使用前安装curl wget docker 再运行命令，群晖、windows请离开
 

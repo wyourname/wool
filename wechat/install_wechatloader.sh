@@ -58,21 +58,21 @@ select_image() {
     case $ARCH in
         "arm64" | "aarch64")
             IMAGE_NAME="wechatloader-arm64:latest"
-            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-arm64.tar.gz"
-            LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
-            MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
+            DOWNLOAD_URL="https://git.365676.xyz/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-arm64.tar.gz"
+            LAYERS_URL="https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm64"
+            MAIN_URL="https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm64"
             ;;
         "armv7" | "armv7l" | "armv7a" | "armv7b" | "arm")
             IMAGE_NAME="wechatloader-arm32:latest"
-            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-arm32.tar.gz"
-            LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
-            MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
+            DOWNLOAD_URL="https://git.365676.xyz/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-arm32.tar.gz"
+            LAYERS_URL="https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-arm"
+            MAIN_URL="https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-arm"
             ;;
         "x86_64")
             IMAGE_NAME="wechatloader:latest"
-            DOWNLOAD_URL="https://git.kfc50.us.kg/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-amd64.tar.gz"
-            LAYERS_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-amd64"
-            MAIN_URL="https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-amd64"
+            DOWNLOAD_URL="https://git.365676.xyz/https://github.com/wyourname/wool/releases/download/v2.0.0/wechatloader-amd64.tar.gz"
+            LAYERS_URL="https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/layers-amd64"
+            MAIN_URL="https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/main-amd64"
             ;;
         *)
             log "不支持的系统架构: $ARCH"
@@ -113,7 +113,7 @@ patch_container() {
     # 下载所需文件（保留原始文件名）
     download_file "$LAYERS_URL" "layers-${arch_suffix}"
     download_file "$MAIN_URL" "main-${arch_suffix}"
-    download_file "https://git.kfc50.us.kg/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/static.zip" "static.zip"
+    download_file "https://git.365676.xyz/https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/wechat/static.zip" "static.zip"
 
     # 解压并复制文件
     unzip -q static.zip

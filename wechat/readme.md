@@ -1,4 +1,4 @@
-# 请认真阅读以下使用说明与条款,否则对于使用过程中出现的任何问题概不答复 (已停止售卖)
+# 请认真阅读以下使用说明与条款,否则对于使用过程中出现的任何问题概不答复 
 
 1. 本仓库为个人学习与研究，仅供学习参考，请勿用于非法用途。
 
@@ -13,7 +13,7 @@
 6. 对于阅读脚本目前并没有多少可用的，请小白绕道而行，我无法及时更新脚本。若已购买，请联系退款。
 
 7. 使用者本身要具备勇于尝试、勤奋坚韧、细心谨慎、不怕吃苦的精神。贪图安逸只会阻碍自身成长，依赖他人只会让人丧失斗志。如你不具备以上品行，请绕道而行。
-A user must possess the qualities of being adventurous, diligent, resilient, meticulous, and unafraid of hardship. Seeking comfort will only hinder personal growth, and relying on others will lead to a loss of motivation. If you lack these virtues, please step aside.
+Users themselves must possess the spirit of courage to try new things, diligence and perseverance, attentiveness and prudence, and willingness to endure hardships. Seeking comfort will only hinder personal growth, while relying on others will sap one's fighting spirit. If you lack these qualities, please look elsewhere.
 
 ## 部署步骤：
 

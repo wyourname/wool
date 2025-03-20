@@ -35,7 +35,7 @@ linux ssh 执行,支持Debian ，使用前安装curl wget docker 再运行命令
 
 2. 填写passtoken: 也就是密钥，填写保存方可正常使用 
 
-3. 第一次登录4小时掉线 点唤醒登录后3天一掉，介意勿用 
+3. 第一次登录4小时掉线 点唤醒登录后3天一掉，介意勿用,心跳出现警告missing port in address是正常的，消除只需唤醒登录一下即可（个人推荐忽略，因为不影响） 
 
 4. 本地部署后在青龙配置文件添加 export WECHAT_SERVER='http://你部署的ip:8011' 
 

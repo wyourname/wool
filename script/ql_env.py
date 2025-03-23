@@ -82,11 +82,11 @@ class Qinglong:
         response = self.request_method("get", url)
         if not name:
             return response
-        # env_list = []
+        env_list = []
         for env in response:
             if env["name"] == name:
-                return env
-        return {}
+                env_list.append(env)
+        return env_list
 
     def update_env_from_id(self, data:dict):
         url = self.host + "/open/envs"

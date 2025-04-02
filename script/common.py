@@ -5,7 +5,7 @@
 """
 SCRIPT_NAME = "test"  # 脚本名称 记得修改这里
 
-PROXY_URL = ''
+PROXY_URL = 'https://git.365676.xyz'   # 可以改成你的代理
 
 
 if not PROXY_URL:

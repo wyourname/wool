@@ -21,7 +21,7 @@ SCRIPT_NAME = "test"  # 脚本名称
 # URL配置
 PROXY_URL = 'https://git.365676.xyz'   # 可以改成你的代理
 BASE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others'
-ALPINE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others/apline'
+ALPINE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others/alpine'
 
 # 日志配置 - 只配置当前模块的日志器，不影响全局
 logger = logging.getLogger(__name__)

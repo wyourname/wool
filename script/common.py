@@ -1,21 +1,33 @@
 """
 通用代码
 用于学习交流，请在下载24小时内删除代码
+使用 task common.py --script=test --proxy=https://git.365676.xyz --file=common.so --max-retries=2 --no-retry
+其中 script 为脚本名称，proxy 为代理地址，file 为文件名，max-retries 为最大重试次数，no-retry 为禁用重试机制
+script 为必填参数，其他参数为可选参数，不填则使用默认值
+
 """
-import logging
-import asyncio
-import platform
-import sys
-import os
-import re
-import enum
-import functools
-import aiohttp
-import aiofiles
-from typing import Tuple, Optional, List, Dict, Any, Callable
 
 # 配置
-SCRIPT_NAME = "test"  # 脚本名称
+SCRIPT_NAME = "test"  # 脚本名称，默认值
+
+
+try:
+    import logging
+    import asyncio
+    import platform
+    import sys
+    import os
+    import re
+    import enum
+    import functools
+    import aiohttp
+    import aiofiles
+    import argparse  # 添加argparse模块用于解析命令行参数
+    from typing import Tuple, Optional, List, Dict, Any, Callable
+except ImportError as e:
+    print(f"缺少必要的模块，请安装: {e}")
+    exit(1)
+
 
 # URL配置
 PROXY_URL = 'https://git.365676.xyz'   # 可以改成你的代理
@@ -54,6 +66,46 @@ class EnvCheckResult(enum.Enum):
     INVALID_PYTHON = "invalid_python"
     INVALID_OS = "invalid_os"
     INVALID_ARCH = "invalid_arch"
+
+# 解析命令行参数
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='脚本下载器')
+    parser.add_argument('--script', dest='script_name', type=str,
+                        help='指定要执行的脚本名称')
+    parser.add_argument('--proxy', dest='proxy_url', type=str,
+                        help='指定代理URL')
+    parser.add_argument('--file', dest='file_name', type=str, default='common.so',
+                        help='指定要下载的文件名')
+    parser.add_argument('--no-retry', dest='no_retry', action='store_true',
+                        help='禁用重试机制')
+    parser.add_argument('--max-retries', dest='max_retries', type=int, default=2,
+                        help='设置最大重试次数')
+    return parser.parse_args()
+
+# 获取脚本名称，优先使用命令行参数
+def get_script_name():
+    args = parse_arguments()
+    if args.script_name:
+        logger.info(f"使用命令行参数指定的脚本名称: {args.script_name}")
+        return args.script_name
+    else:
+        logger.info(f"使用默认脚本名称: {SCRIPT_NAME}")
+        return SCRIPT_NAME
+
+# 获取代理URL，优先使用命令行参数
+def get_proxy_url():
+    args = parse_arguments()
+    if args.proxy_url:
+        logger.info(f"使用命令行参数指定的代理URL: {args.proxy_url}")
+        return args.proxy_url
+    return PROXY_URL
+
+# 获取最大重试次数
+def get_max_retries():
+    args = parse_arguments()
+    if args.no_retry:
+        return 0
+    return args.max_retries
 
 # 异常处理装饰器
 def exception_handler(func):
@@ -108,6 +160,12 @@ def get_environment_info() -> Tuple[int, str, str]:
 @exception_handler
 def check_environment(file_name: str) -> EnvCheckResult:
     """检查运行环境是否符合要求"""
+    # 检查命令行参数，优先使用命令行指定的文件名
+    args = parse_arguments()
+    if args.file_name:
+        file_name = args.file_name
+        logger.info(f"使用命令行参数指定的文件名: {file_name}")
+    
     py_minor, os_type, arch = get_environment_info()
     logger.info(f"Python版本: 3.{py_minor}, 操作系统: {os_type}, 架构: {arch}")
     
@@ -143,8 +201,8 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if not hasattr(process_so_file, 'retry_count'):
         process_so_file.retry_count = 0
     
-    # 限制最大重试次数为2
-    MAX_RETRIES = 2
+    # 获取最大重试次数
+    MAX_RETRIES = get_max_retries()
     if process_so_file.retry_count >= MAX_RETRIES:
         logger.error(f"已达到最大重试次数({MAX_RETRIES})，停止尝试")
         return False
@@ -156,7 +214,9 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     logger.info(f"本地已存在文件: {filename}")
     try:
         import common
-        await common.main(SCRIPT_NAME)
+        # 获取脚本名称，优先使用命令行参数
+        script_name = get_script_name()
+        await common.main(script_name)
         # 成功后重置计数器
         process_so_file.retry_count = 0
         return True
@@ -172,7 +232,7 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
     """异步下载.so文件"""
     file_base_name = os.path.splitext(filename)[0]
     
-    # 确定下载URL
+    # 确定下载URL，使用命令行参数指定的代理URL
     base_download_url = get_download_url(container_type)
     if container_type == ContainerType.ALPINE:
         logger.info(f"使用Alpine专用下载链接: {base_download_url}")
@@ -205,11 +265,14 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
 
 def get_download_url(container_type: Optional[ContainerType]) -> str:
     """根据容器类型获取下载URL"""
+    # 获取代理URL，优先使用命令行参数
+    proxy_url = get_proxy_url()
+    
     # 设置基本URL
-    if not PROXY_URL:
+    if not proxy_url:
         base_url = ALPINE_URL if container_type == ContainerType.ALPINE else BASE_URL
     else:
-        proxy = PROXY_URL if PROXY_URL.endswith('/') else f"{PROXY_URL}/"
+        proxy = proxy_url if proxy_url.endswith('/') else f"{proxy_url}/"
         base_url = f"{proxy}{ALPINE_URL}" if container_type == ContainerType.ALPINE else f"{proxy}{BASE_URL}"
     
     return base_url
@@ -259,11 +322,17 @@ async def update_progress_bar(downloaded_size: int, total_size: int, bar_length:
     progress = downloaded_size / total_size if total_size else 0
     arrow = '=' * int(bar_length * progress)
     spaces = ' ' * (bar_length - len(arrow))
-    if total_size >= 1024 * 1024: 
+
+    if total_size >= 1024 * 1024:  # MB级别
         size_str = f"{downloaded_size/(1024*1024):.2f}MB/{total_size/(1024*1024):.2f}MB"
-    else: 
+    else:  # KB级别
         size_str = f"{downloaded_size/1024:.2f}KB/{total_size/1024:.2f}KB"
+
     print(f"\r下载进度: [{arrow}{spaces}] {int(progress*100)}% {size_str}", end='', flush=True)
 
 if __name__ == '__main__':
-    check_environment('common.so')
+    # 解析命令行参数并执行环境检查
+    args = parse_arguments()
+    logger.info(f"启动代码执行器...")
+    # 开始下载和检查过程
+    check_environment(args.file_name if args.file_name else 'common.so')

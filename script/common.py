@@ -7,7 +7,6 @@ import asyncio
 import platform
 import sys
 import os
-import subprocess
 import re
 import enum
 import functools
@@ -23,9 +22,9 @@ PROXY_URL = 'https://git.365676.xyz'   # 可以改成你的代理
 BASE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others'
 ALPINE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others/alpine'
 
-# 日志配置 - 只配置当前模块的日志器，不影响全局
+
 logger = logging.getLogger(__name__)
-if not logger.handlers:  # 防止重复添加处理器
+if not logger.handlers: 
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(
         fmt='%(asctime)s-%(levelname)s:%(message)s',
@@ -49,12 +48,6 @@ class CpuArchitecture(enum.Enum):
     ARMV8 = "armv8"
     ARMV7 = "armv7l"
 
-# 使用枚举定义下载工具
-class DownloadTool(enum.Enum):
-    CURL = "curl"
-    WGET = "wget"
-    AIOHTTP = "aiohttp"
-
 # 使用枚举定义环境检查结果
 class EnvCheckResult(enum.Enum):
     SUCCESS = "success"
@@ -64,7 +57,6 @@ class EnvCheckResult(enum.Enum):
 
 # 异常处理装饰器
 def exception_handler(func):
-    """装饰器：捕获并处理函数执行过程中的异常"""
     @functools.wraps(func)
     async def async_wrapper(*args, **kwargs):
         try:
@@ -80,22 +72,17 @@ def exception_handler(func):
         except Exception as e:
             logger.error(f"执行 {func.__name__} 时出错: {e}")
             return None
-    
-    # 根据函数是否是协程函数返回不同的包装器
     if asyncio.iscoroutinefunction(func):
         return async_wrapper
     return sync_wrapper
 
 @exception_handler
 def detect_container() -> Tuple[bool, Optional[ContainerType]]:
-    """检测当前是否在容器中运行，以及容器类型"""
     is_container = os.path.exists('/.dockerenv')
     container_type = None
     
     if not is_container:
         return False, None
-        
-    # 通过/etc/os-release检测
     if os.path.exists('/etc/os-release'):
         with open('/etc/os-release', 'r') as f:
             os_info = f.read().lower()
@@ -103,8 +90,6 @@ def detect_container() -> Tuple[bool, Optional[ContainerType]]:
                 return True, ContainerType.ALPINE
             if 'debian' in os_info:
                 return True, ContainerType.DEBIAN
-    
-    # 通过特定文件检测
     if os.path.exists('/etc/alpine-release'):
         return True, ContainerType.ALPINE
     if os.path.exists('/etc/debian_version'):
@@ -154,6 +139,16 @@ def check_environment(file_name: str) -> EnvCheckResult:
 
 @exception_handler
 async def process_so_file(filename: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> bool:
+    # 添加重试计数器
+    if not hasattr(process_so_file, 'retry_count'):
+        process_so_file.retry_count = 0
+    
+    # 限制最大重试次数为2
+    MAX_RETRIES = 2
+    if process_so_file.retry_count >= MAX_RETRIES:
+        logger.error(f"已达到最大重试次数({MAX_RETRIES})，停止尝试")
+        return False
+    
     if not os.path.exists(filename):
         logger.info(f"文件{filename}不存在，正在下载...")
         return await download_so_file(filename, py_v, cpu_info, container_type)
@@ -162,9 +157,13 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     try:
         import common
         await common.main(SCRIPT_NAME)
+        # 成功后重置计数器
+        process_so_file.retry_count = 0
         return True
     except Exception as e:
         logger.error(f"加载{filename}失败: {e}")
+        # 增加重试计数
+        process_so_file.retry_count += 1
         os.remove(filename)
         return await download_so_file(filename, py_v, cpu_info, container_type)
 
@@ -185,13 +184,14 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
     
     logger.info(f"正在从 {url} 下载文件...")
     
-    # 尝试使用不同工具下载
-    for tool in [DownloadTool.AIOHTTP, DownloadTool.CURL, DownloadTool.WGET]:
-        if await try_download(tool, url, filename):
-            logger.info(f"文件下载成功: {filename}")
-            return await process_so_file(filename, py_v, cpu_info, container_type)
+    # 使用aiohttp下载并显示进度条
+    success = await download_with_progress(url, filename)
     
-    # 所有工具都下载失败
+    if success:
+        logger.info(f"文件下载成功: {filename}")
+        return await process_so_file(filename, py_v, cpu_info, container_type)
+    
+    # 下载失败
     logger.error(f"下载失败: {url}")
     if os.path.exists(filename):
         os.remove(filename)
@@ -227,74 +227,43 @@ def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: 
         return None
 
 @exception_handler
-async def try_download(tool: DownloadTool, url: str, filename: str) -> bool:
-    """尝试使用指定工具下载文件"""
-    if tool == DownloadTool.AIOHTTP:
-        return await download_with_aiohttp(url, filename)
-    elif tool == DownloadTool.CURL and check_command_exists('curl'):
-        return await download_with_curl(url, filename)
-    elif tool == DownloadTool.WGET and check_command_exists('wget'):
-        return await download_with_wget(url, filename)
-    return False
-
-@exception_handler
-async def download_with_aiohttp(url: str, filename: str) -> bool:
-    """使用aiohttp下载文件"""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as response:
-                if response.status != 200:
-                    return False
-                
-                async with aiofiles.open(filename, 'wb') as f:
-                    await f.write(await response.read())
-                return True
-    except:
-        # aiohttp可能未安装，静默失败
-        return False
-
-@exception_handler
-async def download_with_curl(url: str, filename: str) -> bool:
-    """使用curl下载文件"""
-    command = ['curl', '-#', '-o', filename, '-w', '%{http_code}', url]
-    result, stdout = await run_command(command)
-    return stdout == '200' and result == 0
-
-@exception_handler
-async def download_with_wget(url: str, filename: str) -> bool:
-    """使用wget下载文件"""
-    command = ['wget', '-q', '-O', filename, url]
-    result, _ = await run_command(command)
-    return result == 0
-
-@exception_handler
-async def run_command(command: List[str]) -> Tuple[int, str]:
-    """异步执行shell命令并返回结果"""
-    process = await asyncio.create_subprocess_exec(
-        *command,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.STDOUT
-    )
+async def download_with_progress(url: str, filename: str) -> bool:
+    """使用aiohttp下载文件并显示进度条"""
+    session = aiohttp.ClientSession()
+    async with session:
+        response = await session.get(url)
+        if response.status != 200:
+            logger.error(f"HTTP请求失败，状态码: {response.status}")
+            return False
+        total_size = int(response.headers.get('content-length', 0))
+        return await save_file_with_progress(response, filename, total_size)
     
-    stdout_data = await process.stdout.read()
-    await process.wait()
-    
-    output = stdout_data.decode('utf-8', errors='ignore').strip()
-    return process.returncode, output
 
-@exception_handler
-def check_command_exists(command: str) -> bool:
-    """检查系统中是否存在指定命令"""
-    try:
-        subprocess.run(
-            ['which', command], 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.PIPE, 
-            check=True
-        )
-        return True
-    except subprocess.SubprocessError:
-        return False
+
+async def save_file_with_progress(response, filename: str, total_size: int) -> bool:
+    """保存文件并显示进度条"""
+    downloaded_size = 0
+    chunk_size = 8192 
+    progress_bar_length = 30  
+    async with aiofiles.open(filename, 'wb') as f:
+        async for chunk in response.content.iter_chunked(chunk_size):
+            await f.write(chunk)
+            downloaded_size += len(chunk)
+            await update_progress_bar(downloaded_size, total_size, progress_bar_length)
+    print()
+    return True
+
+
+async def update_progress_bar(downloaded_size: int, total_size: int, bar_length: int) -> None:
+    """更新并显示下载进度条"""
+    progress = downloaded_size / total_size if total_size else 0
+    arrow = '=' * int(bar_length * progress)
+    spaces = ' ' * (bar_length - len(arrow))
+    if total_size >= 1024 * 1024: 
+        size_str = f"{downloaded_size/(1024*1024):.2f}MB/{total_size/(1024*1024):.2f}MB"
+    else: 
+        size_str = f"{downloaded_size/1024:.2f}KB/{total_size/1024:.2f}KB"
+    print(f"\r下载进度: [{arrow}{spaces}] {int(progress*100)}% {size_str}", end='', flush=True)
 
 if __name__ == '__main__':
     check_environment('common.so')

@@ -16,20 +16,25 @@ import aiofiles
 from typing import Tuple, Optional, List, Dict, Any, Callable
 
 # 配置
-SCRIPT_NAME = "nebula-full"  # 脚本名称
+SCRIPT_NAME = "test"  # 脚本名称
 
 # URL配置
 PROXY_URL = 'https://git.365676.xyz'   # 可以改成你的代理
 BASE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others'
 ALPINE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others/apline'
 
-# 日志配置
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s-%(levelname)s:%(message)s',
-    datefmt='%H:%M:%S'
-)
+# 日志配置 - 只配置当前模块的日志器，不影响全局
 logger = logging.getLogger(__name__)
+if not logger.handlers:  # 防止重复添加处理器
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter(
+        fmt='%(asctime)s-%(levelname)s:%(message)s',
+        datefmt='%H:%M:%S'
+    ))
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    # 设置为不向上传播日志，避免重复日志
+    logger.propagate = False
 
 # 使用枚举定义容器类型
 class ContainerType(enum.Enum):

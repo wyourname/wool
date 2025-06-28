@@ -6,13 +6,15 @@
 
 ### 3. 协议已死，不再出售，请勿联系。
 
-4. 对于使用过程中出现任何bug 本人不一定能修复，请慎重联系，对于使用有疑问我概不回复。
+### 4. 购买前请留意该条例,协议版本855该版本具有封号的风险,推荐1小号先试水,token到手请勿第一时间激活，先到机器人@Mark_oool_bot 进行命令【/register】 注册完绑定你的token 命令 【/bind passtoken 收到的token值】 完成后再激活。价格35（下个月有空更新下857看看，大概可能吧）emmm 5天内随时退款,只要我看到消息秒退
 
-5. 对于使用了很多天但却中途不想用了，请带上你的token 联系我，我将全款退回给你，但需要注意的是本仓库内任何代码你将无法使用，也请你从你的计算机上删除本仓库任何有关代码，否则后果自负。
+5. 对于使用过程中出现任何bug 本人不一定能修复，请慎重联系，对于使用有疑问我概不回复。
 
-6. 对于阅读脚本目前并没有多少可用的，请小白绕道而行，我无法及时更新脚本。若已购买，请联系退款。
+6. 对于使用了很多天但却中途不想用了，请带上你的token 联系我，我将全款退回给你，但需要注意的是本仓库内任何代码你将无法使用，也请你从你的计算机上删除本仓库任何有关代码，否则后果自负。
 
-7. 使用者本身要具备勇于尝试、勤奋坚韧、细心谨慎、不怕吃苦的精神。贪图安逸只会阻碍自身成长，依赖他人只会让人丧失斗志。如你不具备以上品行，请绕道而行。
+7. 对于阅读脚本目前并没有多少可用的，请小白绕道而行，我无法及时更新脚本。若已购买，请联系退款。
+
+8. 使用者本身要具备勇于尝试、勤奋坚韧、细心谨慎、不怕吃苦的精神。贪图安逸只会阻碍自身成长，依赖他人只会让人丧失斗志。如你不具备以上品行，请绕道而行。
 Users themselves must possess the spirit of courage to try new things, diligence and perseverance, attentiveness and prudence, and willingness to endure hardships. Seeking comfort will only hinder personal growth, while relying on others will sap one's fighting spirit. If you lack these qualities, please look elsewhere.
 
 ## 部署步骤：

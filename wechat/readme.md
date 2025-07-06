@@ -83,20 +83,11 @@
 4.  **准备通用脚本模板**：
     *   在青龙的脚本目录中新建一个文件夹（例如 `wechat_scripts`）。
     *   下载 `common.py` 文件到该文件夹中，作为脚本模板。
+    *   前往 定时任务 - 添加任务 名称随便
+    *   填写命令
         ```bash
-        # 在青龙容器内或挂载的脚本目录执行
-        mkdir -p /ql/scripts/wechat_scripts
-        wget https://raw.githubusercontent.com/wyourname/wool/refs/heads/master/script/common.py -O /ql/scripts/wechat_scripts/common.py
+        task wechat_scripts/common.py --script 脚本名      
         ```
-
-5.  **创建任务脚本**：
-    *   在 `wechat_scripts` 文件夹中创建一个新的 `.py` 文件，例如 `kele.py`。
-    *   将 `common.py` 的内容复制到 `kele.py` 中。
-    *   修改 `kele.py` 脚本中的 `SCRIPT_NAME` 变量。例如，要跑可乐阅读，就修改为：
-        ```python
-        SCRIPT_NAME = 'wxkele'
-        ```
-    *   其他脚本以此类推。
 
 6.  **邀请码**：对于需要邀请码的脚本，请自行寻找。
 
@@ -104,7 +95,7 @@
 
 8.  **网络代理**：如果在下载 `common.so` 时遇到问题，可以在脚本中设置代理。找到 `PROXY_URL = ''` 这一行，修改为：
     ```python
-    PROXY_URL = 'https://ghproxy.com/' # 或者其他可用的GitHub代理
+    PROXY_URL = 'https://git.3675676.xyz.com/' # 或者其他可用的GitHub代理
     ```
 
 ---

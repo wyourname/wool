@@ -34,9 +34,9 @@
 
 ### 安装命令
 
-1.  创建并进入工作目录：
+1.  dockeramd64的命令：
     ```bash
-    mkdir -p wechat && cd wechat
+    docker run -d --name wechatloader -v $PWD/wechatloader:/root -p 8011:8011 --restart unless-stopped wyourname/wechatloader:amd64-latest
     
     ```
 

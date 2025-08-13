@@ -34,10 +34,18 @@
 
 ### 安装命令
 
-1.  dockeramd64的命令：
+1.  docker amd64的命令：
     ```bash
     docker run -d --name wechatloader -v $PWD/wechatloader:/root -p 8011:8011 --restart unless-stopped wyourname/wechatloader:amd64-latest
     
+    ```
+    2.  docker arm64的命令：
+    ```bash
+    docker run -d --name wechatloader -v $PWD/wechatloader:/root -p 8011:8011 --restart unless-stopped wyourname/wechatloader:arm64-latest
+    ```
+    3.  面具 kernelsu模块的安装：
+    ```bash
+    从releases中下载wechatloader_chroot.zip模块,直接刷即可
     ```
 
 ---

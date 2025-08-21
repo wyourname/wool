@@ -1,57 +1,115 @@
 """
-通用代码
-用于学习交流，请在下载24小时内删除代码
-使用 task common.py --script=test --proxy=https://git.365676.xyz --file=common.so --max-retries=2 --no-retry
-其中 script 为脚本名称，proxy 为代理地址，file 为文件名，max-retries 为最大重试次数，no-retry 为禁用重试机制
-script 为必填参数，其他参数为可选参数，不填则使用默认值
+通用代码 - 脚本下载器和执行器
+命令行使用说明：
+python common.py [参数选项]
 
+参数详解：
+--script SCRIPT_NAME        指定要执行的脚本名称 (默认: test)
+                            示例: --script abc
+
+--proxy PROXY_URL           指定代理服务器URL (默认: https://git.365676.xyz)
+                            示例: --proxy https://your-proxy.com
+
+--file FILE_NAME            指定要下载的文件名 (默认: common.so)
+                            示例: --file myfile.so
+
+--max-retries MAX_RETRIES   设置最大重试次数，设置为0禁用重试 (默认: 2)
+                            示例: --max-retries 3
+
+--concurrency               是否启用脚本并发参数 (开关参数，无需值)
+                            示例: --concurrency
+
+--max-concurrency NUM      设置最大并发数 (默认: 5)
+                            示例: --max-concurrency 10
+
+使用示例：
+# 基本使用
+python common.py --script theater
+
+# 完整参数示例
+python common.py --script theater --proxy https://git.365676.xyz --file common.so --max-retries 2 --concurrency --max-concurrency 3
+
+# 禁用重试
+python common.py --script test --max-retries 0
+
+# 使用自定义代理
+python common.py --script myapp --proxy https://my-proxy.com --file myapp.so
+
+# 青龙基本用法
+task common.py --script 脚本名 --concurrency
+或者
+python3 common.py --script 脚本名 --concurrency
+
+功能说明：
+1. 自动检测运行环境（Python版本、操作系统、CPU架构）
+2. 检测容器环境（Docker、Alpine、Debian等）
+3. 根据环境自动下载对应的.so文件
+4. 支持重试机制和进度条显示
+5. 自动设置环境变量供脚本使用
+6. 支持代理服务器下载
+
+环境变量设置：
+- {script_name}_concurrency: 并发开关状态
+- {script_name}_max_concurrency: 最大并发数
+- GITHUB_PROXY: 代理服务器地址
+
+环境要求：
+- Python 3.9-3.12
+- Linux 操作系统
+- 支持的CPU架构: x86_64, aarch64, armv8, armv7l
+- 依赖包: aiohttp, aiofiles
+码友如需借鉴请带上原作者出处
 """
 
-# 配置
-SCRIPT_NAME = "test"  # 脚本名称，默认值
-
+import logging
+import asyncio
+import platform
+import sys
+import os
+import enum
+import functools
+import argparse
+from typing import Tuple, Optional
 
 try:
-    import logging
-    import asyncio
-    import platform
-    import sys
-    import os
-    import re
-    import enum
-    import functools
     import aiohttp
     import aiofiles
-    import argparse  # 添加argparse模块用于解析命令行参数
-    from typing import Tuple, Optional, List, Dict, Any, Callable
 except ImportError as e:
-    print(f"缺少必要的模块，请安装: {e}")
-    exit(1)
+    print(f"缺少必要的模块，请安装: pip install aiohttp aiofiles")
+    sys.exit(1)
 
+# 配置
+SCRIPT_NAME = "test"
 
 # URL配置
-PROXY_URL = 'https://git.365676.xyz'   # 可以改成你的代理
+PROXY_URL = 'https://git.365676.xyz'
 BASE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others'
 ALPINE_URL = 'https://raw.githubusercontent.com/wyourname/wool/master/others/alpine'
 
+# 配置日志
+def setup_logger(log_level='INFO'):
+    _logger = logging.getLogger(__name__)
+    if not _logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(
+            fmt='%(asctime)s-%(levelname)s:%(message)s',
+            datefmt='%H:%M:%S'
+        ))
+        _logger.setLevel(getattr(logging, log_level))
+        _logger.addHandler(handler)
+        _logger.propagate = False
+    return _logger
 
-logger = logging.getLogger(__name__)
-if not logger.handlers: 
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter(
-        fmt='%(asctime)s-%(levelname)s:%(message)s',
-        datefmt='%H:%M:%S'
-    ))
-    logger.setLevel(logging.INFO)
-    logger.addHandler(handler)
-    # 设置为不向上传播日志，避免重复日志
-    logger.propagate = False
+# 初始化时使用默认日志级别，稍后会根据配置更新
+logger = setup_logger()
+
 
 # 使用枚举定义容器类型
 class ContainerType(enum.Enum):
     UNKNOWN = "unknown"
     ALPINE = "alpine"
     DEBIAN = "debian"
+
 
 # 使用枚举定义CPU架构
 class CpuArchitecture(enum.Enum):
@@ -60,6 +118,7 @@ class CpuArchitecture(enum.Enum):
     ARMV8 = "armv8"
     ARMV7 = "armv7l"
 
+
 # 使用枚举定义环境检查结果
 class EnvCheckResult(enum.Enum):
     SUCCESS = "success"
@@ -67,45 +126,78 @@ class EnvCheckResult(enum.Enum):
     INVALID_OS = "invalid_os"
     INVALID_ARCH = "invalid_arch"
 
-# 解析命令行参数
-def parse_arguments():
-    parser = argparse.ArgumentParser(description='脚本下载器')
-    parser.add_argument('--script', dest='script_name', type=str,
-                        help='指定要执行的脚本名称')
-    parser.add_argument('--proxy', dest='proxy_url', type=str,
-                        help='指定代理URL')
-    parser.add_argument('--file', dest='file_name', type=str, default='common.so',
-                        help='指定要下载的文件名')
-    parser.add_argument('--no-retry', dest='no_retry', action='store_true',
-                        help='禁用重试机制')
-    parser.add_argument('--max-retries', dest='max_retries', type=int, default=2,
-                        help='设置最大重试次数')
-    return parser.parse_args()
 
-# 获取脚本名称，优先使用命令行参数
-def get_script_name():
-    args = parse_arguments()
-    if args.script_name:
-        logger.info(f"使用命令行参数指定的脚本名称: {args.script_name}")
-        return args.script_name
-    else:
-        logger.info(f"使用默认脚本名称: {SCRIPT_NAME}")
-        return SCRIPT_NAME
+class Config:
+    """配置类，单例模式避免重复解析参数"""
+    _instance = None
+    _args = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._parse_arguments()
+        return cls._instance
+    
+    @classmethod
+    def _parse_arguments(cls):
+        parser = argparse.ArgumentParser(description='脚本下载器')
+        parser.add_argument('--script', dest='script_name', type=str,
+                            help='指定要执行的脚本名称')
+        parser.add_argument('--proxy', dest='proxy_url', type=str,
+                            help='指定代理URL')
+        parser.add_argument('--file', dest='file_name', type=str, default='common.so',
+                            help='指定要下载的文件名')
+        parser.add_argument('--max-retries', dest='max_retries', type=int, default=2,
+                            help='设置最大重试次数，设置为0禁用重试')
+        parser.add_argument('--concurrency', dest='concurrency', action='store_true',
+                            help='是否启用script并发参数')
+        parser.add_argument('--max-concurrency', dest='max_concurrency', type=int, 
+                            default=5, help='设置最大并发数')
+        parser.add_argument('--log-level', dest='log_level', type=str, 
+                            choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'], default='INFO',
+                            help='设置日志级别')
+        cls._args = parser.parse_args()
+    
+    @property
+    def script_name(self):
+        return self._args.script_name or SCRIPT_NAME
+    
+    @property
+    def proxy_url(self):
+        return self._args.proxy_url or PROXY_URL
+    
+    @property
+    def file_name(self):
+        return self._args.file_name
+    
+    @property
+    def max_retries(self):
+        return self._args.max_retries
+    
+    @property
+    def concurrency(self):
+        return self._args.concurrency
+    
+    @property
+    def max_concurrency(self):
+        return self._args.max_concurrency
+    
+    @property
+    def log_level(self):
+        return self._args.log_level
 
-# 获取代理URL，优先使用命令行参数
-def get_proxy_url():
-    args = parse_arguments()
-    if args.proxy_url:
-        logger.info(f"使用命令行参数指定的代理URL: {args.proxy_url}")
-        return args.proxy_url
-    return PROXY_URL
+config = Config()
 
-# 获取最大重试次数
-def get_max_retries():
-    args = parse_arguments()
-    if args.no_retry:
-        return 0
-    return args.max_retries
+
+def set_environment():
+    """设置环境变量"""
+    script_name = config.script_name
+    os.environ[f'{script_name}_concurrency'] = str(config.concurrency)
+    os.environ[f'{script_name}_max_concurrency'] = str(config.max_concurrency)
+    os.environ['GITHUB_PROXY'] = config.proxy_url
+    logger.info(f"设置环境变量: {script_name}_concurrency={config.concurrency}")
+    logger.info(f"设置环境变量: {script_name}_max_concurrency={config.max_concurrency}")
+
 
 # 异常处理装饰器
 def exception_handler(func):
@@ -116,7 +208,7 @@ def exception_handler(func):
         except Exception as e:
             logger.error(f"执行 {func.__name__} 时出错: {e}")
             return None
-    
+
     @functools.wraps(func)
     def sync_wrapper(*args, **kwargs):
         try:
@@ -124,30 +216,40 @@ def exception_handler(func):
         except Exception as e:
             logger.error(f"执行 {func.__name__} 时出错: {e}")
             return None
-    if asyncio.iscoroutinefunction(func):
-        return async_wrapper
-    return sync_wrapper
+
+    return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+
 
 @exception_handler
 def detect_container() -> Tuple[bool, Optional[ContainerType]]:
-    is_container = os.path.exists('/.dockerenv')
-    container_type = None
-    
-    if not is_container:
+    """检测容器环境和类型"""
+    if not os.path.exists('/.dockerenv'):
         return False, None
+    
+    # 检查容器类型的优先级顺序
+    container_checks = [
+        ('/etc/alpine-release', ContainerType.ALPINE),
+        ('/etc/debian_version', ContainerType.DEBIAN),
+    ]
+    
+    for file_path, container_type in container_checks:
+        if os.path.exists(file_path):
+            return True, container_type
+    
+    # 检查 /etc/os-release
     if os.path.exists('/etc/os-release'):
-        with open('/etc/os-release', 'r') as f:
-            os_info = f.read().lower()
-            if 'alpine' in os_info:
-                return True, ContainerType.ALPINE
-            if 'debian' in os_info:
-                return True, ContainerType.DEBIAN
-    if os.path.exists('/etc/alpine-release'):
-        return True, ContainerType.ALPINE
-    if os.path.exists('/etc/debian_version'):
-        return True, ContainerType.DEBIAN
+        try:
+            with open('/etc/os-release', 'r') as f:
+                os_info = f.read().lower()
+                if 'alpine' in os_info:
+                    return True, ContainerType.ALPINE
+                if 'debian' in os_info:
+                    return True, ContainerType.DEBIAN
+        except IOError:
+            pass
     
     return True, ContainerType.UNKNOWN
+
 
 @exception_handler
 def get_environment_info() -> Tuple[int, str, str]:
@@ -157,125 +259,163 @@ def get_environment_info() -> Tuple[int, str, str]:
     a = platform.machine()
     return v.minor, o, a
 
+
 @exception_handler
-def check_environment(file_name: str) -> EnvCheckResult:
+def check_environment(file_name: str = None) -> EnvCheckResult:
     """检查运行环境是否符合要求"""
-    # 检查命令行参数，优先使用命令行指定的文件名
-    args = parse_arguments()
-    if args.file_name:
-        file_name = args.file_name
-        logger.info(f"使用命令行参数指定的文件名: {file_name}")
-    
+    file_name = file_name or config.file_name
+    logger.info(f"使用文件名: {file_name}")
+
     py_minor, os_type, arch = get_environment_info()
     logger.info(f"Python版本: 3.{py_minor}, 操作系统: {os_type}, 架构: {arch}")
-    
+
     # 检测容器环境
     is_container, container_type = detect_container()
     if is_container:
         logger.info(f"检测到容器环境: {container_type.value if container_type else '未知类型'}")
+
+    # 环境验证
+    validations = [
+        (py_minor in [9, 10, 11, 12], EnvCheckResult.INVALID_PYTHON, 
+         "不符合要求: Python版本不是3.9、3.10、3.11或3.12"),
+        (os_type == 'Linux', EnvCheckResult.INVALID_OS, 
+         "不符合要求: 操作系统类型不是Linux"),
+        (arch in [a.value for a in CpuArchitecture], EnvCheckResult.INVALID_ARCH,
+         f"不符合要求: 处理器架构不支持(需要{', '.join([a.value for a in CpuArchitecture])})")
+    ]
     
-    # 检查Python版本
-    if py_minor not in [9, 10, 11, 12]:
-        logger.error("不符合要求: Python版本不是3.9、3.10、3.11或3.12")
-        return EnvCheckResult.INVALID_PYTHON
-    
-    # 检查操作系统
-    if os_type != 'Linux':
-        logger.error("不符合要求: 操作系统类型不是Linux")
-        return EnvCheckResult.INVALID_OS
-    
-    # 检查CPU架构
-    valid_architectures = [arch.value for arch in CpuArchitecture]
-    if arch not in valid_architectures:
-        logger.error(f"不符合要求: 处理器架构不支持(需要{', '.join(valid_architectures)})")
-        return EnvCheckResult.INVALID_ARCH
-    
+    for is_valid, error_result, error_msg in validations:
+        if not is_valid:
+            logger.error(error_msg)
+            return error_result
+
     # 环境检查通过，进行后续操作
     logger.info("环境符合运行要求")
     asyncio.run(process_so_file(file_name, py_minor, arch, container_type))
     return EnvCheckResult.SUCCESS
 
+
+class RetryCounter:
+    """重试计数器类"""
+    def __init__(self):
+        self.count = 0
+    
+    def increment(self):
+        self.count += 1
+    
+    def reset(self):
+        self.count = 0
+    
+    def exceeded(self, max_retries):
+        return self.count >= max_retries
+
+retry_counter = RetryCounter()
+
 @exception_handler
 async def process_so_file(filename: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> bool:
-    # 添加重试计数器
-    if not hasattr(process_so_file, 'retry_count'):
-        process_so_file.retry_count = 0
-    
-    # 获取最大重试次数
-    MAX_RETRIES = get_max_retries()
-    if process_so_file.retry_count >= MAX_RETRIES:
-        logger.error(f"已达到最大重试次数({MAX_RETRIES})，停止尝试")
+    """处理.so文件，包含重试逻辑"""
+    if retry_counter.exceeded(config.max_retries):
+        logger.error(f"已达到最大重试次数({config.max_retries})，停止尝试")
         return False
-    
+
     if not os.path.exists(filename):
         logger.info(f"文件{filename}不存在，正在下载...")
         return await download_so_file(filename, py_v, cpu_info, container_type)
-    
+
     logger.info(f"本地已存在文件: {filename}")
     try:
-        import common
-        # 获取脚本名称，优先使用命令行参数
-        script_name = get_script_name()
-        await common.main(script_name)
-        # 成功后重置计数器
-        process_so_file.retry_count = 0
+        # 动态导入.so文件
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("common", filename)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"无法加载模块规范: {filename}")
+        
+        common_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(common_module)
+        
+        # 检查是否有main函数
+        if hasattr(common_module, 'main'):
+            main_func = getattr(common_module, 'main')
+            # 检查main函数是否是异步的
+            if asyncio.iscoroutinefunction(main_func):
+                await main_func(config.script_name)
+            else:
+                # 如果是同步函数，直接调用
+                main_func(config.script_name)
+        else:
+            logger.info(f"模块 {filename} 加载成功，但没有找到main函数")
+        
+        retry_counter.reset()
         return True
-    except Exception as e:
-        logger.error(f"加载{filename}失败: {e}")
-        # 增加重试计数
-        process_so_file.retry_count += 1
-        os.remove(filename)
+    except ImportError as e:
+        logger.error(f"导入{filename}失败: {e}")
+        retry_counter.increment()
+        if os.path.exists(filename):
+            os.remove(filename)
         return await download_so_file(filename, py_v, cpu_info, container_type)
+    except Exception as e:
+        logger.error(f"执行{filename}失败: {e}")
+        retry_counter.increment()
+        if os.path.exists(filename):
+            os.remove(filename)
+        return await download_so_file(filename, py_v, cpu_info, container_type)
+
 
 @exception_handler
 async def download_so_file(filename: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> bool:
     """异步下载.so文件"""
     file_base_name = os.path.splitext(filename)[0]
-    
+
     # 确定下载URL，使用命令行参数指定的代理URL
     base_download_url = get_download_url(container_type)
     if container_type == ContainerType.ALPINE:
         logger.info(f"使用Alpine专用下载链接: {base_download_url}")
-    
+
     # 根据CPU架构构建URL
     url = build_download_url(base_download_url, file_base_name, py_v, cpu_info)
     if not url:
         return False
-    
+
     logger.info(f"正在从 {url} 下载文件...")
-    
+
     # 使用aiohttp下载并显示进度条
     success = await download_with_progress(url, filename)
-    
+
     if success:
         logger.info(f"文件下载成功: {filename}")
-        return await process_so_file(filename, py_v, cpu_info, container_type)
-    
+        # 下载成功后不要再次调用process_so_file，避免无限递归
+        return True
+
     # 下载失败
     logger.error(f"下载失败: {url}")
     if os.path.exists(filename):
         os.remove(filename)
-    
+
     # 如果是Alpine，尝试使用普通链接
     if container_type == ContainerType.ALPINE:
         logger.info("尝试使用标准链接下载...")
         return await download_so_file(filename, py_v, cpu_info, None)
-    
+
     return False
+
 
 def get_download_url(container_type: Optional[ContainerType]) -> str:
     """根据容器类型获取下载URL"""
-    # 获取代理URL，优先使用命令行参数
-    proxy_url = get_proxy_url()
+    proxy_url = config.proxy_url
     
-    # 设置基本URL
-    if not proxy_url:
-        base_url = ALPINE_URL if container_type == ContainerType.ALPINE else BASE_URL
-    else:
-        proxy = proxy_url if proxy_url.endswith('/') else f"{proxy_url}/"
-        base_url = f"{proxy}{ALPINE_URL}" if container_type == ContainerType.ALPINE else f"{proxy}{BASE_URL}"
+    # 选择基础URL
+    base_url = ALPINE_URL if container_type == ContainerType.ALPINE else BASE_URL
+    
+    # 如果使用了自定义代理（不是默认代理），构建代理URL
+    if proxy_url != PROXY_URL:
+        # 移除base_url的协议部分，因为代理可能已经包含了
+        if base_url.startswith('https://'):
+            base_url = base_url[8:]  # 移除 'https://'
+        proxy = proxy_url.rstrip('/') + '/'
+        return f"{proxy}{base_url}"
     
     return base_url
+
 
 def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str) -> Optional[str]:
     """构建下载URL"""
@@ -289,50 +429,101 @@ def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: 
         logger.error(f"不支持的CPU架构: {cpu_info}")
         return None
 
+
 @exception_handler
 async def download_with_progress(url: str, filename: str) -> bool:
     """使用aiohttp下载文件并显示进度条"""
-    session = aiohttp.ClientSession()
-    async with session:
-        response = await session.get(url)
-        if response.status != 200:
-            logger.error(f"HTTP请求失败，状态码: {response.status}")
-            return False
-        total_size = int(response.headers.get('content-length', 0))
-        return await save_file_with_progress(response, filename, total_size)
+    timeout = aiohttp.ClientTimeout(total=300, connect=30)  # 总超时5分钟，连接超时30秒
     
+    try:
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(url) as response:
+                if response.status != 200:
+                    logger.error(f"HTTP请求失败，状态码: {response.status}")
+                    return False
+                total_size = int(response.headers.get('content-length', 0))
+                return await save_file_with_progress(response, filename, total_size)
+    except aiohttp.ClientError as e:
+        logger.error(f"网络连接错误: {e}")
+        return False
+    except asyncio.TimeoutError:
+        logger.error("下载超时")
+        return False
 
 
 async def save_file_with_progress(response, filename: str, total_size: int) -> bool:
     """保存文件并显示进度条"""
     downloaded_size = 0
-    chunk_size = 8192 
-    progress_bar_length = 30  
-    async with aiofiles.open(filename, 'wb') as f:
-        async for chunk in response.content.iter_chunked(chunk_size):
-            await f.write(chunk)
-            downloaded_size += len(chunk)
-            await update_progress_bar(downloaded_size, total_size, progress_bar_length)
-    print()
-    return True
+    chunk_size = 8192
+    
+    try:
+        async with aiofiles.open(filename, 'wb') as f:
+            async for chunk in response.content.iter_chunked(chunk_size):
+                await f.write(chunk)
+                downloaded_size += len(chunk)
+                update_progress_bar(downloaded_size, total_size)
+        print()  # 换行
+        
+        # 验证文件大小
+        if total_size > 0 and downloaded_size != total_size:
+            logger.error(f"文件大小不匹配: 期望{total_size}字节，实际{downloaded_size}字节")
+            return False
+            
+        # 验证文件是否为空
+        if downloaded_size == 0:
+            logger.error("下载的文件为空")
+            return False
+            
+        return True
+    except Exception as e:
+        logger.error(f"保存文件失败: {e}")
+        return False
 
 
-async def update_progress_bar(downloaded_size: int, total_size: int, bar_length: int) -> None:
+def update_progress_bar(downloaded_size: int, total_size: int) -> None:
     """更新并显示下载进度条"""
-    progress = downloaded_size / total_size if total_size else 0
-    arrow = '=' * int(bar_length * progress)
-    spaces = ' ' * (bar_length - len(arrow))
+    if total_size == 0:
+        return
+        
+    progress = downloaded_size / total_size
+    bar_length = 30
+    filled_length = int(bar_length * progress)
+    bar = '=' * filled_length + ' ' * (bar_length - filled_length)
+    
+    # 格式化大小显示
+    def format_size(size):
+        if size >= 1024 * 1024:
+            return f"{size / (1024 * 1024):.2f}MB"
+        return f"{size / 1024:.2f}KB"
+    
+    size_str = f"{format_size(downloaded_size)}/{format_size(total_size)}"
+    print(f"\r下载进度: [{bar}] {int(progress * 100)}% {size_str}", end='', flush=True)
 
-    if total_size >= 1024 * 1024:  # MB级别
-        size_str = f"{downloaded_size/(1024*1024):.2f}MB/{total_size/(1024*1024):.2f}MB"
-    else:  # KB级别
-        size_str = f"{downloaded_size/1024:.2f}KB/{total_size/1024:.2f}KB"
 
-    print(f"\r下载进度: [{arrow}{spaces}] {int(progress*100)}% {size_str}", end='', flush=True)
+def main():
+    """主函数"""
+    try:
+        # 更新日志级别
+        logger.setLevel(getattr(logging, config.log_level))
+        
+        logger.info("启动代码执行器...")
+        
+        # 设置环境变量
+        set_environment()
+        
+        result = check_environment()
+        if result == EnvCheckResult.SUCCESS:
+            logger.info("执行完成")
+        else:
+            logger.error(f"执行失败: {result.value}")
+            sys.exit(1)
+    except KeyboardInterrupt:
+        logger.info("用户中断执行")
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"执行过程中发生错误: {e}")
+        sys.exit(1)
+
 
 if __name__ == '__main__':
-    # 解析命令行参数并执行环境检查
-    args = parse_arguments()
-    logger.info(f"启动代码执行器...")
-    # 开始下载和检查过程
-    check_environment(args.file_name if args.file_name else 'common.so')
+    main()

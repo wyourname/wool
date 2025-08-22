@@ -164,7 +164,10 @@ class Config:
     
     @property
     def proxy_url(self):
-        return self._args.proxy_url or PROXY_URL
+        proxy = self._args.proxy_url or PROXY_URL
+        if not proxy.endswith("/"):
+            proxy += "/"
+        return proxy
     
     @property
     def file_name(self):

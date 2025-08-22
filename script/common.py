@@ -200,6 +200,7 @@ def set_environment():
     os.environ['GITHUB_PROXY'] = config.proxy_url
     logger.info(f"设置环境变量: {script_name}_concurrency={config.concurrency}")
     logger.info(f"设置环境变量: {script_name}_max_concurrency={config.max_concurrency}")
+    logger.info(f"设置环境变量: GITHUB_PROXY={config.proxy_url}")
 
 
 # 异常处理装饰器
@@ -320,12 +321,13 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if retry_counter.exceeded(config.max_retries):
         logger.error(f"已达到最大重试次数({config.max_retries})，停止尝试")
         return False
-
+    check_result = False
     if not os.path.exists(filename):
         logger.info(f"文件{filename}不存在，正在下载...")
-        return await download_so_file(filename, py_v, cpu_info, container_type)
-
-    logger.info(f"本地已存在文件: {filename}")
+        check_result = await download_so_file(filename, py_v, cpu_info, container_type)
+    if not check_result:
+        logger.info(f"文件{filename}不存在，退出执行程序！")
+        return False
     try:
         # 动态导入.so文件
         import importlib.util
@@ -408,16 +410,8 @@ def get_download_url(container_type: Optional[ContainerType]) -> str:
     
     # 选择基础URL
     base_url = ALPINE_URL if container_type == ContainerType.ALPINE else BASE_URL
-    
     # 如果使用了自定义代理（不是默认代理），构建代理URL
-    if proxy_url != PROXY_URL:
-        # 移除base_url的协议部分，因为代理可能已经包含了
-        if base_url.startswith('https://'):
-            base_url = base_url[8:]  # 移除 'https://'
-        proxy = proxy_url.rstrip('/') + '/'
-        return f"{proxy}{base_url}"
-    
-    return base_url
+    return f"{proxy_url}{base_url}"
 
 
 def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str) -> Optional[str]:

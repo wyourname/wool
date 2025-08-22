@@ -321,10 +321,11 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if retry_counter.exceeded(config.max_retries):
         logger.error(f"已达到最大重试次数({config.max_retries})，停止尝试")
         return False
-    check_result = False
     if not os.path.exists(filename):
         logger.info(f"文件{filename}不存在，正在下载...")
         check_result = await download_so_file(filename, py_v, cpu_info, container_type)
+    else:
+        check_result = True
     if not check_result:
         logger.info(f"文件{filename}不存在，退出执行程序！")
         return False

@@ -343,12 +343,7 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
         # 检查是否有main函数
         if hasattr(common_module, 'main'):
             main_func = getattr(common_module, 'main')
-            # 检查main函数是否是异步的
-            if asyncio.iscoroutinefunction(main_func):
-                await main_func(config.script_name)
-            else:
-                # 如果是同步函数，直接调用
-                main_func(config.script_name)
+            await main_func(config.script_name)
         else:
             logger.info(f"模块 {filename} 加载成功，但没有找到main函数")
         

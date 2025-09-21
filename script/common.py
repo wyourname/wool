@@ -113,6 +113,7 @@ class ContainerType(enum.Enum):
 
 # 使用枚举定义CPU架构
 class CpuArchitecture(enum.Enum):
+    x86 = 'x86'
     X86_64 = "x86_64"
     AARCH64 = "aarch64"
     ARMV8 = "armv8"
@@ -280,8 +281,8 @@ def check_environment(file_name: str = None) -> EnvCheckResult:
 
     # 环境验证
     validations = [
-        (py_minor in [9, 10, 11, 12], EnvCheckResult.INVALID_PYTHON, 
-         "不符合要求: Python版本不是3.9、3.10、3.11或3.12"),
+        (py_minor in [9, 10, 11, 12, 13], EnvCheckResult.INVALID_PYTHON,
+         "不符合要求: Python版本不是3.9、3.10、3.11、3.12、13"),
         (os_type == 'Linux', EnvCheckResult.INVALID_OS, 
          "不符合要求: 操作系统类型不是Linux"),
         (arch in [a.value for a in CpuArchitecture], EnvCheckResult.INVALID_ARCH,
@@ -373,17 +374,11 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
     file_base_name = os.path.splitext(filename)[0]
 
     # 确定下载URL，使用命令行参数指定的代理URL
-    base_download_url = get_download_url(container_type)
-    if container_type == ContainerType.ALPINE:
-        logger.info(f"使用Alpine专用下载链接: {base_download_url}")
-
-    # 根据CPU架构构建URL
-    url = build_download_url(base_download_url, file_base_name, py_v, cpu_info)
+    base_download_url = get_download_url()
+    url = build_download_url(base_download_url, file_base_name, py_v, cpu_info, container_type)
     if not url:
         return False
-
     logger.info(f"正在从 {url} 下载文件...")
-
     # 使用aiohttp下载并显示进度条
     success = await download_with_progress(url, filename)
 
@@ -405,24 +400,25 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
     return False
 
 
-def get_download_url(container_type: Optional[ContainerType]) -> str:
+def get_download_url() -> str:
     """根据容器类型获取下载URL"""
     proxy_url = config.proxy_url
-    
-    # 选择基础URL
-    base_url = ALPINE_URL if container_type == ContainerType.ALPINE else BASE_URL
     # 如果使用了自定义代理（不是默认代理），构建代理URL
-    return f"{proxy_url}{base_url}"
+    return f"{proxy_url}{BASE_URL}"
 
 
-def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str) -> Optional[str]:
+def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> Optional[str]:
     """构建下载URL"""
+    if container_type == ContainerType.ALPINE:
+        end_type = 'musl'
+    else:
+        end_type = ''
     if cpu_info in [CpuArchitecture.AARCH64.value, CpuArchitecture.ARMV8.value]:
-        return f"{base_url}/{file_base_name}_3{py_v}_aarch64.so"
-    elif cpu_info == CpuArchitecture.X86_64.value:
-        return f"{base_url}/{file_base_name}_3{py_v}_{cpu_info}.so"
+        return f"{base_url}/{file_base_name}_3{py_v}_aarch64_{end_type}.so"
+    elif cpu_info in [CpuArchitecture.X86_64.value ,CpuArchitecture.x86.value]:
+        return f"{base_url}/{file_base_name}_3{py_v}_{cpu_info}_{end_type}.so"
     elif cpu_info == CpuArchitecture.ARMV7.value:
-        return f"{base_url}/{file_base_name}_3{py_v}_armv7.so"
+        return f"{base_url}/{file_base_name}_3{py_v}_armv7_{end_type}.so"
     else:
         logger.error(f"不支持的CPU架构: {cpu_info}")
         return None

@@ -391,12 +391,6 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
     logger.error(f"下载失败: {url}")
     if os.path.exists(filename):
         os.remove(filename)
-
-    # 如果是Alpine，尝试使用普通链接
-    if container_type == ContainerType.ALPINE:
-        logger.info("尝试使用标准链接下载...")
-        return await download_so_file(filename, py_v, cpu_info, None)
-
     return False
 
 

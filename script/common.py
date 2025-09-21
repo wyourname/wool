@@ -399,15 +399,15 @@ def get_download_url() -> str:
 def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> Optional[str]:
     """构建下载URL"""
     if container_type == ContainerType.ALPINE:
-        end_type = 'musl'
+        end_type = '_musl'
     else:
         end_type = ''
     if cpu_info in [CpuArchitecture.AARCH64.value, CpuArchitecture.ARMV8.value]:
-        return f"{base_url}/{file_base_name}_3{py_v}_aarch64_{end_type}.so"
+        return f"{base_url}/{file_base_name}_3{py_v}_aarch64{end_type}.so"
     elif cpu_info in [CpuArchitecture.X86_64.value ,CpuArchitecture.x86.value]:
-        return f"{base_url}/{file_base_name}_3{py_v}_{cpu_info}_{end_type}.so"
+        return f"{base_url}/{file_base_name}_3{py_v}_{cpu_info}{end_type}.so"
     elif cpu_info == CpuArchitecture.ARMV7.value:
-        return f"{base_url}/{file_base_name}_3{py_v}_armv7_{end_type}.so"
+        return f"{base_url}/{file_base_name}_3{py_v}_armv7{end_type}.so"
     else:
         logger.error(f"不支持的CPU架构: {cpu_info}")
         return None

@@ -332,6 +332,8 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if not check_result:
         logger.info(f"文件{filename}不存在，退出执行程序！")
         return False
+    if container_type.value == ContainerType.ALPINE:
+        fix_missing_libs(filename)
     try:
         # 动态导入.so文件
         import importlib.util
@@ -381,8 +383,6 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
 
     if success:
         logger.info(f"文件下载成功: {filename}")
-        if container_type.value == ContainerType.ALPINE:
-            fix_missing_libs(filename)
         return True
     # 下载失败
     logger.error(f"下载失败: {url}")

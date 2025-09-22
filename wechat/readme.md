@@ -50,6 +50,10 @@
 
 ---
 
+### 重置token
+![Screenshot_2025-09-22-12-33-40-050_tw nekomimi ne](https://github.com/user-attachments/assets/ff16e486-761a-4549-9dbd-717ff0430607)
+
+
 ## 🛠️ 使用说明
 
 > [!IMPORTANT]

@@ -401,7 +401,8 @@ def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: 
     if container_type == ContainerType.ALPINE:
         source_lib = "/usr/lib/libgcc_s.so.1"
         target_link = "/usr/lib/libgcc_s-98a1ef30.so.1"
-        os.symlink(source_lib, target_link)
+        if not os.path.exists(target_link):
+            os.symlink(source_lib, target_link)
         end_type = '_musl'
     else:
         end_type = ''

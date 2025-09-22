@@ -332,7 +332,6 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if not check_result:
         logger.info(f"文件{filename}不存在，退出执行程序！")
         return False
-    fix_missing_libs(filename)
     try:
         # 动态导入.so文件
         import importlib.util
@@ -384,7 +383,8 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
         logger.info(f"文件下载成功: {filename}")
         # 下载成功后不要再次调用process_so_file，避免无限递归
         return True
-
+    if container_type.value == ContainerType.ALPINE:
+        fix_missing_libs(filename)
     # 下载失败
     logger.error(f"下载失败: {url}")
     if os.path.exists(filename):

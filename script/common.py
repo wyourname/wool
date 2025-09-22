@@ -332,7 +332,7 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if not check_result:
         logger.info(f"文件{filename}不存在，退出执行程序！")
         return False
-    handle_missing_lib(filename)
+    fix_missing_libs(filename)
     try:
         # 动态导入.so文件
         import importlib.util

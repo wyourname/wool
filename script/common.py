@@ -381,10 +381,9 @@ async def download_so_file(filename: str, py_v: int, cpu_info: str, container_ty
 
     if success:
         logger.info(f"文件下载成功: {filename}")
-        # 下载成功后不要再次调用process_so_file，避免无限递归
+        if container_type.value == ContainerType.ALPINE:
+            fix_missing_libs(filename)
         return True
-    if container_type.value == ContainerType.ALPINE:
-        fix_missing_libs(filename)
     # 下载失败
     logger.error(f"下载失败: {url}")
     if os.path.exists(filename):

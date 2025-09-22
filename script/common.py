@@ -69,6 +69,8 @@ import os
 import enum
 import functools
 import argparse
+import subprocess
+from pathlib import Path
 from typing import Tuple, Optional
 
 try:
@@ -330,6 +332,7 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if not check_result:
         logger.info(f"文件{filename}不存在，退出执行程序！")
         return False
+    handle_missing_lib(filename)
     try:
         # 动态导入.so文件
         import importlib.util
@@ -396,13 +399,74 @@ def get_download_url() -> str:
     return f"{proxy_url}{BASE_URL}"
 
 
+def fix_missing_libs(so_path: str):
+    """自动检测缺失库并创建软链（仅 Alpine）"""
+    if not Path(so_path).exists():
+        logger.warning(f"{so_path} 不存在，无法检测依赖")
+        return
+    try:
+        # ldd 检查动态依赖
+        result = subprocess.run(["ldd", so_path], capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"执行ldd命令失败: {e}")
+        return
+    except Exception as e:
+        logger.error(f"修复缺失库失败: {e}")
+        return
+    # 提取缺失的库
+    missing_libs = [
+        line.split()[0]
+        for line in result.stdout.splitlines()
+        if "not found" in line
+    ]
+    if not missing_libs:
+        logger.info("没有缺失的依赖库")
+        return
+
+    logger.info(f"检测到缺失库: {missing_libs}")
+
+    # 处理每个缺失的库
+    for lib in missing_libs:
+        handle_missing_lib(lib)
+
+def handle_missing_lib(lib: str):
+    """处理单个缺失的库"""
+    # 从缺失库名去掉版本号进行匹配
+    lib_base = lib.split(".so")[0] + ".so"
+    try:
+        # 在系统里查找可用同名库
+        find_result = subprocess.run(
+            ["find", "/usr", "-name", f"{lib_base}*"],
+            capture_output=True, text=True, check=True
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning(f"查找库 {lib} 失败: {e}")
+        return
+    except Exception as e:
+        logger.error(f"查找库 {lib} 时发生错误: {e}")
+        return
+
+    paths = find_result.stdout.splitlines()
+    if not paths:
+        logger.warning(f"未找到 {lib} 对应的系统库，请手动安装")
+        return
+    source = paths[0]
+    target = Path("/usr/lib") / lib
+
+    if target.exists():
+        return
+    try:
+        os.symlink(source, target)
+        logger.info(f"软链 {source} -> {target} 已创建")
+    except FileExistsError:
+        # 处理竞态条件：另一个进程可能已经创建了软链接
+        logger.debug(f"软链 {target} 已存在")
+    except OSError as e:
+        logger.warning(f"创建软链 {source} -> {target} 失败: {e}")
+
 def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> Optional[str]:
     """构建下载URL"""
     if container_type == ContainerType.ALPINE:
-        source_lib = "/usr/lib/libgcc_s.so.1"
-        target_link = "/usr/lib/libgcc_s-98a1ef30.so.1"
-        if not os.path.exists(target_link):
-            os.symlink(source_lib, target_link)
         end_type = '_musl'
     else:
         end_type = ''
@@ -421,7 +485,7 @@ def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: 
 async def download_with_progress(url: str, filename: str) -> bool:
     """使用aiohttp下载文件并显示进度条"""
     timeout = aiohttp.ClientTimeout(total=300, connect=30)  # 总超时5分钟，连接超时30秒
-    
+
     try:
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url) as response:
@@ -442,7 +506,7 @@ async def save_file_with_progress(response, filename: str, total_size: int) -> b
     """保存文件并显示进度条"""
     downloaded_size = 0
     chunk_size = 8192
-    
+
     try:
         async with aiofiles.open(filename, 'wb') as f:
             async for chunk in response.content.iter_chunked(chunk_size):
@@ -450,17 +514,17 @@ async def save_file_with_progress(response, filename: str, total_size: int) -> b
                 downloaded_size += len(chunk)
                 update_progress_bar(downloaded_size, total_size)
         print()  # 换行
-        
+
         # 验证文件大小
         if total_size > 0 and downloaded_size != total_size:
             logger.error(f"文件大小不匹配: 期望{total_size}字节，实际{downloaded_size}字节")
             return False
-            
+
         # 验证文件是否为空
         if downloaded_size == 0:
             logger.error("下载的文件为空")
             return False
-            
+
         return True
     except Exception as e:
         logger.error(f"保存文件失败: {e}")
@@ -471,18 +535,18 @@ def update_progress_bar(downloaded_size: int, total_size: int) -> None:
     """更新并显示下载进度条"""
     if total_size == 0:
         return
-        
+
     progress = downloaded_size / total_size
     bar_length = 30
     filled_length = int(bar_length * progress)
     bar = '=' * filled_length + ' ' * (bar_length - filled_length)
-    
+
     # 格式化大小显示
     def format_size(size):
         if size >= 1024 * 1024:
             return f"{size / (1024 * 1024):.2f}MB"
         return f"{size / 1024:.2f}KB"
-    
+
     size_str = f"{format_size(downloaded_size)}/{format_size(total_size)}"
     print(f"\r下载进度: [{bar}] {int(progress * 100)}% {size_str}", end='', flush=True)
 
@@ -492,12 +556,12 @@ def main():
     try:
         # 更新日志级别
         logger.setLevel(getattr(logging, config.log_level))
-        
+
         logger.info("启动代码执行器...")
-        
+
         # 设置环境变量
         set_environment()
-        
+
         result = check_environment()
         if result == EnvCheckResult.SUCCESS:
             logger.info("执行完成")

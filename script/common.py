@@ -66,7 +66,6 @@ import asyncio
 import platform
 import sys
 import os
-import re
 import enum
 import functools
 import argparse
@@ -281,9 +280,7 @@ def check_environment(file_name: str = None) -> EnvCheckResult:
     is_container, container_type = detect_container()
     if is_container:
         logger.info(f"检测到容器环境: {container_type.value if container_type else '未知类型'}")
-    else:
-        logger.info(f"疑似是面具模块！！！设置为alpine运行模式可能运行不成功！！！")
-        container_type = ContainerType.ALPINE
+
     # 环境验证
     validations = [
         (py_minor in [9, 10, 11, 12, 13], EnvCheckResult.INVALID_PYTHON,
@@ -305,28 +302,9 @@ def check_environment(file_name: str = None) -> EnvCheckResult:
     return EnvCheckResult.SUCCESS
 
 
-class RetryCounter:
-    """重试计数器类"""
-    def __init__(self):
-        self.count = 0
-    
-    def increment(self):
-        self.count += 1
-    
-    def reset(self):
-        self.count = 0
-    
-    def exceeded(self, max_retries):
-        return self.count >= max_retries
-
-retry_counter = RetryCounter()
-
 @exception_handler
 async def process_so_file(filename: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> bool:
     """处理.so文件，包含重试逻辑"""
-    if retry_counter.exceeded(config.max_retries):
-        logger.error(f"已达到最大重试次数({config.max_retries})，停止尝试")
-        return False
     if not os.path.exists(filename):
         logger.info(f"文件{filename}不存在，正在下载...")
         check_result = await download_so_file(filename, py_v, cpu_info, container_type)
@@ -335,7 +313,7 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
     if not check_result:
         logger.info(f"文件{filename}不存在，退出执行程序！")
         return False
-    if container_type == ContainerType.ALPINE:
+    if container_type.value == ContainerType.ALPINE:
         fix_missing_libs(filename)
     try:
         # 动态导入.so文件
@@ -354,20 +332,17 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
         else:
             logger.info(f"模块 {filename} 加载成功，但没有找到main函数")
         
-        retry_counter.reset()
         return True
     except ImportError as e:
         logger.error(f"导入{filename}失败: {e}")
-        retry_counter.increment()
         if os.path.exists(filename):
             os.remove(filename)
-        return await download_so_file(filename, py_v, cpu_info, container_type)
+        return False
     except Exception as e:
         logger.error(f"执行{filename}失败: {e}")
-        retry_counter.increment()
         if os.path.exists(filename):
             os.remove(filename)
-        return await download_so_file(filename, py_v, cpu_info, container_type)
+        return False
 
 
 @exception_handler
@@ -402,49 +377,69 @@ def get_download_url() -> str:
 
 
 def fix_missing_libs(so_path: str):
-    """自动检测缺失库并创建软链（仅 Alpine 有效）"""
-    so_file = Path(so_path)
-    if not so_file.exists():
+    """自动检测缺失库并创建软链（仅 Alpine）"""
+    if not Path(so_path).exists():
         logger.warning(f"{so_path} 不存在，无法检测依赖")
         return
-
     try:
-        # ldd 检查动态依赖，musl ldd 在缺库时会返回非0，这里不加 check=True
-        result = subprocess.run(
-            ["ldd", str(so_file)],
-            capture_output=True, text=True
-        )
-    except FileNotFoundError:
-        logger.error("系统未安装 ldd 命令，无法检测依赖")
+        # ldd 检查动态依赖
+        result = subprocess.run(["ldd", so_path], capture_output=True, text=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"执行ldd命令失败: {e}")
         return
     except Exception as e:
-        logger.error(f"执行 ldd 失败: {e}")
+        logger.error(f"修复缺失库失败: {e}")
+        return
+    # 提取缺失的库
+    missing_libs = [
+        line.split()[0]
+        for line in result.stdout.splitlines()
+        if "not found" in line
+    ]
+    if not missing_libs:
+        logger.info("没有缺失的依赖库")
         return
 
-    # ldd 输出里找缺失库
-    missing = set()
-    for line in result.stderr.splitlines():
-        m1 = re.search(r'(\S+)\s*=>\s*not found', line)
-        m2 = re.search(r'Error loading shared library (\S+): No such file', line)
-        if m1: missing.add(m1.group(1))
-        if m2: missing.add(m2.group(1))
+    logger.info(f"检测到缺失库: {missing_libs}")
 
-    if not missing:
-        logging.info("没有缺失库")
-        return
-
-    for lib in missing:
+    # 处理每个缺失的库
+    for lib in missing_libs:
         handle_missing_lib(lib)
 
 def handle_missing_lib(lib: str):
-    lib_path = Path("/usr/lib")
-    source, target = lib_path/"libgcc_s.so.1", lib_path / lib
-    if not target.exists():
-        try:
-            logging.info(f"创建软链 {target} -> {source}")
-            os.symlink(source, target)
-        except OSError as e:
-            logging.error(f"创建失败 {e}")
+    """处理单个缺失的库"""
+    # 从缺失库名去掉版本号进行匹配
+    lib_base = lib.split(".so")[0] + ".so"
+    try:
+        # 在系统里查找可用同名库
+        find_result = subprocess.run(
+            ["find", "/usr", "-name", f"{lib_base}*"],
+            capture_output=True, text=True, check=True
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning(f"查找库 {lib} 失败: {e}")
+        return
+    except Exception as e:
+        logger.error(f"查找库 {lib} 时发生错误: {e}")
+        return
+
+    paths = find_result.stdout.splitlines()
+    if not paths:
+        logger.warning(f"未找到 {lib} 对应的系统库，请手动安装")
+        return
+    source = paths[0]
+    target = Path("/usr/lib") / lib
+
+    if target.exists():
+        return
+    try:
+        os.symlink(source, target)
+        logger.info(f"软链 {source} -> {target} 已创建")
+    except FileExistsError:
+        # 处理竞态条件：另一个进程可能已经创建了软链接
+        logger.debug(f"软链 {target} 已存在")
+    except OSError as e:
+        logger.warning(f"创建软链 {source} -> {target} 失败: {e}")
 
 def build_download_url(base_url: str, file_base_name: str, py_v: int, cpu_info: str, container_type: Optional[ContainerType]) -> Optional[str]:
     """构建下载URL"""
@@ -547,6 +542,7 @@ def main():
         result = check_environment()
         if result == EnvCheckResult.SUCCESS:
             logger.info("执行完成")
+            sys.exit(0)
         else:
             logger.error(f"执行失败: {result.value}")
             sys.exit(1)

@@ -325,6 +325,7 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
         common_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(common_module)
         
+        logger.info(f'common version: {common_module.version}')
         # 检查是否有main函数
         if hasattr(common_module, 'main'):
             main_func = getattr(common_module, 'main')
@@ -340,8 +341,8 @@ async def process_so_file(filename: str, py_v: int, cpu_info: str, container_typ
         return False
     except Exception as e:
         logger.error(f"执行{filename}失败: {e}")
-        if os.path.exists(filename):
-            os.remove(filename)
+        # if os.path.exists(filename):
+        #     os.remove(filename)
         return False
 
 

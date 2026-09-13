@@ -1,0 +1,61 @@
+{
+  "format": "wynveil.runtime-downloads",
+  "version": 1,
+  "python_min": [
+    3,
+    10
+  ],
+  "python_max": [
+    3,
+    14
+  ],
+  "abi": "abi3",
+  "ticket_api": "https://cloudverify-cloudflare.anhjq3.workers.dev/v1/tickets",
+  "ticket_verify_key": "ysHOkrSC5Bla8GK9aEV5vgT4psh4U30hsJq47WgMkfQ=",
+  "key_id": "issuer-v1",
+  "hardening_profile": "standard",
+  "files": [
+    {
+      "libc": "glibc",
+      "arch": "x86_64",
+      "path": "blobs/wynveil-b4ceb7141aeab4c3f080d42355f6e239c651c09f7f9783c89099267c38cd274a.so",
+      "sha256": "b4ceb7141aeab4c3f080d42355f6e239c651c09f7f9783c89099267c38cd274a",
+      "size": 6427224
+    },
+    {
+      "libc": "glibc",
+      "arch": "arm64",
+      "path": "blobs/wynveil-2c7e48febf03e4841005d0564b5166b7aaab575e61461c1ba6f573c7c55af211.so",
+      "sha256": "2c7e48febf03e4841005d0564b5166b7aaab575e61461c1ba6f573c7c55af211",
+      "size": 5000848
+    },
+    {
+      "libc": "glibc",
+      "arch": "armv7l",
+      "path": "blobs/wynveil-b2e33665ea5aed8a50ebefa5f0c359ada04d47785882fd5af801feefa6f173c7.so",
+      "sha256": "b2e33665ea5aed8a50ebefa5f0c359ada04d47785882fd5af801feefa6f173c7",
+      "size": 4122976
+    },
+    {
+      "libc": "musl",
+      "arch": "x86_64",
+      "path": "blobs/wynveil-ce5ef1edc2c47be6eb17bec2f7946bbc03f79b3328f07b8777a8d56c80b89699.so",
+      "sha256": "ce5ef1edc2c47be6eb17bec2f7946bbc03f79b3328f07b8777a8d56c80b89699",
+      "size": 6426496
+    },
+    {
+      "libc": "musl",
+      "arch": "arm64",
+      "path": "blobs/wynveil-a10a6f70423b77da087a2ad41c923ea481bde9086dbb5bd7b606c16ab4b715f7.so",
+      "sha256": "a10a6f70423b77da087a2ad41c923ea481bde9086dbb5bd7b606c16ab4b715f7",
+      "size": 4995744
+    },
+    {
+      "libc": "musl",
+      "arch": "armv7l",
+      "path": "blobs/wynveil-f5d1e5d1f007e98d224de8184cb6d7ad250c5425feaf570182ad92e6d00ec747.so",
+      "sha256": "f5d1e5d1f007e98d224de8184cb6d7ad250c5425feaf570182ad92e6d00ec747",
+      "size": 4120264
+    }
+  ]
+}

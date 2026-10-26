@@ -255,11 +255,13 @@ def main(argv=None) -> int:
     parser.add_argument("--config", type=Path, help="可选业务配置 JSON，权限 0600")
     parser.add_argument("--json-result", action="store_true")
     args = parser.parse_args(argv)
-    logging.basicConfig(
-        level=getattr(logging, args.log_level),
-        format="%(asctime)s-%(levelname)s:%(message)s",
-        datefmt="%H:%M:%S",
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s-%(levelname)s:%(message)s", "%H:%M:%S")
     )
+    LOGGER.handlers[:] = [handler]
+    LOGGER.setLevel(getattr(logging, args.log_level))
+    LOGGER.propagate = False
     try:
         config = dict(SCRIPT_CONFIG)
         if args.config is not None:

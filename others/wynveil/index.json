@@ -14,44 +14,44 @@
     {
       "libc": "glibc",
       "arch": "x86_64",
-      "path": "blobs/wynveil-dbeab8ccb839cd5785015e52c966155739888b252ae3c8f8b5efc799dcb331f3.so",
-      "sha256": "dbeab8ccb839cd5785015e52c966155739888b252ae3c8f8b5efc799dcb331f3",
-      "size": 6423528
+      "path": "blobs/wynveil-50801fb7d496ca31244d2a67f529df71288e6eabe70a9c86b21a2388047ef526.so",
+      "sha256": "50801fb7d496ca31244d2a67f529df71288e6eabe70a9c86b21a2388047ef526",
+      "size": 7211416
     },
     {
       "libc": "glibc",
       "arch": "arm64",
-      "path": "blobs/wynveil-fcc1dc386e74c069f4cc1324bccd0d283c3bc5ea423ce701392fba430dbe7900.so",
-      "sha256": "fcc1dc386e74c069f4cc1324bccd0d283c3bc5ea423ce701392fba430dbe7900",
-      "size": 4998432
+      "path": "blobs/wynveil-7813d8e0c1ecfc33f529a175b04f395acea3d0fc4b50c81a16c6d591016c208b.so",
+      "sha256": "7813d8e0c1ecfc33f529a175b04f395acea3d0fc4b50c81a16c6d591016c208b",
+      "size": 5736392
     },
     {
       "libc": "glibc",
       "arch": "armv7l",
-      "path": "blobs/wynveil-53fe65af48abc4cd4e03f6ea91137e3fbf8770eb5182d66d106801f4f791475d.so",
-      "sha256": "53fe65af48abc4cd4e03f6ea91137e3fbf8770eb5182d66d106801f4f791475d",
-      "size": 4120872
+      "path": "blobs/wynveil-27965b793ba4031a015ec46d14d389def79be5178473226e2af7c1faa9656255.so",
+      "sha256": "27965b793ba4031a015ec46d14d389def79be5178473226e2af7c1faa9656255",
+      "size": 4855336
     },
     {
       "libc": "musl",
       "arch": "x86_64",
-      "path": "blobs/wynveil-f49d14a7fa233c25a628e7d78915ea6c5db281b09ce477685bffce42701b42e2.so",
-      "sha256": "f49d14a7fa233c25a628e7d78915ea6c5db281b09ce477685bffce42701b42e2",
-      "size": 6422736
+      "path": "blobs/wynveil-da481814fbe680d37b89683a68ba8b9470096ac8df3ddf25416992bec11ee2ca.so",
+      "sha256": "da481814fbe680d37b89683a68ba8b9470096ac8df3ddf25416992bec11ee2ca",
+      "size": 7210560
     },
     {
       "libc": "musl",
       "arch": "arm64",
-      "path": "blobs/wynveil-fb60b1fa8573834d322c6cb81bce74864668bb0035397c2d8eb64e72575dc18b.so",
-      "sha256": "fb60b1fa8573834d322c6cb81bce74864668bb0035397c2d8eb64e72575dc18b",
-      "size": 4989744
+      "path": "blobs/wynveil-3dc0cb489e68003bc1b776e839e44176c77ea98ca0bd959b8b3c9e3c966bcfbe.so",
+      "sha256": "3dc0cb489e68003bc1b776e839e44176c77ea98ca0bd959b8b3c9e3c966bcfbe",
+      "size": 5731288
     },
     {
       "libc": "musl",
       "arch": "armv7l",
-      "path": "blobs/wynveil-a52080bd600d2a132a7c3194182000e4a51af89c10555fc290d46f3ec5c9d5b6.so",
-      "sha256": "a52080bd600d2a132a7c3194182000e4a51af89c10555fc290d46f3ec5c9d5b6",
-      "size": 4118160
+      "path": "blobs/wynveil-5fb17239ba3b24b4b6bd1b6df16a4041833a557559facffbd6bb1458c7114e41.so",
+      "sha256": "5fb17239ba3b24b4b6bd1b6df16a4041833a557559facffbd6bb1458c7114e41",
+      "size": 4852624
     }
   ]
 }
